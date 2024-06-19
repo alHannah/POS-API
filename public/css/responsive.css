@@ -1,0 +1,104 @@
+@media (max-width: 900px) {
+	.modal-content {
+		width: 100% !important;
+	}
+	#menu .modal-content {
+		width: 75% !important;
+	}
+	#menu .modal-body {
+		max-height: 100vh !important;
+	}
+
+	.web_ {
+		display: none;
+	}
+	.mobile_ {
+		display: block !important;
+	}
+	.content-panel {
+		width: 100% !important;
+	}
+
+	.p-5 {
+		padding: 1.5rem !important;
+	}
+	.px-5 {
+		padding-left: 1.5rem !important;
+		padding-right: 1.5rem !important;
+	}
+	.pt-5 {
+		padding-top: 1.5rem !important;
+	}
+	.pb-5 {
+		padding-bottom: 1.5rem !important;
+	}
+	button .ml-5 {
+	    margin-left: 1rem!important;
+	}
+	.p-4 {
+		padding: 1rem .5rem !important;
+	}
+	.mb-n5,
+	.mb-n4 {
+		margin-bottom: 0 !important;
+	}
+
+	.events-panel {
+	    height: auto;
+	}
+
+	.f-s80 {
+	    font-size: 46px !important;
+	}
+	h1 {
+	    font-size: 22px !important;
+	    margin-top: -1rem;
+	}
+	.header-table * {
+		text-align: center !important;
+	}
+	.header-table div {
+		margin-bottom: 1rem !important;
+	}
+
+	.bootstrap-table .fixed-table-toolbar .search input {
+		margin-left: 0;
+		width: 100%;
+	}
+
+	.col-md-6.pl-4,
+	.col-md-6.pr-4 {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
+
+	.report-panel select {
+		width: 100%;
+		margin-top: 1rem;
+	}
+
+	.prev-btn,
+	.next-btn {
+		width: 100% !important;
+	}
+
+	.step-1 {
+		margin-left: 3rem;
+	}
+	.steps {
+		margin-bottom: 1rem;
+	}
+	.tab-btn.w-16 {
+		width: 45%;
+	}
+	.reference-panel {
+		padding-right: 0 !important;
+	}
+
+	.application-menu div {
+		padding: 0 !important;
+	}
+	.step-content {
+	    padding-right: 1rem;
+	}
+}

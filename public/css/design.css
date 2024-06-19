@@ -1,0 +1,541 @@
+img[alt="Info icon"] {
+    display: none;
+}
+#table {
+	overflow: hidden;
+}
+/* table {
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;
+} */
+.table thead th {
+	border-bottom: none;
+	border-color: rgb(64,168,169) !important;
+}
+table th div {
+	background-color: rgb(64,168,169) !important;
+	color: #fff;
+	border-color: rgb(64,168,169) !important;
+}
+table td button.p-3 {
+	padding: 1.15rem !important;
+}
+.table-bordered {
+    border: 2px solid #dee2e6;
+}
+
+table.light {
+	overflow: hidden;
+}
+table.light td,
+table.light td li {
+	vertical-align: top !important;
+	color: #616161;
+	font-size: .85rem;
+}
+table.light {
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+table.light thead th {
+	border-bottom: none;
+	border-color: rgb(197,227,228) !important;
+}
+table.light th div {
+	background-color: rgb(197,227,228) !important;
+	color: #000;
+	font-size: .9rem;
+}
+table.light td button.p-3 {
+	padding: 1.15rem !important;
+}
+table.light .table-bordered {
+    border: 2px solid #dee2e6;
+}
+table.light td {
+    padding-top: .5rem;
+    padding-bottom: .5rem !important;
+}
+
+table td:last-child {
+	min-width: 105px;
+}
+
+
+
+.bootstrap-table .fixed-table-toolbar .search {
+	width: 100%;
+	margin-right: 15rem;
+	margin-bottom: 15px;
+	float: none !important;
+	text-align: right;
+}
+.bootstrap-table .fixed-table-toolbar .search input {
+	/*margin-left: 75%;*/
+	width: 100%;
+}
+
+
+.form input:hover,
+.form input:focus {
+	background-color: rgba(0,0,0,.3) !important;
+}
+
+.modal-backdrop.overlap {
+    z-index: 1050;
+}
+.alerts .modal {
+    z-index: 1060;
+}
+
+input:focus.black-opacity-30,
+select:focus.black-opacity-30 {
+    background-color: rgba(0,0,0,.3);
+}
+
+.patient-panel {
+	max-height: 50vh;
+}
+
+.medicine-panel {
+	width: 150px !important;
+	max-height: 50vh;
+}
+
+.events-panel {
+	height: calc(100vh - 12.2rem);
+}
+
+#consulation_form tbody td,
+#consulation_form table {
+  position: relative;
+  z-index: 1;
+}
+
+#consulation_form tbody td:hover {
+  z-index: 2;
+}
+
+.notifs,
+.notifs_2 {
+	width: 300px !important;
+    transform: translate3d(-250px, 45px, 0px) !important;
+}
+
+/*.modal-body {
+	max-height: 75vh;
+	overflow-y: scroll;
+}*/
+
+.scroll-y {
+    overflow-x: hidden;
+}
+
+.fc-event {
+	padding: 0 3px !important;
+	margin-bottom: 5px !important;
+}
+.fc-basic-view .fc-day-number {
+    padding: 3px 6px !important;
+}
+.fc-row.fc-rigid .fc-content-skeleton {
+	position: relative !important;
+}
+
+table.table a {
+    margin: 0;
+    color: #007bff; 
+}
+
+.steps .active,
+.steps .active i {
+	color: var(--cyan);
+	font-weight: 600;
+}
+.agents-tab .active {
+	color: var(--cyan);
+	font-weight: 700;
+	border-bottom: none !important;
+}
+
+.checked .checked-btn,
+.unchecked .unchecked-btn {
+	display: block;
+}
+.checked .unchecked-btn,
+.unchecked .checked-btn {
+	display: none;
+}
+
+.tab-btn,
+.result {
+	cursor: pointer;
+}
+.tab-btn.active {
+	color: var(--cyan);
+	font-weight: 700;
+	font-size: 12px !important;
+	background-color: white;
+}
+
+.steps.active,
+.steps.active .icon {
+	color: var(--cyan) !important;
+	font-weight: 600;
+}
+.steps.active .circle-xs {
+	background: var(--cyan) !important;
+}
+
+.step-content {
+	height: calc(100vh - 25rem);
+    overflow-y: scroll;
+}
+.step-content::-webkit-scrollbar {
+	width: 7px;
+	display: block !important;
+}
+ 
+.step-content::-webkit-scrollbar-track {
+	box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+ 
+.step-content::-webkit-scrollbar-thumb {
+	background-color: darkgrey;
+	/*outline: 1px solid slategrey;*/
+	border-radius: 6px;
+}
+
+.w-100.white.p-5 {
+	padding: 2rem !important;
+}
+
+.w-16 {
+	width: 16%;
+}
+
+.checklist-menu .tab-content {
+	height: calc(100vh - 25rem);
+	overflow-y: scroll;
+}
+#documents .tab-content {
+	height: 65vh;
+	overflow-y: scroll;
+}
+
+.application-menu button.active {
+	box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+	background: rgba(133, 0, 0, 0.1) !important;
+	border: 1px solid #a62400  ;
+}
+.application-menu button.active h5 {
+	font-weight: 700 !important;
+}
+.application-menu button.active p {
+	font-weight: 600;
+	color: #000;
+}
+
+.result-panel {
+	max-height: 60vh;
+}
+
+.uneditable .icon {
+	color: #aaa !important;
+}
+
+a:hover {
+  text-decoration: none !important;
+}
+
+.form-control {
+	height: auto;
+}
+
+.attachment{
+	font-size: 0.8rem;
+}
+
+
+.pull-center{
+    display: flex;
+    align-items: center;
+    /*justify-content: center;*/
+}
+
+#tbl_applications_filter{
+	display: none !important;
+}
+
+.table .thead-light th {
+  color: #343a40;
+  font-weight: 600;
+  background-color: #fff;
+  padding: 0.5rem 0.8rem;
+}
+
+/*.table tr td{
+	border-bottom: 1px solid #ced4da;
+}*/
+
+table.table td, table.table th {
+	padding: 0.2rem;
+}
+
+.bold{
+	font-weight: 700;
+}
+
+.semi-bold{
+	font-weight: 600;
+}
+
+input:disabled{
+	background-color: #eee !important;
+}
+
+.pagination .page-item.active .page-link {
+	background-color: var(--cyan);
+}
+
+td{
+	vertical-align: middle !important;
+}
+
+
+.btn {
+	text-transform: none !important;
+}
+
+.bg-main{
+	background-image: url('../images/bg-building.jpg');
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: cover;
+
+}
+
+.body-content {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: 10%;
+}
+
+#reader_birth, #reader_marriage, #reader_death  {
+	width: 600px;
+	
+}
+
+a{
+	color: var(--cyan);
+}
+a:hover{
+	color: #005d55;
+}
+
+.nav-link{
+	padding: 0.8rem 1rem;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #343a40;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+	color: #fff;
+	background-color: var(--cyan);
+	border-color: var(--cyan);
+}
+
+/*.nav-tabs{
+	border-bottom: 2px solid var(--cyan);
+}*/
+
+
+
+.nav-tabs .nav-link{
+	border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.grey-n{
+	background-color: #343a40;
+}
+
+
+.form-control:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 .2rem rgb(179, 228, 224, 0.20);
+
+}
+
+.no-border-radius{
+	border-radius: 0 !important;
+}
+
+.div_file{
+	margin-top: 0.5rem;
+}
+.list-group-item{
+	padding: .25rem 1rem;
+}
+
+div.dataTables_wrapper div.dataTables_filter input {
+  padding: 8px;
+}
+
+
+
+.modal-fullscreen {
+  width: 100vw;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+}
+
+.modal-fullscreen .modal-content {
+  /*height: 100%;*/
+  min-height: 100%;
+  border: 0;
+  border-radius: 0;
+  padding-bottom: 40px;
+}
+
+.modal-fullscreen .modal-body {
+  overflow-y: auto;
+}
+
+.modal-fullscreen .modal-footer{
+	position: fixed;
+	bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+}
+
+@media (max-width: 900px){
+	.menu-panel {
+	  min-width: 80px;
+	  max-width: 100px;
+	}
+
+	.menu-panel p {
+		font-size: 0.8rem;
+	}
+
+	.menu-panel i {
+		font-size: 30px !important;
+	}
+}
+
+/* add ons */
+
+/** Common CSS for all buttons & selector. */
+
+/* CSS by Github. Source: https://getcssscan.com/css-buttons-examples */
+/* region */
+button.html5-qrcode-element,
+select.html5-qrcode-element,
+button.scanapp-button {
+  appearance: none;
+  background-color: #FAFBFC;
+  border: 1px solid rgba(27, 31, 35, 0.15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
+  box-sizing: border-box;
+  color: #24292E;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  padding: 6px 16px;
+  position: relative;
+  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  word-wrap: break-word;
+  margin-bottom: 5px;
+}
+
+button.html5-qrcode-element:hover,
+select.html5-qrcode-element:hover,
+button.scanapp-button:hover {
+  background-color: #F3F4F6;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
+button.html5-qrcode-element:disabled,
+select.html5-qrcode-element:disabled,
+button.scanapp-button:disabled {
+  background-color: #FAFBFC;
+  border-color: rgba(27, 31, 35, 0.15);
+  color: #959DA5;
+  cursor: default;
+}
+
+button.html5-qrcode-element:active,
+select.html5-qrcode-element:active,
+button.scanapp-button:hover {
+  background-color: #EDEFF2;
+  box-shadow: rgba(225, 228, 232, 0.2) 0 1px 0 inset;
+  transition: none 0s;
+}
+
+button.html5-qrcode-element:focus,
+select.html5-qrcode-element:focus,
+button.scanapp-button:focus {
+  outline: 1px transparent;
+}
+
+button.html5-qrcode-element:before,
+select.html5-qrcode-element:before,
+button.scanapp-button::before {
+  display: none;
+}
+
+button.html5-qrcode-element:-webkit-details-marker,
+select.html5-qrcode-element:-webkit-details-marker,
+button.scanapp-button:-webkit-details-marker {
+  display: none;
+}
+
+/* Torch button. */
+button#html5-qrcode-button-torch.html5-qrcode-button-torch-on,
+button.scanapp-button.enticing {
+  background-color: #fff000;
+  color: #000;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 200ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+button#html5-qrcode-button-torch.html5-qrcode-button-torch-on:not(:disabled):hover,
+button#html5-qrcode-button-torch.html5-qrcode-button-torch-on:not(:disabled):focus,
+button.scanapp-button.enticing:not(:disabled):hover,
+button.scanapp-button.enticing:not(:disabled):focus
+{
+  outline: 0;
+  background: #f4e603;
+}
+
+button#html5-qrcode-button-torch.html5-qrcode-button-torch-on:disabled,
+button.scanapp-button.enticing:disabled
+ {
+  filter: saturate(0.2) opacity(0.5);
+  -webkit-filter: saturate(0.2) opacity(0.5);
+  cursor: not-allowed;
+}
+

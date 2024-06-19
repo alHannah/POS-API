@@ -1,4 +1,4 @@
-# Nexpos New Laravel Api - Web
+# LCR-API
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/live_nb/nexpos-new-laravel-api-web.git
+git remote add origin https://gitlab.com/live_nb/lcr-api.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.com/live_nb/nexpos-new-laravel-api-web/-/settings/integrations)
+- [ ] [Set up project integrations](https://gitlab.com/live_nb/lcr-api/-/settings/integrations)
 
 ## Collaborate with your team
 

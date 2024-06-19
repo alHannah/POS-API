@@ -1,0 +1,308 @@
+/*@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');*/
+/*@import url(https://fonts.googleapis.com/css?family=Nunito);*/
+
+* {
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: #343a40;
+    position: relative;
+	
+}
+html, body, #app {
+	height: 100vh;
+	overflow: hidden;
+}
+input:focus,
+textarea:focus,
+button:focus,
+select:focus {
+    outline: 0 !important;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600 !important;
+}
+/*a:hover {
+	text-decoration: none;
+	color: #ffa726;
+	opacity: .7;
+}*/
+img {
+	object-fit: cover;
+}
+/* i {
+	cursor: pointer;
+} */
+
+.text-500 {
+	font-weight: 500;
+}
+.text-600 {
+	font-weight: 600;
+}
+.text-700 {
+	font-weight: 700;
+}
+
+
+COLOR THEME
+.red {
+	background-color: var(--cyan) !important;
+}
+.text-red {
+	color: var(--cyan) !important;
+}
+.border-red {
+	border: 1px solid var(--cyan) !important;
+}
+.light-red {
+	background-color: var(--cyan) !important;
+}
+.text-light-red {
+	color: var(--cyan) !important;
+}
+.border-light-red {
+	border: 1px solid var(--cyan) !important;
+}
+
+
+/* .teal {
+	background-color: #00857A !important;
+}
+.text-teal {
+	color: #00857A !important;
+}
+.border-teal {
+	border: 1px solid #00857A !important;
+}
+
+.light-teal {
+	background-color: #00A699 !important;
+}
+.text-light-teal {
+	color: #00A699 !important;
+}
+.border-light-teal {
+	border: 1px solid #00A699 !important;
+} */
+
+
+.border-dashed {
+	border-style: dashed !important;
+}
+.border-none {
+	border: none;
+}
+.lh-1 {
+	line-height: 1.3;
+}
+
+
+/* ADDITIONALS */
+.z-2 {
+	z-index: 2;
+}
+.z-3 {
+	z-index: 3;
+}
+/* ADDITIONAL DESIGNS */
+.p-75 {
+	padding: .75rem;
+}
+.pl-75, .px-75 {
+	padding-left: .75rem;
+}
+.pr-75, .px-75 {
+	padding-right: .75rem;
+}
+.pt-75, .py-75 {
+	padding-top: .75rem;
+}
+.pb-75, .py-75 {
+	padding-bottom: .75rem;
+}
+.m-75 {
+	margin: .75rem;
+}
+.ml-75, .mx-75 {
+	margin-left: .75rem;
+}
+.mr-75, .mx-75 {
+	margin-right: .75rem;
+}
+.mt-75, .my-75 {
+	margin-top: .75rem;
+}
+.mb-75, .my-75 {
+	margin-bottom: .75rem;
+}
+
+.m-n75 {
+	margin-top: -.5rem;
+	margin-right: -.75rem;
+}
+
+.w-85px {
+	width: 85px;
+}
+
+.rounded-l {
+	border-radius: 10px;
+}
+.rounded-xl {
+	border-radius: 16px;
+}
+.rounded-top-xl {
+	border-top-left-radius: 32px;
+	border-top-right-radius: 32px;
+}
+.rounded-bottom-xl {
+	border-bottom-left-radius: 32px;
+	border-bottom-right-radius: 32px;
+}
+.border-none {
+	border: none;
+}
+.border-dashed {
+	border: 1px dashed #eee;
+}
+hr.light-orange {
+	border: none;
+	padding-top: 1px;
+}
+.z-1 {
+	z-index: 1;
+}
+.z-2 {
+	z-index: 2;
+}
+.z-1060 {
+	z-index: 1060;
+}
+.lh-2 {
+	line-height: 1.5;
+}
+.lh-1 {
+	line-height: 1.1;
+}
+.space {
+	letter-spacing: 1px;
+}
+.horizontal {
+	display: -webkit-box;
+}
+
+
+.circle-xxxs {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+}
+.circle-xxs {
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+}
+.circle-xs {
+	width: 21px;
+	height: 21px;
+	border-radius: 50%;
+}
+.circle-sm {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+}
+.circle {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+}
+.circle-m {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+}
+.circle-lg {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+}
+.circle-xl {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+}
+.circle-xxl {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+}
+
+.box-lg {
+	width: 60px;
+	height: 60px;
+}
+
+.box-xl {
+	width: 80px;
+	height: 80px;
+}
+
+.font-500 {
+	font-weight: 500;
+}
+.font-600 {
+	font-weight: 600;
+}
+.font-700 {
+	font-weight: 700;
+}
+
+
+.close-modal {
+	cursor: pointer;
+}
+
+/* MAIN PANEL */
+.main-panel {
+	height: 100vh;
+	overflow-y: hidden;
+}
+
+/* menu panel */
+.menu-panel {
+	min-width: 120px;
+	max-width: 500px;
+}
+
+
+/* menu bar */
+.scroll-menu,
+.content-panel {
+	height: calc(100vh - 71px);
+	background: #e8fff1;
+	/* width : calc(100vh - 71px); */
+}
+.menu-bar.active {
+	background-color: rgba(0,0,0,.3) !important;
+}
+
+
+/* main content */
+.main-content {
+	height: calc(100vh - 70px);
+}
+
+::-webkit-scrollbar {
+    display: none !important;
+}
+
+.circle {
+	border-radius: 50%;
+}
+
+
+.border-right-teal {
+	border-right: 1px solid #00857A !important;
+}

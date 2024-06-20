@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\{
     AccessTokens,
+    AreaAssignment,
     Brands,
     UserAccesses,
     Users,
-    Areas
+    Areas,
+    BrandAssignments
 };
 
 class LoginController extends Controller
@@ -85,11 +87,15 @@ class LoginController extends Controller
             $user_accesses = [];
 
             //Code for testing ORM
-            /*$areas = Areas::with([
-                'brand_per_area'
-            ])->get();
+            // $areas = AreaAssignment::with([
+            //     // 'brand_per_area'
+            //     'area_to_user'
+            //     // 'area_assignment'
+            // ])->get();
 
-            dd($areas);*/
+            // dd($areas);
+
+
 
             $access = UserAccesses::with([
                 'user_access_module'

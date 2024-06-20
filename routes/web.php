@@ -41,7 +41,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             }); 
 
-            $router->post('/get',            'v1\HomeController@index');
+            // $router->post('/get',            'v1\HomeController@index');
 
         });
 

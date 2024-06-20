@@ -39,55 +39,24 @@ return [
             'prefix' => env('DB_PREFIX', ''),
         ],
 
-        //  ------------- LOCAL -------------
-        'local_record' => [
+        'mysql' => [
             'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', 3306),
-            'database' => env('DB_DATABASE', 'lcr'),
-            'username' => env('DB_USERNAME', 'root'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => env('DB_PREFIX', ''),
-            'strict' => env('DB_STRICT_MODE', true),
-            'engine' => env('DB_ENGINE', null),
-            'timezone' => env('DB_TIMEZONE', '+00:00'),
-        ],
-
-        //  ------------- LOCAL SYNC -------------
-        // 'live_record' => [
-        //     'driver' => 'mysql',
-        //     'host' => env('DB_HOST_SCAN', '127.0.0.1'),
-        //     'port' => env('DB_PORT_SCAN', 3306),
-        //     'database' => env('DB_DATABASE_SCAN', 'lcr_scanning'),
-        //     'username' => env('DB_USERNAME_SCAN', 'root'),
-        //     'password' => env('DB_PASSWORD_SCAN', ''),
-        //     'unix_socket' => env('DB_SOCKET', ''),
-        //     'charset' => env('DB_CHARSET', 'utf8mb4'),
-        //     'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-        //     'prefix' => env('DB_PREFIX', ''),
-        //     'strict' => env('DB_STRICT_MODE', true),
-        //     'engine' => env('DB_ENGINE', null),
-        //     'timezone' => env('DB_TIMEZONE', '+00:00'),
-        // ],
-
-        // ------------- TEST SITE SYNC -------------
-        'live_record' => [
-            'driver' => 'mysql',
-            'host' => env('DB_HOST_SCAN', '162.240.26.109'),
-            'port' => env('DB_PORT_SCAN', 3306),
-            'database' => env('DB_DATABASE_SCAN', 'mfc444c9_lcrscndb'),
-            'username' => env('DB_USERNAME_SCAN', 'mfc444c9_lcrscnusr'),
-            'password' => env('DB_PASSWORD_SCAN', '8#%01WD7ZMDn'),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => env('DB_CHARSET', 'utf8mb4'),
-            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
-            'prefix' => env('DB_PREFIX', ''),
-            'strict' => env('DB_STRICT_MODE', true),
-            'engine' => env('DB_ENGINE', null),
-            'timezone' => env('DB_TIMEZONE', '+00:00'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'sqlsrv' => [

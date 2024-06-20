@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\{
     AccessTokens,
+    UserAccesses,
     Users,
 };
 
@@ -43,13 +44,14 @@ class LoginController extends Controller
             ]);
         }
 
+
         $email = $request->email ?: "";
         $password = $request->password ?: "";
         $today = Carbon::now();
 
         // CHECK IF EMAIL ALREADY EXISTS
         // $user = $this->CRUD_REPO->find($this->USERS, "email = BINARY '" . $email . "' AND `status` = '1' AND role = 'company_user'");
-        $user = Users::where("email", $email)->where("status", 1)->first();
+        $user = Users::where("email", $email)->where("status", "active")->first();
 
         if (!$user) {
             return response()->json([
@@ -72,11 +74,31 @@ class LoginController extends Controller
 
             $token = $this->generateAuthToken($user);
             AccessTokens::insert([
-                'user_id'    => $user->id,
-                'token'      => $token,
-                'created_at' => $today,
-                'updated_at' => $today,
+                'mobile_user_id' => $user->id,
+                'token'          => $token,
+                'created_at'     => $today,
+                'updated_at'     => $today,
             ]);
+
+            $user_accesses = [];
+
+            $access = UserAccesses::with([
+                'user_access_modules'
+            ])->where('role_id', $user->role_id)->get();
+
+            $userAccessMapped = $access->map(function ($item) {
+                $moduleAccess = $item->user_access_modules;
+                
+                return [
+                    'role_id'   => $item->role_id,
+                    'module'    => $moduleAccess->module_name,
+                    'add'       => $item->add,
+                    'edit'      => $item->edit,
+                    'view'      => $item->view,
+                    'delete'    => $item->delete,
+                    'approve'   => $item->approve,
+                ];
+            });
 
             DB::commit();
 
@@ -90,13 +112,15 @@ class LoginController extends Controller
                 'msg' => trans('messages.success'),
                 'modal_title' => trans("alerts_title.success"),
                 'user' => [
-                    // 'name' =>  $email,
-                    'email' => $email,
-                    'token' => $token,
-                    'role'  => $user->role
+                    'name'           =>  $user->name,
+                    'email'          => $email,
+                    'token'          => $token,
+                    'role'           => $user->role_id,
+                    'access_modules' => $userAccessMapped
                 ]
             ]);
         } catch (\Exception $e) {
+            dd($e);
             DB::rollback();
         }
     }

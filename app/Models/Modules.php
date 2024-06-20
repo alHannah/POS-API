@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Modules extends Model 
+class Modules extends Model
 {
     protected $table = "modules";
     public $timestamps = false;
@@ -16,6 +16,4 @@ class Modules extends Model
         'delete',
         'approve'
     ];
-
-
 }

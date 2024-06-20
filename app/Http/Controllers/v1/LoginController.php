@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\{
     AccessTokens,
+    Brands,
     UserAccesses,
     Users,
+    Areas
 };
 
 class LoginController extends Controller
@@ -83,11 +85,11 @@ class LoginController extends Controller
             $user_accesses = [];
 
             $access = UserAccesses::with([
-                'user_access_modules'
+                'user_access_module'
             ])->where('role_id', $user->role_id)->get();
 
             $userAccessMapped = $access->map(function ($item) {
-                $moduleAccess = $item->user_access_modules;
+                $moduleAccess = $item->user_access_module;
                 
                 return [
                     'role_id'   => $item->role_id,

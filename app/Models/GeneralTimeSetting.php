@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeneralTimeSetting extends Model
 {
-    protected $table = 'area_assignments';
+    protected $table = 'general_time_settings';
 
     protected $fillable = [
-        'area_id',
-        'user_id'
+        'start_time',
+        'end_time'
     ];
 }

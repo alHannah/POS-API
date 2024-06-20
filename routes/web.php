@@ -45,6 +45,14 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
         });
 
+          // ----------------------- STORE --------------------------------------
+          $router->group(["prefix" => "/store", "middleware" => "auth"], function () use ($router) {
+            $router->get('/', function () use ($router) {
+                return view('index', ['api' => env('APP_NAME')]);
+            });
+
+        });
+
         // ----------------------- ACCESS --------------------------------------
         $router->group(["prefix" => "/access", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {
@@ -73,14 +81,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
         // ----------------------- OIC2 --------------------------------------
         $router->group(["prefix" => "/oic2", "middleware" => "auth"], function () use ($router) {
-            $router->get('/', function () use ($router) {
-                return view('index', ['api' => env('APP_NAME')]);
-            });
-
-        });
-
-        // ----------------------- STORE --------------------------------------
-        $router->group(["prefix" => "/store", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });

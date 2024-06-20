@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Brands extends Model
 {
@@ -12,4 +13,8 @@ class Brands extends Model
         'brand',
         'status'
     ];
+
+    public function brand_areas() : HasMany {
+        return $this->hasMany(Areas::class, 'brand_id');
+    }
 }

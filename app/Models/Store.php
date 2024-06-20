@@ -4,8 +4,8 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Store extends Model
 {
@@ -38,5 +38,15 @@ class Store extends Model
     public function store_per_area () : BelongsTo
     {
         return $this->belongsTo(Areas::class, 'area_id');
+    }
+
+    public function store_per_assignments () : HasMany
+    {
+        return $this->HasMany(StoreAssignments::class, 'store_id');
+    }
+
+    public function store_per_group () : BelongsTo
+    {
+        return $this->belongsTo(StoreGroups::class, 'group_id');
     }
 }

@@ -17,13 +17,10 @@ use App\Models\{
     UserAccesses,
     Users,
     Areas,
-<<<<<<< Updated upstream
-    BrandAssignments
-=======
+    BrandAssignments,
     ScheduleGroups,
     Store,
     StorePerSchedules
->>>>>>> Stashed changes
 };
 
 class LoginController extends Controller
@@ -92,7 +89,6 @@ class LoginController extends Controller
 
             $user_accesses = [];
 
-<<<<<<< Updated upstream
             //Code for testing ORM
             // $areas = AreaAssignment::with([
             //     // 'brand_per_area'
@@ -102,32 +98,30 @@ class LoginController extends Controller
 
             // dd($areas);
 
-
-=======
             /*-------------Code for testing-----------------*/
-            /*$areas = Areas::with([
-                'brand_per_area'
+            /*$store = Store::with([
+                'store_per_assignments'
             ])->get();
 
-            $storewithschedule = Store::with([
-                'store_with_schedule'
+            dd($store);*/
+
+            /*$store_assignments = StoreAssignments::with([
+                'assignment_per_store'
             ])->get();
 
-            $scheduleperstores = StorePerSchedules::with([
-                'schedule_per_stores'
+            dd($store_assignments);*/
+
+            /*$group_store = StoreGroups::with([
+                'group_per_store'
             ])->get();
 
-            $schedulepergroup = StorePerSchedules::with([
-                'store_schedule_per_schedule_group'
+            dd($group_store);*/
+
+            /*$group = Store::with([
+                'store_per_group'
             ])->get();
 
-            $schedulegroupperstore = ScheduleGroups::with([
-                'schedule_groups_per_store'
-            ])->get();
-            dd($schedulepergroup);*/
-
-            /*-------------Code for testing-----------------*/
->>>>>>> Stashed changes
+            dd($areas);*/
 
             $access = UserAccesses::with([
                 'user_access_module'
@@ -146,6 +140,8 @@ class LoginController extends Controller
                     'approve'   => $item->approve,
                 ];
             });
+
+
 
             DB::commit();
 

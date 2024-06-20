@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StoreGroups extends Model
 {
@@ -12,4 +13,9 @@ class StoreGroups extends Model
         'group_name',
         'brand_id'
     ];
+
+    public function group_per_store () : HasMany
+    {
+        return $this->HasMany(Store::class, 'group_id');
+    }
 }

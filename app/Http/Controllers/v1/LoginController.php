@@ -17,7 +17,13 @@ use App\Models\{
     UserAccesses,
     Users,
     Areas,
+<<<<<<< Updated upstream
     BrandAssignments
+=======
+    ScheduleGroups,
+    Store,
+    StorePerSchedules
+>>>>>>> Stashed changes
 };
 
 class LoginController extends Controller
@@ -86,6 +92,7 @@ class LoginController extends Controller
 
             $user_accesses = [];
 
+<<<<<<< Updated upstream
             //Code for testing ORM
             // $areas = AreaAssignment::with([
             //     // 'brand_per_area'
@@ -96,6 +103,31 @@ class LoginController extends Controller
             // dd($areas);
 
 
+=======
+            /*-------------Code for testing-----------------*/
+            /*$areas = Areas::with([
+                'brand_per_area'
+            ])->get();
+
+            $storewithschedule = Store::with([
+                'store_with_schedule'
+            ])->get();
+
+            $scheduleperstores = StorePerSchedules::with([
+                'schedule_per_stores'
+            ])->get();
+
+            $schedulepergroup = StorePerSchedules::with([
+                'store_schedule_per_schedule_group'
+            ])->get();
+
+            $schedulegroupperstore = ScheduleGroups::with([
+                'schedule_groups_per_store'
+            ])->get();
+            dd($schedulepergroup);*/
+
+            /*-------------Code for testing-----------------*/
+>>>>>>> Stashed changes
 
             $access = UserAccesses::with([
                 'user_access_module'

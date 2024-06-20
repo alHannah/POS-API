@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AreaAssignment extends Model
 {
@@ -12,4 +13,10 @@ class AreaAssignment extends Model
         'area_id',
         'user_id'
     ];
+
+
+    public function area_to_user () : BelongsTo
+    {
+        return $this->belongsTo(Users::class, 'user_id');
+    }
 }

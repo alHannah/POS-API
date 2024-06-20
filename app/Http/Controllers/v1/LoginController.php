@@ -84,13 +84,20 @@ class LoginController extends Controller
 
             $user_accesses = [];
 
+            //Code for testing ORM
+            /*$areas = Areas::with([
+                'brand_per_area'
+            ])->get();
+
+            dd($areas);*/
+
             $access = UserAccesses::with([
                 'user_access_module'
             ])->where('role_id', $user->role_id)->get();
 
             $userAccessMapped = $access->map(function ($item) {
                 $moduleAccess = $item->user_access_module;
-                
+
                 return [
                     'role_id'   => $item->role_id,
                     'module'    => $moduleAccess->module_name,
@@ -137,7 +144,7 @@ class LoginController extends Controller
             DB::commit();
 
             return response()->json([
-                'error' => false, 
+                'error' => false,
                 'msg' => trans('messages.success')
             ]);
 

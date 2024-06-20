@@ -12,7 +12,6 @@ class ProductPerTemplate extends Model
         'template_id',
         'product_id',
         'uom_id',
-        'qty',
-        'status'
+        'qty'
     ];
 }

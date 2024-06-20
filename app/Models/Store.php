@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Store extends Model
 {
@@ -22,4 +24,14 @@ class Store extends Model
         'brand_id',
         'pos_enabled'
     ];
+
+    /*public function brand_per_area () : BelongsTo
+    {
+        return $this->belongsTo(Brands::class, 'brand_id');
+    }*/
+
+    public function store_with_schedule () : HasMany {
+        return $this->hasMany(StorePerSchedules::class, 'store_id');
+    }
+
 }

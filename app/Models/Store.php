@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Store extends Model
 {
@@ -34,4 +35,8 @@ class Store extends Model
         return $this->hasMany(StorePerSchedules::class, 'store_id');
     }
 
+    public function store_per_area () : BelongsTo
+    {
+        return $this->belongsTo(Areas::class, 'area_id');
+    }
 }

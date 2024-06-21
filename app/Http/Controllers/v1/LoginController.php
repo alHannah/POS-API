@@ -121,7 +121,12 @@ class LoginController extends Controller
                 'store_per_group'
             ])->get();
 
-            dd($areas);*/
+            $schedulegroupperstore = ScheduleGroups::with([
+                'schedule_groups_per_store'
+            ])->get();
+            dd($schedulepergroup);*/
+
+            /*-------------Code for testing-----------------*/
 
             $access = UserAccesses::with([
                 'user_access_module'

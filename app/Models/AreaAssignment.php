@@ -1,9 +1,7 @@
- <?php
-
+<?php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AreaAssignment extends Model
@@ -19,5 +17,10 @@ class AreaAssignment extends Model
     public function area_to_user () : BelongsTo
     {
         return $this->belongsTo(Users::class, 'user_id');
+    }
+
+    public function area_assignment_per_area () : BelongsTo
+    {
+        return $this->belongsTo(Areas::class, 'area_id');
     }
 }

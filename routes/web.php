@@ -72,6 +72,16 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->get('/get',                        'v1\web\stores\StoreGroupController@get');
             });
 
+            $router->group(["prefix" => "/store_hours", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',             'v1\web\stores\StoreHoursController@create_update');
+                $router->post('/delete',                    'v1\web\stores\StoreHoursController@delete');
+                $router->get('/get',                        'v1\web\stores\StoreHoursController@get');
+            });
+
 
         });
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeneralTimeSetting extends Model
 {
-    protected $table = 'general_time_settings';
+    protected $table = 'general_time_setting';
     protected $fillable = [
         'start_time',
         'end_time'

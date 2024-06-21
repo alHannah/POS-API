@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Uom extends Model
 {
     protected $table = "uom";
-    public $timestamps = false;
     protected $fillable = [
         'name',
         'uom_category_id',

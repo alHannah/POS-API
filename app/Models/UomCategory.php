@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UomCategories extends Model
+class UomCategory extends Model
 {
     protected $table = "uom_categories";
-    public $timestamps = false;
     protected $fillable = [
         'name'
     ];

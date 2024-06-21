@@ -14,6 +14,6 @@ class Brands extends Model
     ];
 
     public function brand_areas(): HasMany {
-        return $this->hasMany(Areas::class, 'brand_id');
+        return $this->hasMany(Area::class, 'brand_id');
     }
 }

@@ -7,28 +7,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Areas;
+use App\Models\Area;
 
 class AreaController extends Controller
 {
-    public function create(Request $request) 
+    public function create(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $area = Areas::updateOrCreate([
+            $area = Area::updateOrCreate([
                 'id' => $request->id
             ], [
                 'name' => $request->name,
                 'brand_id' => $request->brand_id
             ]);
-            
 
-            if ($area->wasRecentlyCreated) {
-                $type = 'Yes it is Recently Created!';
-            } else {
-                $type = 'It is updated!';
-            }
+
+            // if ($area->wasRecentlyCreated) {
+            //     $type = 'Yes it is Recently Created!';
+            // } else {
+            //     $type = 'It is updated!';
+            // }
 
             DB::commit();
 
@@ -36,7 +36,7 @@ class AreaController extends Controller
                 'error'     => false,
                 'message'   => trans('messages.success'),
                 'data'      => $area,
-                'type'      => $type
+                // 'type'      => $type
             ]);
 
         } catch (Exception $e) {

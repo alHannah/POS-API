@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class StoreGroups extends Model
+class StoreGroup extends Model
 {
     protected $table = "store_groups";
-    public $timestamps = false;
     protected $fillable = [
         'group_name',
         'brand_id'

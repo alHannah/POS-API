@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ZReadingDetails extends Model
+class XReadingDetail extends Model
 {
-    protected $table = "z_reading_details";
-    public $timestamps = false;
+    protected $table = "x_reading_details";
     protected $fillable = [
-        'z_reading_id',
+        'x_reading_id',
         'section_name',
         'description',
         'total_no',

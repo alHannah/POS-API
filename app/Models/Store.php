@@ -31,7 +31,7 @@ class Store extends Model
     }*/
 
     public function store_with_schedule () : HasMany {
-        return $this->hasMany(StorePerSchedules::class, 'store_id');
+        return $this->hasMany(StorePerSchedule::class, 'store_id');
     }
 
     public function store_per_area () : BelongsTo
@@ -46,6 +46,6 @@ class Store extends Model
 
     public function store_per_group () : BelongsTo
     {
-        return $this->belongsTo(StoreGroups::class, 'group_id');
+        return $this->belongsTo(StoreGroup::class, 'group_id');
     }
 }

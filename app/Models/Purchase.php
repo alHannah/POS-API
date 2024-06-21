@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Purchase extends Model
 {
     protected $table = "purchase";
-
     protected $fillable = [
         'store_id',
         'submitted_by',

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Receiving extends Model
 {
     protected $table = "receiving";
-
     protected $fillable = [
         'po_no',
         'store_id',

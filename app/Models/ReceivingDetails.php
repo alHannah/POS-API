@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class ReceivingDetails extends Model
 {
     protected $table = "receiving_details";
-
     protected $fillable = [
         'receiving_id',
         'product_id',

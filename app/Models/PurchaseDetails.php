@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseDetails extends Model
 {
     protected $table = "purchase_details";
-
     protected $fillable = [
         'purchase_id',
         'product_id',

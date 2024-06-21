@@ -14,7 +14,7 @@ class StoreGroups extends Model
         'brand_id'
     ];
 
-    public function group_per_store () : HasMany
+    public function group_per_store(): HasMany
     {
         return $this->HasMany(Store::class, 'group_id');
     }

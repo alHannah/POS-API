@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Store extends Model
 {
     protected $table = "stores";
-
     protected $fillable = [
         'store_name',
         'store_code',

@@ -15,11 +15,11 @@ class StorePerSchedules extends Model
         'store_id'
     ];
 
-    public function schedule_per_stores () : BelongsTo {
+    public function schedule_per_stores(): BelongsTo {
         return $this->belongsTo(Store::class, 'store_id');
     }
 
-    public function store_schedule_per_schedule_group () : BelongsTo {
+    public function store_schedule_per_schedule_group(): BelongsTo {
         return $this->belongsTo(ScheduleGroups::class, 'schedule_id');
     }
 }

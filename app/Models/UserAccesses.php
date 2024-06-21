@@ -19,7 +19,7 @@ class UserAccesses extends Model
         'approve'
     ];
 
-    public function user_access_module() : BelongsTo
+    public function user_access_module(): BelongsTo
     {
         return $this->belongsTo(Modules::class, 'module_id');
     }

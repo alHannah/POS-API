@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class StorePerSchedules extends Model
+class StorePerSchedule extends Model
 {
     protected $table = "store_per_schedules";
-    public $timestamps = false;
     // protected $fillable = [
     //     '',
     //     ''

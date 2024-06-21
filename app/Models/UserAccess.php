@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class UserAccesses extends Model
+class UserAccess extends Model
 {
     protected $table = "user_accesses";
-    public $timestamps = false;
     protected $fillable = [
         'role_id',
         'module_id',
@@ -21,6 +20,6 @@ class UserAccesses extends Model
 
     public function user_access_module(): BelongsTo
     {
-        return $this->belongsTo(Modules::class, 'module_id');
+        return $this->belongsTo(Module::class, 'module_id');
     }
 }

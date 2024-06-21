@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class XReadings extends Model
+class XReading extends Model
 {
     protected $table = "x_readings";
-    public $timestamps = false;
     protected $fillable = [
         'reading_no',
         'store_id',

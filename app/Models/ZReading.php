@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class YReadings extends Model
+class ZReading extends Model
 {
-    protected $table = "y_readings";
-    public $timestamps = false;
+    protected $table = "z_readings";
     protected $fillable = [
         'reading_no',
         'store_id',

@@ -34,6 +34,17 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->post('/logout', 'v1\LoginController@logout');
         });
 
+          // ----------------------- AUDIT TRAIL --------------------------------------
+          $router->group(["prefix" => "/audit_trail", "middleware" => "auth"], function () use ($router) {
+            $router->get('/', function () use ($router) {
+                return view('index', ['api' => env('APP_NAME')]);
+            });
+
+            $router->post('/',            'Controller@audit_trail');
+
+
+        });
+
 
         // ----------------------- HOME --------------------------------------
         $router->group(["prefix" => "/home", "middleware" => "auth"], function () use ($router) {
@@ -42,7 +53,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             });
 
             // $router->post('/get',            'v1\HomeController@index');
-
 
         });
 
@@ -59,7 +69,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\AreaController@create_update');
                 $router->post('/delete',                    'v1\web\stores\AreaController@delete');
-                $router->get('/get',                        'v1\web\stores\AreaController@get');
+                $router->post('/get',                        'v1\web\stores\AreaController@get');
             });
 
             $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {

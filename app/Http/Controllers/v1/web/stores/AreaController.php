@@ -11,7 +11,7 @@ use App\Models\Area;
 
 class AreaController extends Controller
 {
-    public function create(Request $request)
+    public function create_update(Request $request)
     {
         try {
             DB::beginTransaction();
@@ -35,7 +35,33 @@ class AreaController extends Controller
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $area,
+                'data'      => $area
+                // 'type'      => $type
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'     => true,
+                'message'   => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $store_group = Area::where('id', $request->id)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'error'     => false,
+                'message'   => trans('messages.success'),
+                'data'      => $store_group
                 // 'type'      => $type
             ]);
 

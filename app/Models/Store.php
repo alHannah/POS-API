@@ -36,12 +36,12 @@ class Store extends Model
 
     public function store_per_area () : BelongsTo
     {
-        return $this->belongsTo(Areas::class, 'area_id');
+        return $this->belongsTo(Area::class, 'area_id');
     }
 
     public function store_per_assignments () : HasMany
     {
-        return $this->HasMany(StoreAssignments::class, 'store_id');
+        return $this->HasMany(StoreAssignment::class, 'store_id');
     }
 
     public function store_per_group () : BelongsTo

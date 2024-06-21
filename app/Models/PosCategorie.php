@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PosCategories extends Model 
+class PosCategorie extends Model
 {
     protected $table = "pos_categories";
-    public $timestamps = false;
     protected $fillable = [
         'pos_category_name',
         'status',

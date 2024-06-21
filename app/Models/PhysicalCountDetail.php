@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PhysicalCountDetails extends Model 
+class PhysicalCountDetail extends Model
 {
     protected $table = "physical_count_details";
-    public $timestamps = false;
     protected $fillable = [
         'pc_id',
         'product_id',

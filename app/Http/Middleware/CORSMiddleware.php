@@ -19,7 +19,7 @@ class CORSMiddleware
     {
         $headers = [
             'Access-Control-Allow-Origin'      => '*',
-            'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, DELETE, UPDATE, PATCH, HEAD, PUT',
             'Access-Control-Allow-Credentials' => 'true',
             'Access-Control-Max-Age'           => '86400',
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization'

@@ -35,4 +35,11 @@ class Controller extends BaseController
         return JWT::encode($payload, $secret, 'HS256');
     }
 
+    public function audit_trail (Request $request) 
+    {
+        $user = $request->auth;
+
+        dd($user);
+    }
+
 }

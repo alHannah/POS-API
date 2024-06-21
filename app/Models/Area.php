@@ -17,7 +17,7 @@ class Area extends Model
 
     public function brand_areas(): BelongsTo
     {
-        return $this->belongsTo(Brands::class, 'brand_id');
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 
     public function areas_per_area_assignment(): HasMany

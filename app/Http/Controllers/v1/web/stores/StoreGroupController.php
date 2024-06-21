@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class StoreGroupController extends Controller
 {
-    public function create_update(Request $request)
-    {
-        try {
-            DB::beginTransaction();
+    // public function create_update(Request $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
 
-            $store_group = StoreGrou
-        }
-    }
+    //         $store_group = StoreGrou
+    //     }
+    // }
+
+    // new
 }

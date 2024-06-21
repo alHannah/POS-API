@@ -3,32 +3,39 @@
 namespace App\Http\Controllers\v1\web\stores;
 
 use App\Http\Controllers\Controller;
-use App\Models\StoreGroup;
+use App\Models\GeneralTimeSetting;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class StoreGroupController extends Controller
+class StoreHoursController extends Controller
 {
     public function create_update(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $store_group = StoreGroup::updateOrCreate([
-                    'id' => $request->id
+            $store_hours = GeneralTimeSetting::updateOrCreate([
+                'id' => $request->id
             ], [
-                    'group_name' => $request->group_name,
-                    'brand_id' => $request->group_id
+                'start_time'    => $request->start_time,
+                'end_time'      => $request->end_time
             ]);
+
+
+            // if ($area->wasRecentlyCreated) {
+            //     $type = 'Yes it is Recently Created!';
+            // } else {
+            //     $type = 'It is updated!';
+            // }
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $store_group
+                'data'      => $store_hours
                 // 'type'      => $type
             ]);
 
@@ -47,14 +54,14 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $store_group = StoreGroup::where('id', $request->id)->delete();
+            $store_hours = GeneralTimeSetting::where('id', $request->id)->delete();
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $store_group
+                'data'      => $store_hours
                 // 'type'      => $type
             ]);
 

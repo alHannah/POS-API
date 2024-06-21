@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AccessTokens extends Model 
+class AccessTokens extends Model
 {
     protected $table = "access_tokens";
     public $timestamps = false;
@@ -13,6 +13,4 @@ class AccessTokens extends Model
         'store_id',
         'token'
     ];
-
-
 }

@@ -25,6 +25,7 @@ use App\Models\{
 
 class LoginController extends Controller
 {
+    protected $request;
     public function __construct(Request $request)
     {
         // SETUP DEFAULT LANGUAGE
@@ -89,44 +90,12 @@ class LoginController extends Controller
 
             $user_accesses = [];
 
-            //Code for testing ORM
-            // $areas = AreaAssignment::with([
-            //     // 'brand_per_area'
-            //     'area_to_user'
-            //     // 'area_assignment'
-            // ])->get();
-
-            // dd($areas);
-
             /*-------------Code for testing-----------------*/
             /*$store = Store::with([
                 'store_per_assignments'
             ])->get();
 
             dd($store);*/
-
-            /*$store_assignments = StoreAssignments::with([
-                'assignment_per_store'
-            ])->get();
-
-            dd($store_assignments);*/
-
-            /*$group_store = StoreGroups::with([
-                'group_per_store'
-            ])->get();
-
-            dd($group_store);*/
-
-            /*$group = Store::with([
-                'store_per_group'
-            ])->get();
-
-            $schedulegroupperstore = ScheduleGroups::with([
-                'schedule_groups_per_store'
-            ])->get();
-            dd($schedulepergroup);*/
-
-            /*-------------Code for testing-----------------*/
 
             $access = UserAccesses::with([
                 'user_access_module'
@@ -146,8 +115,6 @@ class LoginController extends Controller
                 ];
             });
 
-
-
             DB::commit();
 
             // $userCompleteName = implode(" ", array_filter([
@@ -160,7 +127,7 @@ class LoginController extends Controller
                 'msg' => trans('messages.success'),
                 'modal_title' => trans("alerts_title.success"),
                 'user' => [
-                    'name'           =>  $user->name,
+                    'name'           => $user->name,
                     'email'          => $email,
                     'token'          => $token,
                     'role'           => $user->role_id,
@@ -184,7 +151,7 @@ class LoginController extends Controller
 
             return response()->json([
                 'error' => false,
-                'msg' => trans('messages.success')
+                'msg'   => trans('messages.success')
             ]);
 
         } catch (\Exception $e) {
@@ -197,3 +164,4 @@ class LoginController extends Controller
         }
     }
 }
+

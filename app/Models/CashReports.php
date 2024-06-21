@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class CashReports extends Model
 {
     protected $table = 'cash_reports';
-
     protected $fillable = [
         'submitted_by',
         'store_id',

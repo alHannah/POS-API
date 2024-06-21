@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class ReturnPullouts extends Model
 {
     protected $table = "return_pullouts";
-
     protected $fillable = [
         'user_id',
         'store_id',

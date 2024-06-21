@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ScheduleGroups extends Model
 {
     protected $table = "schedule_groups";
-
     protected $fillable = [
         'name',
         'monday',

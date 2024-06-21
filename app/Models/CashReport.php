@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CashReports extends Model
+class CashReport extends Model
 {
     protected $table = 'cash_reports';
     protected $fillable = [

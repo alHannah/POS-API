@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Areas extends Model
+class Area extends Model
 {
     protected $table = 'areas';
     protected $fillable = [
@@ -17,7 +17,7 @@ class Areas extends Model
 
     public function brand_per_area(): BelongsTo
     {
-        return $this->belongsTo(Brands::class, 'brand_id');
+        return $this->belongsTo(Brand::class, 'brand_id');
     }
 
     public function areas_per_area_assignment(): HasMany

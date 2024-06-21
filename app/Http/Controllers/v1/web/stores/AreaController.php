@@ -76,7 +76,7 @@ class AreaController extends Controller
                 'message'   => trans('messages.success'),
                 'data'      => $datas,
             ]);
-            
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");

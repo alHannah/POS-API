@@ -42,6 +42,32 @@ class StoreGroupController extends Controller
         }
     }
 
+    public function get(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $datas = StoreGroup::whereIn('brand_id', $request->brand_id)
+                ->where('status', 1)->latest()->get();
+
+            DB::commit();
+
+            return response()->json([
+                'error'     => false,
+                'message'   => trans('messages.success'),
+                'data'      => $datas,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'     => true,
+                'message'   => trans('messages.error'),
+            ]);
+        }
+    }
+
     public function delete(Request $request)
     {
         try {

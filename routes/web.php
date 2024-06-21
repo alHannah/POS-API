@@ -70,7 +70,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\ScheduleGroupController@create_update');
                 $router->post('/delete',                    'v1\web\stores\ScheduleGroupController@delete');
-                $router->get('/get',                        'v1\web\stores\ScheduleGroupController@get');
+                $router->post('/get',                        'v1\web\stores\ScheduleGroupController@get');
             });
 
             $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {
@@ -80,7 +80,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\StoreGroupController@create_update');
                 $router->post('/delete',                    'v1\web\stores\StoreGroupController@delete');
-                $router->get('/get',                        'v1\web\stores\StoreGroupController@get');
+                $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
             });
 
             $router->group(["prefix" => "/store_hours", "middleware" => "auth"], function () use ($router) {

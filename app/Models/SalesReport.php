@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SalesReports extends Model
+class SalesReport extends Model
 {
     protected $table = "sales_reports";
+
     protected $fillable = [
         'reading_no',
         'store_id',

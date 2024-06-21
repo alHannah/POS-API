@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ScheduleGroups extends Model
+class ScheduleGroup extends Model
 {
     protected $table = "schedule_groups";
+
     protected $fillable = [
         'name',
         'monday',
@@ -20,6 +21,6 @@ class ScheduleGroups extends Model
     ];
 
     public function schedule_groups_per_store () : HasMany {
-        return $this->HasMany(StorePerSchedules::class, 'schedule_id');
+        return $this->HasMany(StorePerSchedule::class, 'schedule_id');
     }
 }

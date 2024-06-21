@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PersonalAccessTokens extends Model
+class PersonalAccessToken extends Model
 {
     protected $table = "personal_access_tokens";
-    public $timestamps = false;
     protected $fillable = [
         'tokenable_type',
         'tokenable_id',

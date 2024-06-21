@@ -19,6 +19,6 @@ class AreaAssignment extends Model
 
     public function area_assignment_per_area () : BelongsTo
     {
-        return $this->belongsTo(Areas::class, 'area_id');
+        return $this->belongsTo(Area::class, 'area_id');
     }
 }

@@ -11,16 +11,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\{
-    AccessTokens,
+    AccessToken,
     AreaAssignment,
-    Brands,
-    UserAccesses,
+    Brand,
+    UserAccess,
     Users,
-    Areas,
-    BrandAssignments,
-    ScheduleGroups,
+    Area,
+    BrandAssignment,
+    ScheduleGroup,
     Store,
-    StorePerSchedules
+    StorePerSchedule
 };
 
 class LoginController extends Controller
@@ -81,7 +81,7 @@ class LoginController extends Controller
             DB::beginTransaction();
 
             $token = $this->generateAuthToken($user);
-            AccessTokens::insert([
+            AccessToken::insert([
                 'mobile_user_id' => $user->id,
                 'token'          => $token,
                 'created_at'     => $today,
@@ -97,7 +97,7 @@ class LoginController extends Controller
 
             dd($store);*/
 
-            $access = UserAccesses::with([
+            $access = UserAccess::with([
                 'user_access_module'
             ])->where('role_id', $user->role_id)->get();
 
@@ -145,7 +145,7 @@ class LoginController extends Controller
         try {
             DB::beginTransaction();
 
-            AccessTokens::where("token", $request->token)->delete();
+            AccessToken::where("token", $request->token)->delete();
 
             DB::commit();
 

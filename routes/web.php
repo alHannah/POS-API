@@ -51,6 +51,16 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/area", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+    
+                $router->post('/create',         'v1\web\stores\AreaController@create');
+    
+            });
+
+
         });
 
         // ----------------------- ACCESS --------------------------------------

@@ -90,7 +90,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\StoreHoursController@create_update');
                 $router->post('/delete',                    'v1\web\stores\StoreHoursController@delete');
-                $router->get('/get',                        'v1\web\stores\StoreHoursController@get');
+                $router->post('/get',                        'v1\web\stores\StoreHoursController@get');
             });
 
 

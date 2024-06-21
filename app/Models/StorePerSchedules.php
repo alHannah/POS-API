@@ -9,6 +9,10 @@ class StorePerSchedules extends Model
 {
     protected $table = "store_per_schedules";
     public $timestamps = false;
+    // protected $fillable = [
+    //     '',
+    //     ''
+    // ];
 
     protected $fillable = [
         'schedule_id',
@@ -20,6 +24,6 @@ class StorePerSchedules extends Model
     }
 
     public function store_schedule_per_schedule_group(): BelongsTo {
-        return $this->belongsTo(ScheduleGroups::class, 'schedule_id');
+        return $this->belongsTo(ScheduleGroup::class, 'schedule_id');
     }
 }

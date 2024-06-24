@@ -16,35 +16,73 @@ class StoreHoursController extends Controller
         try {
             DB::beginTransaction();
 
-            $store_hours = GeneralTimeSetting::updateOrCreate([
-                'id' => $request->id
-            ], [
-                'start_time'    => $request->start_time,
-                'end_time'      => $request->end_time
-            ]);
+            $id = $request->id;
 
+            if ($id) {
+                $previousData = GeneralTimeSetting::find($id);
 
-            // if ($area->wasRecentlyCreated) {
-            //     $type = 'Yes it is Recently Created!';
-            // } else {
-            //     $type = 'It is updated!';
-            // }
+                if ($previousData) {
+                    $previousStart  = $previousData->start_time;
+                    $previousEnd    = $previousData->end_time;
+                }
+            }
+
+            $store_hours = GeneralTimeSetting::updateOrCreate(
+                ['id' => $request->id],
+                [
+                    'start_time' => $request->start_time,
+                    'end_time'   => $request->end_time
+                ]
+            );
+
+            if ($store_hours->wasRecentlyCreated || !$id) {
+                $message = "New Time: {$request->start_time}";
+            } else {
+                $message = "Update Time: $previousStart ($previousEnd) change into {$request->start_time} ({$store_hours->end_time})";
+            }
 
             DB::commit();
 
-            return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $store_hours
-                // 'type'      => $type
+            return response()  -> json([
+                'error'        => false,
+                'message'      => trans('messages.success'),
+                'data'         => $store_hours,
+                'audit_trail'  => $message
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
-            return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+            return response() -> json([
+                'error'       => true,
+                'message'     => trans('messages.error'),
+            ]);
+        }
+    }
+
+
+    public function get(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $id = $request->id;
+            $datas = GeneralTimeSetting::find($id)->latest()->get();
+
+            DB::commit();
+
+            return response() -> son([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $datas,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response() -> json([
+                'error'       => true,
+                'message'     => trans('messages.error'),
             ]);
         }
     }
@@ -58,19 +96,18 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $store_hours
-                // 'type'      => $type
+            return response() -> json([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $store_hours
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
-            return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+            return response() -> json([
+                'error'       => true,
+                'message'     => trans('messages.error'),
             ]);
         }
     }

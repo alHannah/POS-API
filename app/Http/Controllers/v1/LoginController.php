@@ -90,6 +90,7 @@ class LoginController extends Controller
                 'updated_at'     => $today,
             ]);
 
+
             $access = UserAccess::with([
                 'user_access_module'
             ])->where('role_id', $user->role_id)->get();
@@ -132,7 +133,6 @@ class LoginController extends Controller
     {
         try {
             DB::beginTransaction();
-
             AccessToken::where("token", $request->token)->delete();
 
             DB::commit();

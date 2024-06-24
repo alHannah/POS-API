@@ -66,7 +66,6 @@ class AreaController extends Controller
         try {
             dd(auth()->user());
             DB::beginTransaction();
-
             $datas = Area::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
 
             DB::commit();

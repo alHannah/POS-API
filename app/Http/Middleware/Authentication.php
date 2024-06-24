@@ -37,10 +37,9 @@ class Authentication
         $path = $request->getPathInfo();
         $ua = $request->server('HTTP_USER_AGENT');
         $route = $request->route();
-        $isLogout = ($path == '/api/v1/signout/user') ? true : false;
+        $isLogout = ($path == '/api/v1/account/logout') ? true : false;
 
         if(!$isLogout) {
-
 
             if(!$this->validateToken($token)){
                 return response()->json([
@@ -53,8 +52,21 @@ class Authentication
                     "modal_title" => trans("alerts_title.unauthorized")
                 ], 401);
             }
-
             
+            $credentials = JWT::decode($token, new Key(env('AUTH_SECRET'), 'HS256'));
+            // $user = $CRUD_REPO->find($USERS, "id = " . $credentials->sub);
+            $user = Users::where("id", $credentials->sub)->first();
+            if(!$user){
+                return response()->json([
+                    'error' => true,
+                    'msg' => trans('messages.unauthorized'), 
+                    'error_details' => [
+                        'description' => "Not authorized",
+                        'action' => 'request_signin'
+                    ],
+                    "modal_title" => trans("alerts_title.unauthorized")
+                ], 401);
+            }
             $credentials = JWT::decode($token, new Key(env('AUTH_SECRET'), 'HS256'));
             // $user = $CRUD_REPO->find($USERS, "id = " . $credentials->sub);
             $user = Users::where("id", $credentials->sub)->first();
@@ -85,9 +97,24 @@ class Authentication
                     "modal_title" => trans("alerts_title.unauthorized")
                 ], 401);
             }
+            /** OTHER VERIFICATION IF ANY */
+            // CHECK IF TOKEN EXISTS
+            // $checkToken = $CRUD_REPO->find($ACCESS_TOKENS, "token = '$token'");
+            $checkToken = AccessToken::where("token", $token);
+            if(!$checkToken){
+                return response()->json([
+                    'error' => true,
+                    'msg' => trans('messages.unauthorized'),  
+                    'error_details' => [
+                        'description' => "Not authorized",
+                        'action' => 'request_signin'
+                    ],
+                    "modal_title" => trans("alerts_title.unauthorized")
+                ], 401);
+            }
 
             // CHECK USER STATUS
-            if($user->status != "active") {
+            if($user->status != '1') {
                 return response()->json([
                     'error' => true,
                     'msg' => trans('messages.unauthorized'),  
@@ -102,7 +129,7 @@ class Authentication
 
             $request->auth = $user;
         }
-
+        // s
         return $next($request);
     }
     private function validateToken($token){

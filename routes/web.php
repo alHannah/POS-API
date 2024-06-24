@@ -32,8 +32,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
         $router->group(["prefix" => "/account"], function () use ($router) {
 
             $router->group(["prefix" => "/web"], function () use ($router) {
-                $router->post('/login', 'v1\LoginController@login');
-                $router->post('/logout', 'v1\LoginController@logout');
+                $router->post('/login', 'v1\web\LoginController@login');
+                $router->post('/logout', 'v1\web\LoginController@logout');
             });
 
         });

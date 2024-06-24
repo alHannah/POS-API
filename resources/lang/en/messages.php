@@ -38,6 +38,11 @@ return [
     'expired_registration_code' => "Code already expired, please click 'Resend' to generate a new verification code.",
     "password_match" => "Confirm password do not match to password." ,
     "password_changed" => "You have been successfully set your new password.",
-    "password_previous" => "Your new password must be different from your previous password"
+    "password_previous" => "Your new password must be different from your previous password",
+    'store' => [
+        'area' => [
+            'existed' => "Area is already exists!",
+        ]
+    ]
 ]
 ?>

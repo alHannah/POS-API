@@ -18,28 +18,28 @@ class StoresController extends Controller
             DB::beginTransaction();
 
             $store = Store::updateOrCreate([
-                'id'=>$request->id
+                'id'                =>$request->id
             ], [
-                'brand_id'=>$request->brand_id,
-                'store_code'=>$request->store_code,
-                'store_name'=>$request->store_name,
-                'store_address'=>$request->store_address,
-                'group_id'=>$request->group_id,
-                'vat_type'=>$request->vat_type,
-                'tier_id'=>$request->price_tier,
-                'pos_enabled'=>$request->pos_access,
-                'status'=>1,
-                'tablet_serial_no'=>$request->tablet_serial_no,
-                'tin'=>$request->tin,
-                'area_id'=>$request->area_id,
+                'brand_id'          =>$request->brand_id,
+                'store_code'        =>$request->store_code,
+                'store_name'        =>$request->store_name,
+                'store_address'     =>$request->store_address,
+                'group_id'          =>$request->group_id,
+                'vat_type'          =>$request->vat_type,
+                'tier_id'           =>$request->price_tier,
+                'pos_enabled'       =>$request->pos_access,
+                'status'            =>1,
+                'tablet_serial_no'  =>$request->tablet_serial_no,
+                'tin'               =>$request->tin,
+                'area_id'           =>$request->area_id,
             ]);
 
             $device = Device::updateOrCreate([
-                'id'=>$request->id
+                'id'                =>$request->id
             ],[
-                'device_id'=>$request->device_id,
-                'store_id'=>$store->id,
-                'status'=>"active",
+                'device_id'         =>$request->device_id,
+                'store_id'          =>$store->id,
+                'status'            =>"active",
             ]);
 
             /*$oic = OicPerStore::updateOrCreate([
@@ -51,18 +51,18 @@ class StoresController extends Controller
             DB::commit();
 
             return response()->json([
-                "error"=>false,
-                "message"=>trans('messages.success'),
-                "data"=>$store,
-                "data2"=>$device,
+                "error"             =>false,
+                "message"           =>trans('messages.success'),
+                "data"              =>$store,
+                "data2"             =>$device,
             ]);
 
         } catch (Exception $e) {
             DB::rollback();
             Log::info("Error: $e");
             return response()->json([
-                "error"     => true,
-                "message"   => trans("messages.error"),
+                "error"             => true,
+                "message"           => trans("messages.error"),
             ]);
         }
     }
@@ -81,25 +81,25 @@ class StoresController extends Controller
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
+                'error'             => false,
+                'message'           => trans('messages.success'),
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'             => true,
+                'message'           => trans('messages.error'),
             ]);
         }
     }
 
-    public function get_stores_devices() {
+    public function get_stores_devices(Request $request) {
         try {
             DB::beginTransaction();
-            $brandfilter = [6];
-            $areafilter = [16];
+            $brandfilter = [$request->brandfilter];
+            $areafilter = [$request->areafilter];
 
             $getstores = Store::where('status', 1)->whereIn('brand_id', $brandfilter)->whereIn('area_id',$areafilter)->get();
             $storeid = $getstores->pluck('id')->toArray();
@@ -109,10 +109,10 @@ class StoresController extends Controller
 
             DB::commit();
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'storesdata' => $getstores,
-                'devicesdata' => $getdevices,
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'storesdata'        => $getstores,
+                'devicesdata'       => $getdevices,
             ]);
 
 
@@ -120,8 +120,8 @@ class StoresController extends Controller
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'             => true,
+                'message'           => trans('messages.error'),
             ]);
         }
     }

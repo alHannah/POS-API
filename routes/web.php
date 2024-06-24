@@ -69,7 +69,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\StoresController@create_update_store');
                 $router->post('/delete',                    'v1\web\stores\StoresController@delete_store_device');
-                $router->get('/get',                        'v1\web\stores\StoresController@get_stores_devices');
+                $router->post('/get',                        'v1\web\stores\StoresController@get_stores_devices');
             });
 
             $router->group(["prefix" => "/schedule_group", "middleware" => "auth"], function () use ($router) {

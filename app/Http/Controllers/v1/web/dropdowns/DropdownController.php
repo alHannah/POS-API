@@ -19,17 +19,17 @@ class DropdownController extends Controller
             $branddropdown = Brand::where('status', '1')->get();
 
             return response()->json([
-                "error"=>false,
-                "message"=>trans('messages.success'),
-                "data"=>$branddropdown,
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$branddropdown,
             ]);
 
         } catch (Exception $e) {
             DB::rollback();
             Log::info("Error: $e");
             return response()->json([
-                "error"     => true,
-                "message"   => trans("messages.error"),
+                "error"         => true,
+                "message"       => trans("messages.error"),
             ]);
         }
     }
@@ -41,17 +41,17 @@ class DropdownController extends Controller
             $storegroupdropdown = StoreGroup::get();
 
             return response()->json([
-                "error"=>false,
-                "message"=>trans('messages.success'),
-                "data"=>$storegroupdropdown,
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$storegroupdropdown,
             ]);
 
         } catch (Exception $e) {
             DB::rollback();
             Log::info("Error: $e");
             return response()->json([
-                "error"     => true,
-                "message"   => trans("messages.error"),
+                "error"         => true,
+                "message"       => trans("messages.error"),
             ]);
         }
     }
@@ -61,10 +61,10 @@ class DropdownController extends Controller
         $storegroup = $this->store_group_dropdown($request);
 
         return response()->json([
-            "error"=>false,
-            "message"=>trans('messages.success'),
-            "brand_dropdown"=>$brand,
-            "store_dropdown"=>$storegroup,
+            "error"             =>false,
+            "message"           =>trans('messages.success'),
+            "brand_dropdown"    =>$brand,
+            "store_dropdown"    =>$storegroup,
             ]);
         }
 }

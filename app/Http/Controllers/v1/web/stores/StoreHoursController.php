@@ -28,18 +28,24 @@ class StoreHoursController extends Controller
             }
 
             $store_hours = GeneralTimeSetting::updateOrCreate(
-                ['id' => $request->id],
+                ['id' => $id],
                 [
+                    'id'         => $id,
                     'start_time' => $request->start_time,
                     'end_time'   => $request->end_time
                 ]
             );
 
             if ($store_hours->wasRecentlyCreated || !$id) {
-                $message = "New Time: {$request->start_time}";
+                $message = "New Time: Opening: {$request->start_time} & Closing: {$request->end_time}";
             } else {
-                $message = "Update Time: $previousStart ($previousEnd) change into {$request->start_time} ({$store_hours->end_time})";
+                $message = "Update Time: $previousStart(Opening) & $previousEnd(Closing) change into
+                {$request->start_time}(Opening) & {$store_hours->end_time}(Closing)";
             }
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 
@@ -67,11 +73,16 @@ class StoreHoursController extends Controller
             DB::beginTransaction();
 
             $id = $request->id;
-            $datas = GeneralTimeSetting::find($id)->latest()->get();
 
+            if ($id) {
+                $data = GeneralTimeSetting::find($id);
+                $datas = [$data];
+            } else {
+                $datas = GeneralTimeSetting::latest()->get();
+            }
             DB::commit();
 
-            return response() -> son([
+            return response() -> json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $datas,
@@ -93,6 +104,12 @@ class StoreHoursController extends Controller
             DB::beginTransaction();
 
             $store_hours = GeneralTimeSetting::where('id', $request->id)->delete();
+
+            $message = "Successfully Deleted ID #: {$request->id}";
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 

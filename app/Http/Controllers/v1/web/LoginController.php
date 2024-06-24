@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1;
+namespace App\Http\Controllers\v1\web;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -59,8 +59,8 @@ class LoginController extends Controller
 
         // CHECK IF EMAIL ALREADY EXISTS
         // $user = $this->CRUD_REPO->find($this->USERS, "email = BINARY '" . $email . "' AND `status` = '1' AND role = 'company_user'");
-        $user = Users::where("email", $email)->where("status", "active")->first();
-
+        $user = Users::where("email", $email)->where("status", 1)->first();
+    
         if (!$user) {
             return response()->json([
                 'error'         => true,
@@ -133,10 +133,10 @@ class LoginController extends Controller
     {
         try {
             DB::beginTransaction();
+
             AccessToken::where("token", $request->token)->delete();
 
             DB::commit();
-
             return response()->json([
                 'error' => false,
                 'msg'   => trans('messages.success')

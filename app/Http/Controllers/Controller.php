@@ -7,6 +7,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use App\Models\QrCodes;
 use App\Models\AuditTrail;
+use Exception;
 use Illuminate\Http\Request;
 use Firebase\JWT\ExpiredException;
 use Illuminate\Support\Facades\DB;
@@ -32,15 +33,36 @@ class Controller extends BaseController
         ];
 
         $secret = env('AUTH_SECRET');
-    
         return JWT::encode($payload, $secret, 'HS256');
     }
 
-    public function audit_trail (Request $request) 
+    public function audit_trail(Request $request) 
     {
-        $user = $request->auth;
+        try {
+            DB::beginTransaction();
 
-        dd($user);
+            $currentlyAuthId = $request->auth->id;
+
+            AuditTrail::create([
+                'user_id'   => $currentlyAuthId,
+                'remarks'   => $request->remarks,
+                'user_type' => $request->type,
+                'created_at'=> Carbon::now()
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'error' => false,
+                'msg'   => trans('messages.success')
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'error'         => true,
+                'msg'           => trans("messages.error"),
+                'modal_title'   => trans("alerts_title.oops")
+            ]);
+        }
     }
 
 }

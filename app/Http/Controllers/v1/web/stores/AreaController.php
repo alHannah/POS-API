@@ -17,30 +17,57 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            $id         = $request->id;
+            $name       = $request->name;
+            $areaCount  = 0;
+
+            if (!$name) {
+                return response()->json([
+                    'error'     => true,
+                    'message'   => trans('messages.error'),
+                ]);
+            }
 
             if ($id) {
+                // validations for existing area (for update)
+                $areaCount = Area::where('name', $name)->whereNot('id', $id)->count();
 
                 $previousData  = Area::with('brand_areas')->where('id', $id)->first();
                 $previousArea  = $previousData->name;
                 $previousBrand = $previousData->brand_areas->brand;
+
+            } else {
+                // validations for existing area (for create)
+                $areaCount = Area::where('name', $name)->count();
+            }
+
+            if ($areaCount > 0) {
+                return response()->json([
+                    'error'     => true,
+                    'message'   => trans('messages.store.area.existed'),
+                ]);
             }
 
             // --------------------------updateOrCreate-----------------------------------------
+
             $area = Area::updateOrCreate([
                 'id'        => $id
             ], [
-                'name'      => $request->name,
+                'name'      => $name,
                 'brand_id'  => $request->brand_id
             ]);
 
             $brandName = Brand::where('id', $request->brand_id)->first()->brand;
 
             if ($area->wasRecentlyCreated) {
-                $message    = "Create Area: $request->name";
+                $message    = "Create Area: $name";
             } else {
-                $message    = "Update Area: $previousArea ($previousBrand) change into $request->name ($brandName)";
+                $message    = "Update Area: $previousArea ($previousBrand) change into $name ($brandName)";
             }
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 
@@ -48,7 +75,6 @@ class AreaController extends Controller
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $area,
-                'audit_trail' => $message
             ]);
 
         } catch (Exception $e) {
@@ -64,7 +90,7 @@ class AreaController extends Controller
     public function get(Request $request)
     {
         try {
-            dd(auth()->user());
+            dd($request->auth);
             DB::beginTransaction();
             $datas = Area::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
 

@@ -64,6 +64,7 @@ class AreaController extends Controller
     public function get(Request $request)
     {
         try {
+            dd(auth()->user());
             DB::beginTransaction();
 
             $datas = Area::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();

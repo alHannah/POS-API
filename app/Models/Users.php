@@ -38,7 +38,7 @@ class Users extends Model implements AuthenticatableContract, AuthorizableContra
 
 
     public function brand_assignment(): HasMany {
-        return $this->hasMany(BrandAssignments::class, 'user_id');
+        return $this->hasMany(BrandAssignment::class, 'user_id');
     }
 
     public function area_assignment(): HasMany {

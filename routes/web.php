@@ -1,4 +1,3 @@
-
 <?php
 
 /** @var \Laravel\Lumen\Routing\Router $router */
@@ -8,6 +7,7 @@
 | Application Routes
 |--------------------------------------------------------------------------
 |
+
 | Here is where you can register all of the routes for an application.
 | It is a breeze. Simply tell Lumen the URIs it should respond to
 | and give it the Closure to call when that URI is requested.
@@ -62,6 +62,27 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/area", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',             'v1\web\stores\AreaController@create_update_store');
+                $router->post('/delete',                    'v1\web\stores\AreaController@delete_store_device');
+                $router->post('/get',                        'v1\web\stores\AreaController@get_stores_devices');
+            });
+
+            $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',             'v1\web\stores\StoreGroupController@create_update');
+                $router->post('/delete',                    'v1\web\stores\StoreGroupController@delete');
+                $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
+            });
+
             $router->group(["prefix" => "/stores", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
@@ -82,16 +103,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/get',                        'v1\web\stores\ScheduleGroupController@get');
             });
 
-            $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {
-                $router->get('/', function () use ($router) {
-                    return view('index', ['api' => env('APP_NAME')]);
-                });
-
-                $router->post('/create_update',             'v1\web\stores\StoreGroupController@create_update');
-                $router->post('/delete',                    'v1\web\stores\StoreGroupController@delete');
-                $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
-            });
-
             $router->group(["prefix" => "/store_hours", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
@@ -101,7 +112,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/delete',                    'v1\web\stores\StoreHoursController@delete');
                 $router->post('/get',                        'v1\web\stores\StoreHoursController@get');
             });
-
 
         });
 

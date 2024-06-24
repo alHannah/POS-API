@@ -8,8 +8,9 @@ class AccessToken extends Model
 {
     protected $table = "access_tokens";
     protected $fillable = [
-        'mobile_user_id',
+        'user_id',
         'store_id',
-        'token'
+        'token',
+        'type'
     ];
 }

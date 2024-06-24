@@ -16,39 +16,35 @@ class ScheduleGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $create_update = ScheduleGroup::updateOrCreate([
-                'id' => $request->id
-            ], [
-                'name'          =>$request->name,
-                'monday'        =>$request->monday,
-                'tuesday'       =>$request->tuesday,
-                'wednesday'     =>$request->wednesday,
-                'thursday'      =>$request->thursday,
-                'friday'        =>$request->friday,
-                'saturday'      =>$request->saturday,
-                'sunday'        =>$request->sunday,
-            ]);
+            $id = $request->id;
 
-            /* if ($create_update->wasRecentlyCreated) {
-                $type = 'Yes it is Recently Created!';
-            } else {
-                $type = 'It is updated!';
-            } */
+            $createUpdate = ScheduleGroup::updateOrCreate([
+                'id' => $id
+            ], [
+                'name'          => $request->name,
+                'monday'        => $request->monday,
+                'tuesday'       => $request->tuesday,
+                'wednesday'     => $request->wednesday,
+                'thursday'      => $request->thursday,
+                'friday'        => $request->friday,
+                'saturday'      => $request->saturday,
+                'sunday'        => $request->sunday,
+            ]);
 
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $create_update,
-                //'type'      => $type
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $createUpdate,
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'         => true,
+                'message'       => trans('messages.error'),
             ]);
         }
     }
@@ -63,16 +59,42 @@ class ScheduleGroupController extends Controller
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $delete,
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $delete,
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'         => true,
+                'message'       => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function get(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $datas = ScheduleGroup::where('id',$request->id)->latest()->get();
+
+            DB::commit();
+
+            return response()->json([
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $datas,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'         => true,
+                'message'       => trans('messages.error'),
             ]);
         }
     }

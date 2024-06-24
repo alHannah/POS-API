@@ -16,11 +16,11 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $store_group = StoreGroup::updateOrCreate([
-                    'id' => $request->id
+            $storeGroup = StoreGroup::updateOrCreate([
+                    'id'         => $request->id
             ], [
                     'group_name' => $request->group_name,
-                    'brand_id' => $request->group_id
+                    'brand_id'   => $request->group_id
             ]);
 
             DB::commit();
@@ -28,7 +28,7 @@ class StoreGroupController extends Controller
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $store_group
+                'data'      => $storeGroup
                 // 'type'      => $type
             ]);
 
@@ -47,8 +47,7 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $datas = StoreGroup::whereIn('brand_id', $request->brand_id)
-                ->where('status', 1)->latest()->get();
+            $datas = StoreGroup::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
 
             DB::commit();
 
@@ -73,14 +72,14 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $store_group = StoreGroup::where('id', $request->id)->delete();
+            $storeGroup = StoreGroup::where('id', $request->id)->delete();
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $store_group
+                'data'      => $storeGroup
                 // 'type'      => $type
             ]);
 

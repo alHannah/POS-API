@@ -25,10 +25,10 @@ class Store extends Model
         'pos_enabled'
     ];
 
-    /*public function brand_per_area () : BelongsTo
+    public function store_brands () : BelongsTo
     {
-        return $this->belongsTo(Brands::class, 'brand_id');
-    }*/
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
 
     public function store_with_schedule () : HasMany {
         return $this->hasMany(StorePerSchedule::class, 'store_id');

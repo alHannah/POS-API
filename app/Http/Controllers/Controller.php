@@ -19,19 +19,20 @@ class Controller extends BaseController
     protected function generateAuthToken($user)
     {
         $payload = [
-            'iss' => "Intel Hunter", // Issuer of the token
+            'iss' => "NexPOS", // Issuer of the token
             'sub' => $user->id, // Subject of the token
             'user' => [
-                'firstname' => $user->firstname,
-                'lastname' => $user->lastname,
-                'email' => $user->email,
-                'role'  => $user->role,
+                'name'     => $user->name,
+                'email'    => $user->email,
+                'role_id'  => $user->role_id,
             ],
             // 'tag' => $tag, // signup_verification/guest/user
             'iat' => time(), // Time when JWT was issued. 
             'exp' => time() + 60 * 60 // Expiration time
         ];
+
         $secret = env('AUTH_SECRET');
+    
         return JWT::encode($payload, $secret, 'HS256');
     }
 

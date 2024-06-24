@@ -81,9 +81,11 @@ class LoginController extends Controller
             DB::beginTransaction();
 
             $token = $this->generateAuthToken($user);
+  
             AccessToken::insert([
-                'mobile_user_id' => $user->id,
+                'user_id'        => $user->id,
                 'token'          => $token,
+                'type'           => 1,
                 'created_at'     => $today,
                 'updated_at'     => $today,
             ]);
@@ -131,7 +133,6 @@ class LoginController extends Controller
     {
         try {
             DB::beginTransaction();
-
             AccessToken::where("token", $request->token)->delete();
 
             DB::commit();

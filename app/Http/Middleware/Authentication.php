@@ -102,7 +102,7 @@ class Authentication
 
             $request->auth = $user;
         }
-
+        // s
         return $next($request);
     }
 

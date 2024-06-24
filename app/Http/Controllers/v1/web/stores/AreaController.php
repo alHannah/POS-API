@@ -65,7 +65,6 @@ class AreaController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $datas = Area::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
 
             DB::commit();

@@ -67,9 +67,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',             'v1\web\stores\AreaController@create_update_store');
-                $router->post('/delete',                    'v1\web\stores\AreaController@delete_store_device');
-                $router->post('/get',                        'v1\web\stores\AreaController@get_stores_devices');
+                $router->post('/create_update',             'v1\web\stores\AreaController@create_update');
+                $router->post('/delete',                    'v1\web\stores\AreaController@delete');
+                $router->post('/get',                        'v1\web\stores\AreaController@get');
             });
 
             $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {

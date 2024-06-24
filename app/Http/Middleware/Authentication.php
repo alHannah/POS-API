@@ -41,9 +41,8 @@ class Authentication
         $route = $request->route();
         $isLogout = ($path == '/api/v1/account/logout') ? true : false;
 
-        // dd($isLogout);
-
         if(!$isLogout) {
+
             if(!$this->validateToken($token)){
                 return response()->json([
                     'error' => true,
@@ -88,7 +87,7 @@ class Authentication
             }
 
             // CHECK USER STATUS
-            if($user->status != "active") {
+            if($user->status != '1') {
                 return response()->json([
                     'error' => true,
                     'msg' => trans('messages.unauthorized'),  
@@ -114,7 +113,7 @@ class Authentication
         try {
             $credentials = JWT::decode($token, new Key(env('AUTH_SECRET'), 'HS256'));
             return true;
-        } catch(UnexpectedValueException $e){
+        } catch(\UnexpectedValueException $e){
             return false;
         }catch(SignatureInvalidException $e){
             return false;

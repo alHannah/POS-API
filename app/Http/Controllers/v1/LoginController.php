@@ -88,14 +88,6 @@ class LoginController extends Controller
                 'updated_at'     => $today,
             ]);
 
-            $user_accesses = [];
-
-            /*-------------Code for testing-----------------*/
-            /*$store = Store::with([
-                'store_per_assignments'
-            ])->get();
-
-            dd($store);*/
 
             $access = UserAccess::with([
                 'user_access_module'
@@ -116,11 +108,6 @@ class LoginController extends Controller
             });
 
             DB::commit();
-
-            // $userCompleteName = implode(" ", array_filter([
-            //     'first_name' => $user->firstname,
-            //     'last_name' => $user->lastname,
-            // ]));
 
             return response()->json([
                 'error' => false,

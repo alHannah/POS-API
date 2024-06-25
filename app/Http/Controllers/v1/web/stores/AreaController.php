@@ -19,26 +19,27 @@ class AreaController extends Controller
 
             $id         = $request->id;
             $name       = $request->name;
+            $brandId    = $request->brand_id;
             $areaCount  = 0;
 
             if (!$name) {
                 return response()->json([
                     'error'     => true,
-                    'message'   => trans('messages.error'),
+                    'message'   => trans('messages.required'),
                 ]);
             }
 
             if ($id) {
                 // validations for existing area (for update)
-                $areaCount = Area::where('name', $name)->whereNot('id', $id)->count();
+                $areaCount      = Area::where('name', $name)->whereNot('id', $id)->count();
 
-                $previousData  = Area::with('brand_areas')->where('id', $id)->first();
-                $previousArea  = $previousData->name;
-                $previousBrand = $previousData->brand_areas->brand;
+                $previousData   = Area::with('brand_areas')->where('id', $id)->first();
+                $previousArea   = $previousData->name;
+                $previousBrand  = $previousData->brand_areas->brand;
 
             } else {
                 // validations for existing area (for create)
-                $areaCount = Area::where('name', $name)->count();
+                $areaCount      = Area::where('name', $name)->count();
             }
 
             if ($areaCount > 0) {
@@ -54,7 +55,7 @@ class AreaController extends Controller
                 'id'        => $id
             ], [
                 'name'      => $name,
-                'brand_id'  => $request->brand_id
+                'brand_id'  => $brandId
             ]);
 
             $brandName = Brand::where('id', $request->brand_id)->first()->brand;
@@ -117,14 +118,20 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $storeGroup = Area::where('id', $request->id)->delete();
+            $area = Area::where('id', $request->id)->delete();
+
+            $message = "Deleted: $area Successfully!";
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $storeGroup
+                'data'      => $area
                 // 'type'      => $type
             ]);
 

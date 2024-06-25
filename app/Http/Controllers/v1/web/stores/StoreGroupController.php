@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\web\stores;
 
 use App\Http\Controllers\Controller;
+use App\Models\Store;
 use App\Models\StoreGroup;
 use Exception;
 use Illuminate\Http\Request;
@@ -16,12 +17,41 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
+            $id             = $request->id;
+            $groupName      = $request->group_name;
+            $brandId        = $request->brand_id;
+
+            if (!$groupName || !$brandId) {
+                return response()->json([
+                    'error'     => true,
+                    'message'   => trans('messages.required')
+                ]);
+            }
+
+            $existingGroup = StoreGroup::where('group_name', $groupName)
+                            ->where('brand_id', $brandId)
+                            ->where('id', '!=', $id)
+                            ->first();
+
+            if ($existingGroup) {
+                return response()->json([
+                    'error'     => true,
+                    'message'   => trans('messages.store.store_group.existed'),
+                ]);
+            }
+
             $storeGroup = StoreGroup::updateOrCreate([
-                    'id'         => $request->id
+                'id' => $id
             ], [
-                    'group_name' => $request->group_name,
-                    'brand_id'   => $request->group_id
+                'group_name'    => $groupName,
+                'brand_id'      => $brandId
             ]);
+
+            $message = $id ? "Update Group: $groupName" : "Create Group: $groupName";
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 
@@ -29,7 +59,6 @@ class StoreGroupController extends Controller
                 'error'     => false,
                 'message'   => trans('messages.success'),
                 'data'      => $storeGroup
-                // 'type'      => $type
             ]);
 
         } catch (Exception $e) {
@@ -47,14 +76,14 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $datas = StoreGroup::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
+            $getData = StoreGroup::latest()->get();
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $datas,
+                'data'      => $getData,
             ]);
 
         } catch (Exception $e) {
@@ -72,7 +101,16 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $storeGroup = StoreGroup::where('id', $request->id)->delete();
+            $id = $request->id;
+
+            $storeGroup = StoreGroup::where('id', $id)
+                        ->delete();
+
+            $message = "Deleted: $storeGroup Successfully!";
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
 
             DB::commit();
 

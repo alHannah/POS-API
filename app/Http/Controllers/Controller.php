@@ -28,7 +28,7 @@ class Controller extends BaseController
                 'role_id'  => $user->role_id,
             ],
             // 'tag' => $tag, // signup_verification/guest/user
-            'iat' => time(), // Time when JWT was issued. 
+            'iat' => time(), // Time when JWT was issued.
             'exp' => time() + 60 * 60 // Expiration time
         ];
 
@@ -36,7 +36,7 @@ class Controller extends BaseController
         return JWT::encode($payload, $secret, 'HS256');
     }
 
-    public function audit_trail(Request $request) 
+    public function audit_trail(Request $request)
     {
         try {
             DB::beginTransaction();

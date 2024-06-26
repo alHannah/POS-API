@@ -39,6 +39,13 @@ return [
         'store_hours' => [
             'notFound'         => 'The requested record was not found',
             'alreadyExist'     => 'The time already exists'
+            'existed' => "Area is already exists!",
+        ],
+        'stores' => [
+            'exists'          => "Store already exists!",
+            'notexist'        => "Store does not exist!",
+            'recentlycreated' => "Store was recently created",
+            'missing_mob_id'  => "Please choose Mobile User ID/s"
         ]
     ],
     'required'                  => 'This value is required.',

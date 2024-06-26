@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\PriceTier;
 use App\Models\StoreGroup;
 
 class DropdownController extends Controller
@@ -67,4 +68,70 @@ class DropdownController extends Controller
             "store_dropdown"    =>$storegroup,
             ]);
         }
+
+    public function price_tier_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $priceTierDropdown = PriceTier::where('status', "active")->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$priceTierDropdown,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function manager_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $managerDropdown = PriceTier::where('status', "active")->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$managerDropdown,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function add_product_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $managerDropdown = PriceTier::where('status', "active")->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$managerDropdown,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
 }

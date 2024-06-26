@@ -42,9 +42,9 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $previousData = $id ? StoreGroup::with('brand_storeGroup')->find($id) : null;
-            $previousStore = $previousData->group_name ?? 'N/A';
-            $previousBrand = $previousData->brand_storeGroup->brand ?? 'N/A';
+            $previousData       = $id ? StoreGroup::with('brand_storeGroup')->find($id) : null;
+            $previousStore      = $previousData->group_name ?? 'N/A';
+            $previousBrand      = $previousData->brand_storeGroup->brand ?? 'N/A';
 
             $createUpdate = StoreGroup::updateOrCreate([
                 'id'            => $id
@@ -56,8 +56,8 @@ class StoreGroupController extends Controller
             $brandName = Brand::find($brandId)->brand;
 
             $message = $id
-                ? "Updated ID No. $id Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
-                : "Created ID No. $id $groupName (Brand: $brandName)";
+                    ? "Updated ID No. $id Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
+                    : "Created ID No. $id $groupName (Brand: $brandName)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -87,12 +87,15 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $brandId = $request->brand_id;
+            $brandIds = $request->input('brand_id', []);
 
-            !$brandId ? $getData = StoreGroup::latest()->get()
-                      : $getData = StoreGroup::where('brand_id', $brandId)
-                                ->latest()
-                                ->get();
+            if (is_array($brandIds) && !empty($brandIds)) {
+                $getData = Area::whereIn('brand_id', $brandIds)
+                            ->latest()
+                            ->get();
+            } else {
+                $getData = Area::latest()->get();
+            }
 
             DB::commit();
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductPerStore extends Model
 {
@@ -13,4 +14,9 @@ class ProductPerStore extends Model
         'store_id',
         'status'
     ];
+
+    public function products_product_per_store () : BelongsTo
+    {
+        return $this->belongsTo(Product::class,'product_id', 'id');
+    }
 }

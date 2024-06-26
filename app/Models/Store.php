@@ -48,4 +48,24 @@ class Store extends Model
     {
         return $this->belongsTo(StoreGroup::class, 'group_id');
     }
+
+    public function store_price_tier () : BelongsTo
+    {
+        return $this->belongsTo(PriceTier::class, 'tier_id');
+    }
+
+    public function store_devices () : HasMany
+    {
+        return $this->hasMany(Device::class, 'store_id', 'id');
+    }
+
+    public function store_oic () : HasMany
+    {
+        return $this->hasMany(OicPerStore::class,'store_id', 'id');
+    }
+
+    public function store_product_per_store () : HasMany
+    {
+        return $this->hasMany(ProductPerStore::class,'store_id', 'id');
+    }
 }

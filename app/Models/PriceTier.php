@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PriceTier extends Model
 {
@@ -15,5 +16,8 @@ class PriceTier extends Model
         'brand_id'
     ];
 
-
+    public function price_tier_store () : HasMany
+    {
+        return $this->hasMany(Store::class, 'tier_id');
+    }
 }

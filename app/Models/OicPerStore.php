@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OicPerStore extends Model
 {
@@ -12,5 +13,13 @@ class OicPerStore extends Model
         'store_id'
     ];
 
+    public function oic_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
 
+    public function oic_mobile_user () : BelongsTo
+    {
+        return $this->belongsTo(MobileUser::class, 'mobile_user_id');
+    }
 }

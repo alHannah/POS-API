@@ -98,6 +98,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/update',                    'v1\web\stores\StoresController@update_store');
                 $router->post('/delete',                    'v1\web\stores\StoresController@delete_store_device');
                 $router->post('/get',                       'v1\web\stores\StoresController@get_stores_devices');
+                $router->post('/showProduct',               'v1\web\stores\StoresController@show_product');
+                $router->post('/addProduct',               'v1\web\stores\StoresController@add_product');
+                $router->post('/activateProduct',               'v1\web\stores\StoresController@activate_product');
             });
 
             $router->group(["prefix" => "/schedule_group", "middleware" => "auth"], function () use ($router) {

@@ -38,7 +38,7 @@ return [
         ],
         'store_hours' => [
             'notFound'         => 'The requested record was not found',
-            'alreadyExist'    => 'The time already exists'
+            'alreadyExist'     => 'The time already exists'
         ]
     ],
     'required'                  => 'This value is required.',

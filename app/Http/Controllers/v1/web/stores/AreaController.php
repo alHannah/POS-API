@@ -118,9 +118,12 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $area = Area::where('id', $request->id)->delete();
+            $id = $request->id;
 
-            $message = "Deleted: $area Successfully!";
+            $area = Area::where('id', $id)
+                  -> delete();
+
+            $message = "Deleted ID No. $id Successfully!";
 
             $request['remarks'] = $message;
             $request['type']    = 2;

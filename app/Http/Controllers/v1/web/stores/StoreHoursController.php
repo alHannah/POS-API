@@ -124,65 +124,65 @@ class StoreHoursController extends Controller
         }
     }
 
-    public function get(Request $request)
-    {
-        try {
-            DB::beginTransaction();
+    // public function get(Request $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
 
-            $id = $request->id;
+    //         $id = $request->id;
 
-            if ($id) {
-                $data = GeneralTimeSetting::find($id);
-                $datas = [$data];
-            } else {
-                $datas = GeneralTimeSetting::latest()->get();
-            }
-            DB::commit();
+    //         if ($id) {
+    //             $data = GeneralTimeSetting::find($id);
+    //             $datas = [$data];
+    //         } else {
+    //             $datas = GeneralTimeSetting::latest()->get();
+    //         }
+    //         DB::commit();
 
-            return response() -> json([
-                'error'       => false,
-                'message'     => trans('messages.success'),
-                'data'        => $datas,
-            ]);
+    //         return response() -> json([
+    //             'error'       => false,
+    //             'message'     => trans('messages.success'),
+    //             'data'        => $datas,
+    //         ]);
 
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::info("Error: $e");
-            return response() -> json([
-                'error'       => true,
-                'message'     => trans('messages.error'),
-            ]);
-        }
-    }
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info("Error: $e");
+    //         return response() -> json([
+    //             'error'       => true,
+    //             'message'     => trans('messages.error'),
+    //         ]);
+    //     }
+    // }
 
-    public function delete(Request $request)
-    {
-        try {
-            DB::beginTransaction();
+    // public function delete(Request $request)
+    // {
+    //     try {
+    //         DB::beginTransaction();
 
-            $store_hours = GeneralTimeSetting::where('id', $request->id)->delete();
+    //         $store_hours = GeneralTimeSetting::where('id', $request->id)->delete();
 
-            $message = "Successfully Deleted ID #: {$request->id}";
+    //         $message = "Successfully Deleted ID #: {$request->id}";
 
-            $request['remarks'] = $message;
-            $request['type']    = 2;
-            $this->audit_trail($request);
+    //         $request['remarks'] = $message;
+    //         $request['type']    = 2;
+    //         $this->audit_trail($request);
 
-            DB::commit();
+    //         DB::commit();
 
-            return response() -> json([
-                'error'       => false,
-                'message'     => trans('messages.success'),
-                'data'        => $store_hours
-            ]);
+    //         return response() -> json([
+    //             'error'       => false,
+    //             'message'     => trans('messages.success'),
+    //             'data'        => $store_hours
+    //         ]);
 
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::info("Error: $e");
-            return response() -> json([
-                'error'       => true,
-                'message'     => trans('messages.error'),
-            ]);
-        }
-    }
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info("Error: $e");
+    //         return response() -> json([
+    //             'error'       => true,
+    //             'message'     => trans('messages.error'),
+    //         ]);
+    //     }
+    // }
 }

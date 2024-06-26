@@ -89,9 +89,10 @@ class StoreGroupController extends Controller
 
             $brandId = $request->brand_id;
 
-            $getData = StoreGroup::where('brand_id', $brandId)
-                        ->latest()
-                        ->get();
+            !$brandId ? $getData = StoreGroup::latest()->get()
+                      : $getData = StoreGroup::where('brand_id', $brandId)
+                                ->latest()
+                                ->get();
 
             DB::commit();
 

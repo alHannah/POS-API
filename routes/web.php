@@ -84,7 +84,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',             'v1\web\stores\StoreGroupController@create_update');
                 $router->post('/delete',                    'v1\web\stores\StoreGroupController@delete');
-                $router->get('/get',                        'v1\web\stores\StoreGroupController@get');
+                $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
                 $router->post('/filter',                    'v1\web\stores\StoreGroupController@filter');
 
             });

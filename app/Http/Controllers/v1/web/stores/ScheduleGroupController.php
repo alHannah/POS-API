@@ -5,6 +5,8 @@ namespace App\Http\Controllers\v1\web\stores;
 use Exception;
 use App\Http\Controllers\Controller;
 use App\Models\ScheduleGroup;
+use App\Models\Store;
+use App\Models\StorePerSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,45 +18,76 @@ class ScheduleGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            $storeNames  = $request->store_name;
+            $storeIds    = [];
+            $id          = $request->id;
 
-            if ($id) {
-                $previousData       = ScheduleGroup::where('id', $id)->first();
-                $previousName       = $previousData->name;
-                $previousMonday     = $previousData->monday;
-                $previousTuesday    = $previousData->tuesday;
-                $previousWednesday  = $previousData->wednesday;
-                $previousThursday   = $previousData->thursday;
-                $previousFriday     = $previousData->friday;
-                $previousSaturday   = $previousData->saturday;
-                $previousSunday     = $previousData->sunday;
-
-                $previousSchedule = [
-                    "Mo({$previousMonday})",
-                    "Tu({$previousTuesday})",
-                    "We({$previousWednesday})",
-                    "Th({$previousThursday})",
-                    "Fr({$previousFriday})",
-                    "Sa({$previousSaturday})",
-                    "Su({$previousSunday})"
-                ];
+            //Get store ids based on store names
+            foreach ($storeNames as $storeName) {
+                $store              = Store::where('store_name', $storeName)->first();
+                if ($store) {
+                    $storeIds[]     = $store->id;
+                } else {
+                    return response()->json([
+                        'error'     => true,
+                        'store'     => 'Store Not Found: ' . $storeName,
+                    ]);
+                }
             }
 
-            $createUpdate = ScheduleGroup::updateOrCreate([
-                'id' => $id
-            ], [
-                'name'          => $request->name,
-                'monday'        => $request->monday,
-                'tuesday'       => $request->tuesday,
-                'wednesday'     => $request->wednesday,
-                'thursday'      => $request->thursday,
-                'friday'        => $request->friday,
-                'saturday'      => $request->saturday,
-                'sunday'        => $request->sunday,
-            ]);
+            //For update and create
+            if ($request->has('id')) {
+                // Update existing schedule group
+                $scheduleGroup        = ScheduleGroup::find($id);
+                if (!$scheduleGroup) {
+                    return response()->json([
+                        'error'       => true,
+                        'message'     => 'Schedule Group not found.',
+                    ]);
+                }
 
+                // Retrieve previous data for audit_trail
+                $previousStoreNames   = $scheduleGroup->stores()->pluck('store_name')->toArray();
+                $previousData         = ScheduleGroup::where('id', $id)->first();
+                $previousName         = $previousData->name;
+
+                //Update schedule group details
+                $scheduleGroup->update([
+                    'name'            => $request->name,
+                    'monday'          => $request->monday,
+                    'tuesday'         => $request->tuesday,
+                    'wednesday'       => $request->wednesday,
+                    'thursday'        => $request->thursday,
+                    'friday'          => $request->friday,
+                    'saturday'        => $request->saturday,
+                    'sunday'          => $request->sunday,
+                ]);
+                //Delete existing store associations
+                $scheduleGroup->schedule_groups_per_store()->delete();
+            } else {
+                // Create new schedule group
+                $scheduleGroup = ScheduleGroup::create([
+                    'name'            => $request->name,
+                    'monday'          => $request->monday,
+                    'tuesday'         => $request->tuesday,
+                    'wednesday'       => $request->wednesday,
+                    'thursday'        => $request->thursday,
+                    'friday'          => $request->friday,
+                    'saturday'        => $request->saturday,
+                    'sunday'          => $request->sunday,
+                ]);
+            }
+            // Create new store associations for the schedule group
+            foreach ($storeIds as $storeId) {
+                $storeSchedule       =  StorePerSchedule::create([
+                    'schedule_id'    => $scheduleGroup->id,
+                    'store_id'       => $storeId,
+                ]);
+            }
+
+            // Prepare new schedule details for audit_trail
             $newSchedule = [
-                "Mo({$request->monday})",
+                " Mo({$request->monday})",
                 "Tu({$request->tuesday})",
                 "We({$request->wednesday})",
                 "Th({$request->thursday})",
@@ -62,32 +95,38 @@ class ScheduleGroupController extends Controller
                 "Sa({$request->saturday})",
                 "Su({$request->sunday})"
             ];
-
-            if ($createUpdate->wasRecentlyCreated) {
-                $message     = "New Schedule: '$request->name' " . implode(' ', $newSchedule);
+            // Generate message for audit trail based on create or update
+            if ($scheduleGroup->wasRecentlyCreated) {
+                $message  = "New Schedule: '$request->name' (" .
+                            implode(', ', $storeNames). ")" .
+                            implode(' ', $newSchedule);
             } else {
-                $message    = "Update Schedule: '$previousName' " . implode(' ', $previousSchedule) . " change into '$request->name' " . implode(' ', $newSchedule);
+                $message  = "Update Schedule: '$previousName' (" .
+                            implode(', ', $previousStoreNames) . ")" .
+                            " change into '$request->name' (" .
+                            implode(', ', $storeNames) . ")";
             }
-
-            $request['remarks']  = $message;
-            $request['type']     = 2;
+            //insert audit_trail to database
+            $request['remarks']     = $message;
+            $request['type']        = 2;
             $this->audit_trail($request);
 
             DB::commit();
 
             return response()->json([
-                'error'         => false,
-                'message'       => trans('messages.success'),
-                'data'          => $createUpdate,
-                //'audit_trail'   => $message
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $scheduleGroup,
+                'store'             => $storeSchedule,
+                //'audit_trail'       => $message
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'         => true,
-                'message'       => trans('messages.error'),
+                'error'             => true,
+                'message'           => trans('messages.error'),
             ]);
         }
     }
@@ -98,54 +137,61 @@ class ScheduleGroupController extends Controller
             DB::beginTransaction();
 
             $id = $request->id;
+            // Find schedule group by ID
+            $scheduleGroup          = ScheduleGroup::find($id);
 
-            if ($id) {
-                $datas      = ScheduleGroup::where('id', $id)->first();
-                $name       = $datas->name;
-                $monday     = $datas->monday;
-                $tuesday    = $datas->tuesday;
-                $wednesday  = $datas->wednesday;
-                $thursday   = $datas->thursday;
-                $friday     = $datas->friday;
-                $saturday   = $datas->saturday;
-                $sunday     = $datas->sunday;
-
-                $schedule = [
-                    "Mo({$monday})",
-                    "Tu({$tuesday})",
-                    "We({$wednesday})",
-                    "Th({$thursday})",
-                    "Fr({$friday})",
-                    "Sa({$saturday})",
-                    "Su({$sunday})"
-                ];
+            if (!$scheduleGroup) {
+                return response()->json([
+                    'error'         => true,
+                    'message'       => 'Schedule Group not found.',
+                ]);
             }
+            // Get store names associated with the schedule group
+            $storeNames             = $scheduleGroup->stores()->pluck('store_name')->toArray();
 
-            $delete = ScheduleGroup::where("id", $id)->delete();
+            // Delete all store associations for the schedule group
+            $scheduleGroup->schedule_groups_per_store()->delete();
 
-            if ($delete){
-                $message    = "Schedule Deleted: '$name' " . implode(' ', $schedule);
-            }
+             // Retrieve schedule group name for audit_trail
+            $scheduleGroupName      = $scheduleGroup->name;
 
-            $request['remarks'] = $message;
-            $request['type']    = 2;
+             // Prepare deleted schedule details for audit
+            $deletedSchedule = [
+                " Mo({$scheduleGroup->monday})",
+                "Tu({$scheduleGroup->tuesday})",
+                "We({$scheduleGroup->wednesday})",
+                "Th({$scheduleGroup->thursday})",
+                "Fr({$scheduleGroup->friday})",
+                "Sa({$scheduleGroup->saturday})",
+                "Su({$scheduleGroup->sunday})"
+            ];
+            // Delete the schedule group record
+            $scheduleGroup->delete();
+
+            // Generate message for audit trail
+            $message = "Deleted Schedule: '{$scheduleGroupName}' (" .
+                       implode(', ', $storeNames) . ")" .
+                       implode(' ', $deletedSchedule);
+
+            $request['remarks']     = $message;
+            $request['type']        = 2;
             $this->audit_trail($request);
 
             DB::commit();
 
             return response()->json([
-                'error'         => false,
-                'message'       => trans('messages.success'),
-                'data'          => $delete,
-                //'audith_trail'  =>$message
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $scheduleGroup,
+                //'audith_trail'      => $message
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'         => true,
-                'message'       => trans('messages.error'),
+                'error'             => true,
+                'message'           => trans('messages.error'),
             ]);
         }
     }
@@ -154,12 +200,11 @@ class ScheduleGroupController extends Controller
     {
         try {
             DB::beginTransaction();
+            $id = $request->id;
 
-            if($request->id){
-                $datas = ScheduleGroup::where('id',$request->id)->latest()->get();
-            } else {
-                $datas = ScheduleGroup::latest()->get();
-            }
+            // Retrieve schedule group data based on ID or latest if ID is not provided
+            !$id ? $datas = ScheduleGroup::latest()->get()
+                : $datas = ScheduleGroup::where('id',$id)->first();
 
             DB::commit();
 

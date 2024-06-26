@@ -23,4 +23,8 @@ class ScheduleGroup extends Model
     public function schedule_groups_per_store () : HasMany {
         return $this->HasMany(StorePerSchedule::class, 'schedule_id');
     }
+    public function stores()
+    {
+        return $this->hasManyThrough(Store::class, StorePerSchedule::class, 'schedule_id', 'id', 'id', 'store_id');
+    }
 }

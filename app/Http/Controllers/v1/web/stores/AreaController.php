@@ -20,51 +20,43 @@ class AreaController extends Controller
             $id         = $request->id;
             $name       = $request->name;
             $brandId    = $request->brand_id;
-            $areaCount  = 0;
 
-            if (!$name) {
+            if (!$name || !$brandId) {
                 return response()->json([
                     'error'     => true,
-                    'message'   => trans('messages.required'),
+                    'message'   => trans('messages.required')
                 ]);
             }
 
-            if ($id) {
-                // validations for existing area (for update)
-                $areaCount      = Area::where('name', $name)->whereNot('id', $id)->count();
+            $existingGroup = Area::where('name', $name)
+                            ->where('id', '!=', $id)
+                            ->first();
 
-                $previousData   = Area::with('brand_areas')->where('id', $id)->first();
-                $previousArea   = $previousData->name;
-                $previousBrand  = $previousData->brand_areas->brand;
-
-            } else {
-                // validations for existing area (for create)
-                $areaCount      = Area::where('name', $name)->count();
-            }
-
-            if ($areaCount > 0) {
+            if ($existingGroup) {
                 return response()->json([
                     'error'     => true,
                     'message'   => trans('messages.store.area.existed'),
                 ]);
             }
 
+            $previousData       = $id ? Area::with('brand_areas')->where('id', $id)->first() : null;
+            $previousArea       = $previousData->name ?? 'N/A';
+            $previousBrand      = $previousData->brand_areas->brand ?? 'N/A';
+
             // --------------------------updateOrCreate-----------------------------------------
 
-            $area = Area::updateOrCreate([
+            $createUpdate = Area::updateOrCreate([
                 'id'        => $id
             ], [
                 'name'      => $name,
                 'brand_id'  => $brandId
             ]);
 
-            $brandName = Brand::where('id', $request->brand_id)->first()->brand;
+            $brandName = Brand::find($brandId)->brand;
 
-            if ($area->wasRecentlyCreated) {
-                $message    = "Create Area: $name";
-            } else {
-                $message    = "Update Area: $previousArea ($previousBrand) change into $name ($brandName)";
-            }
+            $message = $id
+                    ? "Updated ID No. $id Previous: $previousArea (Brand: $previousBrand) New: $name (Brand: $brandName)"
+                    : "Created ID No. $id $name (Brand: $brandName)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -75,7 +67,7 @@ class AreaController extends Controller
             return response()->json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
-                'data'        => $area,
+                'data'        => $createUpdate,
             ]);
 
         } catch (Exception $e) {
@@ -91,16 +83,27 @@ class AreaController extends Controller
     public function get(Request $request)
     {
         try {
-            dd($request->auth);
             DB::beginTransaction();
-            $datas = Area::whereIn('brand_id', $request->brand_id)->where('status', 1)->latest()->get();
+
+            $brandIds = $request->input('brand_id', []);
+
+            if (is_array($brandIds) && !empty($brandIds)) {
+                $getData = Area::whereIn('brand_id', $brandIds)
+                            ->where('status', 1)
+                            ->latest()
+                            ->get();
+            } else {
+                $getData = Area::where('status', 1)
+                            ->latest()
+                            ->get();
+            }
 
             DB::commit();
 
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $datas,
+                'data'      => $getData,
             ]);
 
         } catch (Exception $e) {

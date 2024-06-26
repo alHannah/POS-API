@@ -35,6 +35,10 @@ return [
         'store_group' => [
             'added'             => 'New Store Group added.',
             'existed'           => "Store Group already exists with same brand!"
+        ],
+        'store_hours' => [
+            'notFound'         => 'The requested record was not found',
+            'alreadyExist'    => 'The time already exists'
         ]
     ],
     'required'                  => 'This value is required.',

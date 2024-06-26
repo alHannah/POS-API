@@ -5,6 +5,8 @@ namespace App\Http\Controllers\v1\web\stores;
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Models\StoreGroup;
+use App\Models\Area;
+use App\Models\Brand;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class StoreGroupController extends Controller
 {
-    public function create_update(Request $request)
+        public function create_update(Request $request)
     {
         try {
             DB::beginTransaction();
@@ -40,6 +42,10 @@ class StoreGroupController extends Controller
                 ]);
             }
 
+            $previousData = $id ? StoreGroup::with('brand_storeGroup')->find($id) : null;
+            $previousStore = $previousData->group_name ?? 'N/A';
+            $previousBrand = $previousData->brand_storeGroup->brand ?? 'N/A';
+
             $createUpdate = StoreGroup::updateOrCreate([
                 'id'            => $id
             ], [
@@ -47,7 +53,11 @@ class StoreGroupController extends Controller
                 'brand_id'      => $brandId
             ]);
 
-            $message = $id ? "Update Group: $groupName" : "Create Group: $groupName";
+            $brandName = Brand::find($brandId)->brand;
+
+            $message = $id
+                ? "Updated ID No. $id Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
+                : "Created ID No. $id $groupName (Brand: $brandName)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -70,6 +80,7 @@ class StoreGroupController extends Controller
             ]);
         }
     }
+
 
     public function get(Request $request)
     {
@@ -141,7 +152,7 @@ class StoreGroupController extends Controller
             $storeGroup = StoreGroup::where('id', $id)
                             ->delete();
 
-            $message = "Deleted: $storeGroup Successfully!";
+            $message = "Deleted ID No. $id Successfully!";
 
             $request['remarks'] = $message;
             $request['type']    = 2;

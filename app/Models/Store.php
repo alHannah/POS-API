@@ -44,7 +44,7 @@ class Store extends Model
         return $this->HasMany(StoreAssignment::class, 'store_id');
     }
 
-    public function store_per_group () : BelongsTo
+    public function group_per_store () : BelongsTo
     {
         return $this->belongsTo(StoreGroup::class, 'group_id');
     }

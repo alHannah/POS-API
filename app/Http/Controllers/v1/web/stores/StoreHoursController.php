@@ -93,7 +93,10 @@ class StoreHoursController extends Controller
                     'end_time'   => $request->end_time,
                 ]);
 
-                $message = "Update Time: $previousStart (Opening) & $previousEnd (Closing) change into {$request->start_time} (Opening) & {$request->end_time} (Closing)";
+                $start = $request->start_time;
+                $end = $request->end_time;
+
+                $message = "Update Time: $previousStart (Opening) & $previousEnd (Closing) change into {$start} (Opening) & {$end} (Closing)";
 
                 $request['remarks'] = $message;
                 $request['type'] = 2;

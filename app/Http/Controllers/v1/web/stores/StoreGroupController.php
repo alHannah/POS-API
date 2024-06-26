@@ -40,8 +40,8 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $storeGroup = StoreGroup::updateOrCreate([
-                'id' => $id
+            $createUpdate = StoreGroup::updateOrCreate([
+                'id'            => $id
             ], [
                 'group_name'    => $groupName,
                 'brand_id'      => $brandId
@@ -58,7 +58,7 @@ class StoreGroupController extends Controller
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $storeGroup
+                'data'      => $createUpdate
             ]);
 
         } catch (Exception $e) {
@@ -76,7 +76,11 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $getData = StoreGroup::latest()->get();
+            $brandId = $request->brand_id;
+
+            $getData = StoreGroup::where('brand_id', $brandId)
+                        ->latest()
+                        ->get();
 
             DB::commit();
 
@@ -96,6 +100,37 @@ class StoreGroupController extends Controller
         }
     }
 
+    // public function filter(Request $request) {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $areaFilter         = $request->areaFilter;
+    //         $brandFilter        = $request->brandFilter;
+    //         $startDateFilter    = $request->startDateFilter;
+    //         $endDateFilter      = $request->endDateFilter;
+
+    //         $areaFilter = StoreGroup::
+
+    //         return response()->json([
+    //             'error'             => false,
+    //             'message'           => trans('messages.success'),
+    //             'areaData'          => $areaFilter,
+    //             'brandData'         => $brandFilter,
+    //             'startDateData'     => $startDateFilter,
+    //             'endDateData'       => $endDateFilter
+    //             // 'type'      => $type
+    //         ]);
+
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info("Error: $e");
+    //         return response()->json([
+    //             'error'     => true,
+    //             'message'   => trans('messages.error'),
+    //         ]);
+    //     }
+    // }
+
     public function delete(Request $request)
     {
         try {
@@ -104,7 +139,7 @@ class StoreGroupController extends Controller
             $id = $request->id;
 
             $storeGroup = StoreGroup::where('id', $id)
-                        ->delete();
+                            ->delete();
 
             $message = "Deleted: $storeGroup Successfully!";
 

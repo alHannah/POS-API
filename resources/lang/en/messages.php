@@ -39,7 +39,6 @@ return [
         'store_hours' => [
             'notFound'         => 'The requested record was not found',
             'alreadyExist'     => 'The time already exists'
-            'existed' => "Area is already exists!",
         ],
         'stores' => [
             'exists'          => "Store already exists!",

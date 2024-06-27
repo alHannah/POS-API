@@ -71,7 +71,7 @@ class StoresController extends Controller
             }
 
             DB::commit();
-            // dd($store->wasRecentlyCreated);
+
             if ($store->wasRecentlyCreated) {
                 $message    = "Created Store: ". $request->store_name;
             }
@@ -121,6 +121,9 @@ class StoresController extends Controller
                 ]);
             }
 
+            $previousStoreMobileUserId = $previousStore[0]->store_oic->pluck('mobile_user_id');
+            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$previousStoreMobileUserId)->where('store_id', $request->id)->get();
+
             DB::beginTransaction();
 
             $store =  Store::where('id', $request->id)->update([
@@ -145,8 +148,7 @@ class StoresController extends Controller
 
             $mobile_user_id = $request->mobile_user_id;
 
-            OicPerStore::whereNotIn('mobile_user_id', $mobile_user_id)
-                ->where('store_id', $request->id)->delete();
+            OicPerStore::where('store_id', $request->id)->delete();
 
             foreach ($mobile_user_id as $mob_id) {
                 OicPerStore::create([
@@ -224,10 +226,6 @@ class StoresController extends Controller
 
             $updated = json_encode($compareStore);
 
-            $previousStoreMobileUserId = $previousStore[0]->store_oic->pluck('mobile_user_id');
-
-            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$previousStoreMobileUserId)->where('store_id', $request->id)->get();
-
             $newOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$request->mobile_user_id)->where('store_id', $request->id)->get();
 
             foreach ($newOic as $newOics) {
@@ -247,6 +245,7 @@ class StoresController extends Controller
             $request["remarks"] = $message;
             $request["type"] = 2;
             $this->audit_trail($request);
+
             DB::commit();
 
             return response()->json([
@@ -320,7 +319,7 @@ class StoresController extends Controller
 
             $data = Store::with([
                     'store_brands',
-                    'store_per_group',
+                    'group_per_store',
                     'store_per_area',
                     'store_per_area',
                     'store_price_tier',
@@ -348,7 +347,7 @@ class StoresController extends Controller
                     $brand     = $items->store_brands->brand;
                     $code      = $items->store_code;
                     $name      = $items->store_name;
-                    $group     = $items->store_per_group->group_name;
+                    $group     = $items->group_per_store->group_name;
                     $area      = $items->store_per_area->name;
                     $priceTier = $items->store_price_tier->name;
                     $oicName   = collect($oicname)->implode(', ');
@@ -419,6 +418,7 @@ class StoresController extends Controller
                 'message'           => trans('messages.success'),
                 'data'              => $tableData,
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");

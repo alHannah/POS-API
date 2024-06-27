@@ -36,7 +36,7 @@ class ScheduleGroupController extends Controller
             }
 
             //For update and create
-            if ($request->has('id')) {
+            if (isset($id)) {
                 // Update existing schedule group
                 $scheduleGroup        = ScheduleGroup::find($id);
                 if (!$scheduleGroup) {

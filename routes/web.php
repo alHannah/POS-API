@@ -108,7 +108,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',             'v1\web\stores\ScheduleGroupController@create_update');
+                $router->post('/create',                    'v1\web\stores\ScheduleGroupController@create');
+                $router->post('/update',                    'v1\web\stores\ScheduleGroupController@update');
                 $router->post('/delete',                    'v1\web\stores\ScheduleGroupController@delete');
                 $router->post('/get',                       'v1\web\stores\ScheduleGroupController@get');
 

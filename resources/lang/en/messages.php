@@ -45,6 +45,9 @@ return [
             'notexist'        => "Store does not exist!",
             'recentlycreated' => "Store was recently created",
             'missing_mob_id'  => "Please choose Mobile User ID/s"
+        ],
+        'schedule_group' => [
+            'notexist'        => "Schedule Group does not exist!"
         ]
     ],
     'required'                  => 'This value is required.',

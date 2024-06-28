@@ -4,122 +4,75 @@ namespace App\Http\Controllers\v1\web\stores;
 
 use App\Http\Controllers\Controller;
 use App\Models\GeneralTimeSetting;
+use App\Models\Store;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StoreHoursController extends Controller
 {
-    public function create_update(Request $request)
+    public function create(Request $request)
     {
-        // try {
-        //     DB::beginTransaction();
-
-        //     $id = $request->id;
-
-        //     if ($id) {
-        //         $previousData = GeneralTimeSetting::find($id);
-
-        //         if ($previousData) {
-        //             $previousStart  = $previousData->start_time;
-        //             $previousEnd    = $previousData->end_time;
-        //         }
-        //     }
-
-        //     $store_hours = GeneralTimeSetting::updateOrCreate(
-        //         ['id' => $id],
-        //         [
-        //             'id'         => $id,
-        //             'start_time' => $request->start_time,
-        //             'end_time'   => $request->end_time
-        //         ]
-        //     );
-
-        //     if ($store_hours->wasRecentlyCreated || !$id) {
-        //         $message = "New Time: Opening: {$request->start_time} & Closing: {$request->end_time}";
-        //     } else {
-        //         $message = "Update Time: $previousStart(Opening) & $previousEnd(Closing) change into
-        //         {$request->start_time}(Opening) & {$store_hours->end_time}(Closing)";
-        //     }
-
-        //     $request['remarks'] = $message;
-        //     $request['type']    = 2;
-        //     $this->audit_trail($request);
-
-        //     DB::commit();
-
-        //     return response()  -> json([
-        //         'error'        => false,
-        //         'message'      => trans('messages.success'),
-        //         'data'         => $store_hours,
-        //         'audit_trail'  => $message
-        //     ]);
-
-        // } catch (Exception $e) {
-        //     DB::rollBack();
-        //     Log::info("Error: $e");
-        //     return response() -> json([
-        //         'error'       => true,
-        //         'message'     => trans('messages.error'),
-        //     ]);
-        // }
-
         try {
             DB::beginTransaction();
 
-            $id = 1;
+            $id = $request->id;
+            $store_id = $request->store_id;
 
-            $previousData = GeneralTimeSetting::find($id);
-
-            if ($previousData) {
-                $existingData = GeneralTimeSetting::where('start_time', $request->start_time)
-                                                  ->where('end_time', $request->end_time)
-                                                  ->first();
-
-                if ($existingData) {
-                    DB::rollBack();
-                    return response() -> json([
-                        'error'       => true,
-                        'message'     => trans('messages.store.store_hours.alreadyExist'),
-                    ]);
-                }
-
-                $previousStart = $previousData->start_time;
-                $previousEnd   = $previousData->end_time;
-
-                $previousData    -> update([
-                    'start_time' => $request->start_time,
-                    'end_time'   => $request->end_time,
-                ]);
-
-                $start = $request->start_time;
-                $end = $request->end_time;
-
-                $message = "Update Time: $previousStart (Opening) & $previousEnd (Closing) change into {$start} (Opening) & {$end} (Closing)";
-
-                $request['remarks'] = $message;
-                $request['type'] = 2;
-                $this->audit_trail($request);
-
-                DB::commit();
-
-                return response() -> json([
-                    'error'       => false,
-                    'message'     => trans('messages.success'),
-                    'data'        => $previousData,
-                    'audit_trail' => $message,
-                ]);
-            } else {
-                DB::rollBack();
-                return response() -> json([
-                    'error'       => true,
-                    'message'     => trans('messages.store.store_hours.notFound'),
+            if (!$store_id) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.required')
                 ]);
             }
+
+            $store = Store::find($store_id);
+            if (!$store) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.store_hours.notFound')
+                ]);
+            }
+
+            $store_name = $store->store_name;
+
+            $existingStore = GeneralTimeSetting::where('store_id', $store_id)
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($existingStore) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.store_hours.existed'),
+                ]);
+            }
+
+            $store_hours = GeneralTimeSetting::create([
+                'id' => $id,
+                'store_id' => $request->store_id,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time
+            ]);
+
+            $message = "{$store_name} => New Time: Opening: {$request->start_time} & Closing: {$request->end_time}";
+
+            $request['remarks'] = $message;
+            $request['type'] = 2;
+            $this->audit_trail($request);
+
+            DB::commit();
+
+            return response()->json([
+                'error' => false,
+                'message' => trans('messages.success'),
+                'data' => $store_hours,
+                'audit_trail' => $message
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info("Error: $e");
+            Log::error("Error: $e");
             return response()->json([
                 'error' => true,
                 'message' => trans('messages.error'),
@@ -127,65 +80,192 @@ class StoreHoursController extends Controller
         }
     }
 
-    // public function get(Request $request)
-    // {
-    //     try {
-    //         DB::beginTransaction();
+    public function update(Request $request)
+    {
+        try {
+            DB::beginTransaction();
 
-    //         $id = $request->id;
+            $store_id = $request->store_id;
 
-    //         if ($id) {
-    //             $data = GeneralTimeSetting::find($id);
-    //             $datas = [$data];
-    //         } else {
-    //             $datas = GeneralTimeSetting::latest()->get();
-    //         }
-    //         DB::commit();
+            if (!$store_id) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.required')
+                ]);
+            }
 
-    //         return response() -> json([
-    //             'error'       => false,
-    //             'message'     => trans('messages.success'),
-    //             'data'        => $datas,
-    //         ]);
+            $previousData = GeneralTimeSetting::where('store_id', $store_id)->first();
 
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::info("Error: $e");
-    //         return response() -> json([
-    //             'error'       => true,
-    //             'message'     => trans('messages.error'),
-    //         ]);
-    //     }
-    // }
+            if (!$previousData) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.store_hours.notFound')
+                ]);
+            }
 
-    // public function delete(Request $request)
-    // {
-    //     try {
-    //         DB::beginTransaction();
+            if ($previousData->start_time == $request->start_time && $previousData->end_time == $request->end_time) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.store_hours.alreadyExist')
+                ]);
+            }
 
-    //         $store_hours = GeneralTimeSetting::where('id', $request->id)->delete();
+            $store = Store::find($store_id);
+            $store_name = $store->store_name;
 
-    //         $message = "Successfully Deleted ID #: {$request->id}";
+            $previousStart = $previousData->start_time;
+            $previousEnd   = $previousData->end_time;
 
-    //         $request['remarks'] = $message;
-    //         $request['type']    = 2;
-    //         $this->audit_trail($request);
+            $previousData->update([
+                'store_id' => $request->store_id,
+                'start_time' => $request->start_time,
+                'end_time'   => $request->end_time,
+            ]);
 
-    //         DB::commit();
+            $start = $request->start_time;
+            $end = $request->end_time;
 
-    //         return response() -> json([
-    //             'error'       => false,
-    //             'message'     => trans('messages.success'),
-    //             'data'        => $store_hours
-    //         ]);
+            $message = "{$store_name} => Update Time: $previousStart (Opening) & $previousEnd (Closing) change into {$start} (Opening) & {$end} (Closing)";
 
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::info("Error: $e");
-    //         return response() -> json([
-    //             'error'       => true,
-    //             'message'     => trans('messages.error'),
-    //         ]);
-    //     }
-    // }
+            $request['remarks'] = $message;
+            $request['type'] = 2;
+            $this->audit_trail($request);
+
+            DB::commit();
+
+            return response()->json([
+                'error' => false,
+                'message' => trans('messages.success'),
+                'data' => $previousData,
+                'audit_trail' => $message
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error: $e");
+            return response()->json([
+                'error' => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function displayStoreHours(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $store_id = $request->store_id;
+
+            if ($store_id) {
+                $data = GeneralTimeSetting::where('store_id', $store_id)
+                    ->join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                    ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            } else {
+                $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                    ->orderBy('general_time_setting.created_at', 'desc')
+                    ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $store_id = $request->store_id;
+
+            if (!$store_id) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.required')
+                ]);
+            }
+
+            $previousData = GeneralTimeSetting::where('store_id', $store_id)->first();
+
+            if (!$previousData) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.store_hours.notFound')
+                ]);
+            }
+
+            $store_hours = GeneralTimeSetting::where('store_id', $store_id)->delete();
+
+            $store = Store::find($store_id);
+            $store_name = $store->store_name;
+
+            $message = "Deleted {$store_name} (store hours)";
+
+            $request['remarks'] = $message;
+            $request['type']    = 2;
+            $this->audit_trail($request);
+
+            DB::commit();
+
+            return response()->json([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $store_hours,
+                'audit_trail' => $message
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'       => true,
+                'message'     => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function filterStoreHours(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $start_time = $request->start_time;
+            $end_time = $request->end_time;
+
+            $items = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                ->whereTime('general_time_setting.start_time', '>=', $start_time)
+                ->whereTime('general_time_setting.end_time', '<=', $end_time)
+                ->orderBy('general_time_setting.created_at', 'desc')
+                ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $items,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error: {$e->getMessage()}");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
 }

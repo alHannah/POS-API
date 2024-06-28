@@ -133,9 +133,11 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',                 'v1\web\stores\StoreHoursController@create_update');
-                $router->post('/delete',                        'v1\web\stores\StoreHoursController@delete');
-                $router->post('/get',                           'v1\web\stores\StoreHoursController@get');
+                $router->post('/create',                     'v1\web\stores\StoreHoursController@create');
+                $router->post('/update',                     'v1\web\stores\StoreHoursController@update');
+                $router->post('/delete',                     'v1\web\stores\StoreHoursController@delete');
+                $router->post('/displayStoreHours',          'v1\web\stores\StoreHoursController@displayStoreHours');
+                $router->post('/filterStoreHours',           'v1\web\stores\StoreHoursController@filterStoreHours');
             });
 
         });

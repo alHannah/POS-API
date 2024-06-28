@@ -6,20 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Models\StoreGroup;
 use App\Models\Area;
+use App\Models\Users;
 use App\Models\Brand;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StoreGroupController extends Controller
 {
-        public function create_update(Request $request)
+    public function create_update(Request $request)
     {
         try {
             DB::beginTransaction();
-
-            $id             = $request->id;
+            $encryptedId    = $request->id ? Crypt::decrypt($request->id) : null;
             $groupName      = $request->group_name;
             $brandId        = $request->brand_id;
 
@@ -32,7 +34,7 @@ class StoreGroupController extends Controller
 
             $existingGroup = StoreGroup::where('group_name', $groupName)
                             ->where('brand_id', $brandId)
-                            ->where('id', '!=', $id)
+                            ->where('id', '!=', $encryptedId)
                             ->first();
 
             if ($existingGroup) {
@@ -42,12 +44,12 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $previousData       = $id ? StoreGroup::with('brand_storeGroup')->find($id) : null;
+            $previousData       = Crypt::encrypt($encryptedId) ? StoreGroup::with('brand_storeGroup')->find($encryptedId) : null;
             $previousStore      = $previousData->group_name ?? 'N/A';
             $previousBrand      = $previousData->brand_storeGroup->brand ?? 'N/A';
 
             $createUpdate = StoreGroup::updateOrCreate([
-                'id'            => $id
+                'id'            => $encryptedId
             ], [
                 'group_name'    => $groupName,
                 'brand_id'      => $brandId
@@ -55,14 +57,13 @@ class StoreGroupController extends Controller
 
             $brandName = Brand::find($brandId)->brand;
 
-            $message = $id
-                    ? "Updated ID No. $id Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
-                    : "Created ID No. $id $groupName (Brand: $brandName)";
+            $message = $encryptedId
+                    ? "Updated Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
+                    : "Created $groupName (Brand: $brandName)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
             $this->audit_trail($request);
-
             DB::commit();
 
             return response()->json([
@@ -81,82 +82,68 @@ class StoreGroupController extends Controller
         }
     }
 
-
     public function get(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $brandIds = $request->input('brand_id', []);
+            $areaFilter         = (array) $request->areaFilter;
+            $brandFilter        = (array) $request->brandFilter;
 
-            if (is_array($brandIds) && !empty($brandIds)) {
-                $getData = Area::whereIn('brand_id', $brandIds)
-                            ->latest()
-                            ->get();
-            } else {
-                $getData = Area::latest()->get();
+            // Flatten the filters in case they are nested
+            $areaFilter         = Arr::flatten($areaFilter, 1);
+            $brandFilter        = Arr::flatten($brandFilter, 1);
+
+            $thisData = Store::with(['store_brands', 'group_per_store']);
+            if (!empty($brandFilter)) {
+                $thisData->whereIn('brand_id', $brandFilter);
             }
+
+            if (!empty($areaFilter)) {
+                $thisData->whereIn('area_id', $areaFilter);
+            }
+
+            $getData = $thisData->get();
+
+            $generateData = $getData->map(function ($items) {
+                $name       = $items->group_per_store->group_name ?? 'N/A';
+                $brand      = $items->store_brands->brand ?? 'N/A';
+
+                return [
+                    'store_name'     => $name,
+                    'brand'         => $brand,
+                ];
+            });
 
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $getData,
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $generateData,
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info("Error: $e");
+            Log::error("Error: {$e->getMessage()}");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'         => true,
+                'message'       => trans('messages.error'),
             ]);
         }
     }
-
-    // public function filter(Request $request) {
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $areaFilter         = $request->areaFilter;
-    //         $brandFilter        = $request->brandFilter;
-    //         $startDateFilter    = $request->startDateFilter;
-    //         $endDateFilter      = $request->endDateFilter;
-
-    //         $areaFilter = StoreGroup::
-
-    //         return response()->json([
-    //             'error'             => false,
-    //             'message'           => trans('messages.success'),
-    //             'areaData'          => $areaFilter,
-    //             'brandData'         => $brandFilter,
-    //             'startDateData'     => $startDateFilter,
-    //             'endDateData'       => $endDateFilter
-    //             // 'type'      => $type
-    //         ]);
-
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::info("Error: $e");
-    //         return response()->json([
-    //             'error'     => true,
-    //             'message'   => trans('messages.error'),
-    //         ]);
-    //     }
-    // }
 
     public function delete(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            $encryptedId = $request->id ? Crypt::decrypt($request->id) : null;
 
-            $storeGroup = StoreGroup::where('id', $id)
+            $storeGroup  = StoreGroup::where('id', $encryptedId)
                             ->delete();
 
-            $message = "Deleted ID No. $id Successfully!";
+            $message = "Deleted Successfully!";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -167,7 +154,7 @@ class StoreGroupController extends Controller
             return response()->json([
                 'error'     => false,
                 'message'   => trans('messages.success'),
-                'data'      => $storeGroup
+                'data'      => $storeGroup,
                 // 'type'      => $type
             ]);
 
@@ -180,4 +167,36 @@ class StoreGroupController extends Controller
             ]);
         }
     }
+
+    // public function archive(Request $request) {
+    //     try {
+    //         DB:: beginTransaction();
+
+    //         $userId = Crypt::decrypt($request->encryptedId);
+
+    //         $name = Users::where('id', $userId)->first()->name;
+
+    //         Users::where('id', $userId)->update([
+    //             'status' => 0
+    //         ]);
+
+    //         // AUDIT TRAIL LOG
+    //         // $request['remarks'] = "Archived an user: $name.";
+    //         $request['activity'] = "Archived an user: $name.";
+    //         $this->audit_trail($request);
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             "error" => false,
+    //             'message' =>trans('messages.success'),
+    //         ]);
+    //     } catch (Exception $e) {
+    //         Log::info("Error $e");
+    //         return response()->json([
+    //             "error"=> true,
+    //             "message"=> trans('messages.error'),
+    //         ]);
+    //     }
+    // }
 }

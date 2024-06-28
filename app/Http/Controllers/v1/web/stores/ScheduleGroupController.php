@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ScheduleGroup;
 use App\Models\Store;
 use App\Models\StorePerSchedule;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,9 @@ class ScheduleGroupController extends Controller
                     'store_id'    => $storeId,
                 ]);
             }
+            //for audit
             $storeNames =  $createSchedule->stores()->pluck('store_name')->toArray();
+
             DB::commit();
 
             if ($createSchedule->wasRecentlyCreated) {
@@ -66,15 +69,53 @@ class ScheduleGroupController extends Controller
         }
     }
 
+    public function edit(Request $request){
+        try{
+            DB::beginTransaction();
+
+            $decryptedId = Crypt::decrypt($request->encryptedId);
+
+            $scheduleData = ScheduleGroup::where('id', $decryptedId)->first();
+            $storeData =  StorePerSchedule::where('schedule_id',$decryptedId)->get();
+
+            $storeIds = $storeData->map(function ($item){
+                $storeId = $item->store_id;
+                return $storeId;
+            });
+
+            $encryptedId = Crypt::encrypt($decryptedId);
+
+            DB::commit();
+
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $scheduleData,
+                'store'             => $storeIds,
+                'encryptedId'       => $encryptedId
+                //'audit_trail'       => $message
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'             => true,
+                'message'           => trans('messages.error'),
+            ]);
+        }
+    }
+
     public function update(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            //$id = $request->id;
             $storeIds = $request->store_id;
 
-            $scheduleGroup        = ScheduleGroup::find($id);
+            $decryptedId = Crypt::decrypt($request->encryptedId);
+
+            $scheduleGroup        = ScheduleGroup::find($decryptedId);
             if (!$scheduleGroup) {
                 return response()->json([
                     'error'       => true,
@@ -83,7 +124,7 @@ class ScheduleGroupController extends Controller
             }
 
             $previousStoreNames   = $scheduleGroup->stores()->pluck('store_name')->toArray();
-            $previousData         = ScheduleGroup::where('id', $id)->first();
+            $previousData         = ScheduleGroup::where('id', $decryptedId)->first();
             $previousName         = $previousData->name;
 
             $scheduleGroup->update([
@@ -100,10 +141,11 @@ class ScheduleGroupController extends Controller
 
             foreach ($storeIds as $storeId) {
                 StorePerSchedule::create([
-                    'schedule_id' => $id,
-                    'store_id' => $storeId
+                    'schedule_id' => $decryptedId,
+                    'store_id'    => $storeId
                 ]);
             }
+
             $newStoreName   = $scheduleGroup->stores()->pluck('store_name')->toArray();
             DB::commit();
 
@@ -136,9 +178,11 @@ class ScheduleGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            //$id = $request->id;
 
-            $scheduleGroup          = ScheduleGroup::find($id);
+            $decryptedId = Crypt::decrypt($request->encryptedId);
+
+            $scheduleGroup          = ScheduleGroup::find($decryptedId);
             if (!$scheduleGroup) {
                 return response()->json([
                     'error'         => true,
@@ -181,17 +225,21 @@ class ScheduleGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            //---------------------Ayusin pa---------------
-            $id = $request->id;
+            $storeCount = ScheduleGroup::withCount('schedule_groups_per_store as store_count')->latest()->get();
 
-            $datas = ScheduleGroup::withCount('schedule_groups_per_store')->get();
+            $datasEncryptedId = $storeCount->map(function ($item){
+                $item->encryptedId = Crypt::encrypt($item->id);
+                return $item;
+            });
 
             DB::commit();
 
             return response()->json([
                 'error'         => false,
                 'message'       => trans('messages.success'),
-                'data'          => $datas,
+                'data'          => $datasEncryptedId,
+                //'store'         =>$scheduleId,
+
             ]);
         } catch (Exception $e) {
             DB::rollBack();

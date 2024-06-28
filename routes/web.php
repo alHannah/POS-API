@@ -110,9 +110,10 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create',                    'v1\web\stores\ScheduleGroupController@create');
                 $router->post('/update',                    'v1\web\stores\ScheduleGroupController@update');
+                $router->post('/edit',                       'v1\web\stores\ScheduleGroupController@edit');
                 $router->post('/delete',                    'v1\web\stores\ScheduleGroupController@delete');
-                $router->post('/get',                       'v1\web\stores\ScheduleGroupController@get');
-
+                $router->get('/get',                       'v1\web\stores\ScheduleGroupController@get');
+                $router->post('/dropdown',                  'v1\web\dropdowns\DropdownController@stores_dropdown');
             });
 
             $router->group(["prefix" => "/store_hours", "middleware" => "auth"], function () use ($router) {

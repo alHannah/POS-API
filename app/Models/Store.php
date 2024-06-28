@@ -68,4 +68,8 @@ class Store extends Model
     {
         return $this->hasMany(ProductPerStore::class,'store_id', 'id');
     }
+
+    public function store_general_time(): HasMany {
+        return $this->hasMany(GeneralTimeSetting::class, 'store_id');
+    }
 }

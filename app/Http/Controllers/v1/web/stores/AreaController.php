@@ -5,10 +5,15 @@ namespace App\Http\Controllers\v1\web\stores;
 use Exception;
 use App\Models\Area;
 use App\Models\Brand;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
+
+use function PHPUnit\Framework\isEmpty;
 
 class AreaController extends Controller
 {
@@ -17,9 +22,9 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $id         = $request->id;
-            $name       = $request->name;
-            $brandId    = $request->brand_id;
+            $encryptedId = $request ? Crypt::decrypt($request->id) : null;
+            $name        = $request->name;
+            $brandId     = $request->brand_id;
 
             if (!$name || !$brandId) {
                 return response()->json([
@@ -29,7 +34,7 @@ class AreaController extends Controller
             }
 
             $existingGroup = Area::where('name', $name)
-                            ->where('id', '!=', $id)
+                            ->where('id', '!=', $encryptedId)
                             ->first();
 
             if ($existingGroup) {
@@ -39,14 +44,14 @@ class AreaController extends Controller
                 ]);
             }
 
-            $previousData       = $id ? Area::with('brand_areas')->where('id', $id)->first() : null;
+            $previousData       = Crypt::encrypt($encryptedId) ? Area::with('brand_areas')->where('id', $encryptedId)->first() : null;
             $previousArea       = $previousData->name ?? 'N/A';
             $previousBrand      = $previousData->brand_areas->brand ?? 'N/A';
 
             // --------------------------updateOrCreate-----------------------------------------
 
             $createUpdate = Area::updateOrCreate([
-                'id'        => $id
+                'id'        => $encryptedId
             ], [
                 'name'      => $name,
                 'brand_id'  => $brandId
@@ -54,9 +59,9 @@ class AreaController extends Controller
 
             $brandName = Brand::find($brandId)->brand;
 
-            $message = $id
-                    ? "Updated ID No. $id Previous: $previousArea (Brand: $previousBrand) New: $name (Brand: $brandName)"
-                    : "Created ID No. $id $name (Brand: $brandName)";
+            $message = $encryptedId
+                    ? "Update Previous: $previousArea (Brand: $previousBrand) New: $name (Brand: $brandName)"
+                    : "Created $name (Brand: $brandName)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -68,6 +73,7 @@ class AreaController extends Controller
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $createUpdate,
+
             ]);
 
         } catch (Exception $e) {
@@ -85,48 +91,63 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $brandIds = $request->input('brand_id', []);
+            $brandFilter    = (array) $request->brandFilter;
+            $status         = $request->status;
 
-            if (is_array($brandIds) && !empty($brandIds)) {
-                $getData = Area::whereIn('brand_id', $brandIds)
-                            ->where('status', 1)
-                            ->latest()
-                            ->get();
-            } else {
-                $getData = Area::where('status', 1)
-                            ->latest()
-                            ->get();
+            // Flatten the filters in case they are nested
+            $brandFilter    = Arr::flatten($brandFilter, 1);
+
+            $thisData = Store::with(['store_brands', 'store_per_area'])->where('status', 1);
+
+            if (!empty($brandFilter)) {
+                $thisData->whereIn('brand_id', $brandFilter);
             }
+
+            $getData = $thisData->get();
+
+            $generateData   = $getData->map(function ($items) {
+                    $name       = $items->store_per_area->name ?? 'N/A';
+                    $brand      = $items->store_brands->brand ?? 'N/A';
+                    $status     = $items->status ?? 'N/A';
+
+                    return [
+                        'area_name'     => $name,
+                        'brand'         => $brand,
+                        'status'        => $status,
+                    ];
+            });
 
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $getData,
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $generateData,
             ]);
 
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info("Error: $e");
+            Log::error("Error: {$e->getMessage()}");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                'error'         => true,
+                'message'       => trans('messages.error'),
             ]);
         }
     }
+
+
 
     public function delete(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            $encryptedId = Crypt::decrypt($request->id);
 
-            $area = Area::where('id', $id)
+            $area = Area::where('id', $encryptedId)
                   -> delete();
 
-            $message = "Deleted ID No. $id Successfully!";
+            $message = "Deleted Successfully!";
 
             $request['remarks'] = $message;
             $request['type']    = 2;

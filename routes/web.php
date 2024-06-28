@@ -66,14 +66,27 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/drop_down", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/brand_dropdown',                'v1\web\dropdowns\DropdownController@brand_dropdown');
+                $router->post('/store_group_dropdown',          'v1\web\dropdowns\DropdownController@store_group_dropdown');
+                $router->post('/price_tier_dropdown',           'v1\web\dropdowns\DropdownController@price_tier_dropdown');
+                $router->post('/manager_dropdown',              'v1\web\dropdowns\DropdownController@manager_dropdown');
+                $router->post('/add_product_dropdown',          'v1\web\dropdowns\DropdownController@add_product_dropdown');
+                $router->post('/stores_dropdown',               'v1\web\dropdowns\DropdownController@price_tier_dropdown');
+            });
+
             $router->group(["prefix" => "/area", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',             'v1\web\stores\AreaController@create_update');
-                $router->post('/delete',                    'v1\web\stores\AreaController@delete');
-                $router->post('/get',                        'v1\web\stores\AreaController@get');
+                $router->post('/create_update',                 'v1\web\stores\AreaController@create_update');
+                $router->post('/delete',                        'v1\web\stores\AreaController@delete');
+                $router->post('/get',                           'v1\web\stores\AreaController@get');
             });
 
             $router->group(["prefix" => "/store_group", "middleware" => "auth"], function () use ($router) {
@@ -82,10 +95,10 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',             'v1\web\stores\StoreGroupController@create_update');
-                $router->post('/delete',                    'v1\web\stores\StoreGroupController@delete');
-                $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
-                $router->post('/filter',                    'v1\web\stores\StoreGroupController@filter');
+                $router->post('/create_update',                 'v1\web\stores\StoreGroupController@create_update');
+                $router->post('/delete',                        'v1\web\stores\StoreGroupController@delete');
+                $router->post('/get',                           'v1\web\stores\StoreGroupController@get');
+                $router->post('/filter',                        'v1\web\stores\StoreGroupController@filter');
 
             });
 
@@ -94,12 +107,12 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                    'v1\web\stores\StoresController@create_store');
-                $router->post('/update',                    'v1\web\stores\StoresController@update_store');
-                $router->post('/delete',                    'v1\web\stores\StoresController@delete_store_device');
-                $router->post('/get',                       'v1\web\stores\StoresController@get_stores_devices');
-                $router->post('/showProduct',               'v1\web\stores\StoresController@show_product');
-                $router->post('/addProduct',               'v1\web\stores\StoresController@add_product');
+                $router->post('/create',                        'v1\web\stores\StoresController@create_store');
+                $router->post('/update',                        'v1\web\stores\StoresController@update_store');
+                $router->post('/delete',                        'v1\web\stores\StoresController@delete_store_device');
+                $router->post('/get',                           'v1\web\stores\StoresController@get_stores_devices');
+                $router->post('/showProduct',                   'v1\web\stores\StoresController@show_product');
+                $router->post('/addProduct',                    'v1\web\stores\StoresController@add_product');
                 $router->post('/activateProduct',               'v1\web\stores\StoresController@activate_product');
             });
 
@@ -108,12 +121,11 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                    'v1\web\stores\ScheduleGroupController@create');
-                $router->post('/update',                    'v1\web\stores\ScheduleGroupController@update');
-                $router->post('/edit',                       'v1\web\stores\ScheduleGroupController@edit');
-                $router->post('/delete',                    'v1\web\stores\ScheduleGroupController@delete');
-                $router->get('/get',                       'v1\web\stores\ScheduleGroupController@get');
-                $router->post('/dropdown',                  'v1\web\dropdowns\DropdownController@stores_dropdown');
+                $router->post('/create',                        'v1\web\stores\ScheduleGroupController@create');
+                $router->post('/update',                        'v1\web\stores\ScheduleGroupController@update');
+                $router->post('/edit',                          'v1\web\stores\ScheduleGroupController@edit');
+                $router->post('/delete',                        'v1\web\stores\ScheduleGroupController@delete');
+                $router->get('/get',                            'v1\web\stores\ScheduleGroupController@get');
             });
 
             $router->group(["prefix" => "/store_hours", "middleware" => "auth"], function () use ($router) {
@@ -121,9 +133,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create_update',             'v1\web\stores\StoreHoursController@create_update');
-                $router->post('/delete',                    'v1\web\stores\StoreHoursController@delete');
-                $router->post('/get',                        'v1\web\stores\StoreHoursController@get');
+                $router->post('/create_update',                 'v1\web\stores\StoreHoursController@create_update');
+                $router->post('/delete',                        'v1\web\stores\StoreHoursController@delete');
+                $router->post('/get',                           'v1\web\stores\StoreHoursController@get');
             });
 
         });

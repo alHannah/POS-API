@@ -105,18 +105,18 @@ class AreaController extends Controller
             $getData = $thisData->get();
 
             $generateData   = $getData->map(function ($items) {
-                    $id         = $items->store_per_area->id            ?? 'N/A';
-                    $name       = $items->store_per_area->name          ?? 'N/A';
-                    $brand      = $items->store_brands->brand           ?? 'N/A';
-                    $created    = $items->store_per_area->created_at    ?? 'N/A';
-                    $status     = $items->status                        ?? 'N/A';
+                    $id             = $items->store_per_area->id            ?? 'N/A';
+                    $name           = $items->store_per_area->name          ?? 'N/A';
+                    $brand          = $items->store_brands->brand           ?? 'N/A';
+                    $created_at     = $items->store_per_area->created_at    ?? 'N/A';
+                    $status         = $items->status                        ?? 'N/A';
 
                     return [
                         'id'            => Crypt::encrypt($id),
                         'area_name'     => $name,
                         'brand'         => $brand,
                         'status'        => $status,
-                        'created'       => $created,
+                        'created_at'    => $created_at->format('D m, Y h:i A')
                     ];
             });
 

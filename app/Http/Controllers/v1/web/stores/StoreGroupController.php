@@ -106,16 +106,16 @@ class StoreGroupController extends Controller
             $getData = $thisData->get();
 
             $generateData = $getData->map(function ($items) {
-                $id         = $items->group_per_store->id           ?? 'N/A';
-                $name       = $items->group_per_store->group_name   ?? 'N/A';
-                $brand      = $items->store_brands->brand           ?? 'N/A';
-                $created    = $items->group_per_store->created_at   ?? 'N/A';
+                $id             = $items->group_per_store->id           ?? 'N/A';
+                $name           = $items->group_per_store->group_name   ?? 'N/A';
+                $brand          = $items->store_brands->brand           ?? 'N/A';
+                $created_at     = $items->group_per_store->created_at   ?? 'N/A';
 
                 return [
                     'id'            => Crypt::encrypt($id),
                     'store_name'    => $name,
                     'brand'         => $brand,
-                    'created'       => $created,
+                    'created_at'    => $created_at->format('M d, Y h:i A'),
                 ];
             });
 

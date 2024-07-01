@@ -11,7 +11,7 @@ class GeneralTimeSetting extends Model
     protected $fillable = [
         'store_id',
         'start_time',
-        'end_time'
+        'end_time',
     ];
 
     public function  general_time_store() : BelongsTo

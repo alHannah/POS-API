@@ -138,7 +138,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/create',                     'v1\web\stores\StoreHoursController@create');
                 $router->post('/update',                     'v1\web\stores\StoreHoursController@update');
                 $router->post('/delete',                     'v1\web\stores\StoreHoursController@delete');
-                $router->post('/displayStoreHours',          'v1\web\stores\StoreHoursController@displayStoreHours');
+                $router->post('/searchStoreHours',          'v1\web\stores\StoreHoursController@searchStoreHours');
                 $router->post('/filterStoreHours',           'v1\web\stores\StoreHoursController@filterStoreHours');
                 $router->post('/getStoreHours',              'v1\web\stores\StoreHoursController@getStoreHours');
             });

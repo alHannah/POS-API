@@ -116,7 +116,7 @@ class AreaController extends Controller
                         'area_name'     => $name,
                         'brand'         => $brand,
                         'status'        => $status,
-                        'created_at'    => $created_at->format('D m, Y h:i A')
+                        'created_at'    => $created_at->format('M d, Y h:i A')
                     ];
             });
 

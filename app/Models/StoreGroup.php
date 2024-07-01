@@ -10,8 +10,10 @@ class StoreGroup extends Model
 {
     protected $table = "store_groups";
     protected $fillable = [
+        'id',
         'group_name',
-        'brand_id'
+        'brand_id',
+        'created_at'
     ];
 
     public function group_per_store(): HasMany

@@ -22,9 +22,9 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $encryptedId = $request ? Crypt::decrypt($request->id) : null;
-            $name        = $request->name;
-            $brandId     = $request->brand_id;
+            $encryptedId        = $request ? Crypt::decrypt($request->id) : null;
+            $name               = $request->name;
+            $brandId            = $request->brand_id;
 
             if (!$name || !$brandId) {
                 return response()->json([
@@ -92,10 +92,9 @@ class AreaController extends Controller
             DB::beginTransaction();
 
             $brandFilter    = (array) $request->brandFilter;
-            $status         = $request->status;
 
             // Flatten the filters in case they are nested
-            $brandFilter    = Arr::flatten($brandFilter, 1);
+            $brandFilter = Arr::flatten($brandFilter, 1);
 
             $thisData = Store::with(['store_brands', 'store_per_area'])->where('status', 1);
 
@@ -106,18 +105,18 @@ class AreaController extends Controller
             $getData = $thisData->get();
 
             $generateData   = $getData->map(function ($items) {
-                    $id         = $items->store_per_area->id ?? 'N/A';
-                    $name       = $items->store_per_area->name ?? 'N/A';
-                    $brand      = $items->store_brands->brand ?? 'N/A';
-                    $status     = $items->status ?? 'N/A';
-                    $created    = $items->store_per_area->created_at ?? 'N/A';
+                    $id         = $items->store_per_area->id            ?? 'N/A';
+                    $name       = $items->store_per_area->name          ?? 'N/A';
+                    $brand      = $items->store_brands->brand           ?? 'N/A';
+                    $created    = $items->store_per_area->created_at    ?? 'N/A';
+                    $status     = $items->status                        ?? 'N/A';
 
                     return [
-                        'id'            => $id,
+                        'id'            => Crypt::encrypt($id),
                         'area_name'     => $name,
                         'brand'         => $brand,
                         'status'        => $status,
-                        'created'       => $created
+                        'created'       => $created,
                     ];
             });
 

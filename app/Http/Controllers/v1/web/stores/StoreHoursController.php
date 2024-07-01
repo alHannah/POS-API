@@ -39,8 +39,8 @@ class StoreHoursController extends Controller
             $store_name = $store->store_name;
 
             $existingStore = GeneralTimeSetting::where('store_id', $store_id)
-                ->where('id', '!=', $id)
-                ->first();
+                          -> where('id', '!=', $id)
+                          -> first();
 
             if ($existingStore) {
                 return response()->json([
@@ -50,10 +50,10 @@ class StoreHoursController extends Controller
             }
 
             $store_hours = GeneralTimeSetting::create([
-                'id' => $id,
-                'store_id' => $request->store_id,
+                'id'         => $id,
+                'store_id'   => $request->store_id,
                 'start_time' => $request->start_time,
-                'end_time' => $request->end_time
+                'end_time'   => $request->end_time
             ]);
 
             $message = "{$store_name} => New Time: Opening: {$request->start_time} & Closing: {$request->end_time}";
@@ -64,18 +64,18 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'error' => false,
-                'message' => trans('messages.success'),
-                'data' => $store_hours,
+            return response() -> json([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $store_hours,
                 'audit_trail' => $message
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error("Error: $e");
-            return response()->json([
-                'error' => true,
-                'message' => trans('messages.error'),
+            return response() -> json([
+                'error'       => true,
+                'message'     => trans('messages.error'),
             ]);
         }
     }
@@ -85,16 +85,16 @@ class StoreHoursController extends Controller
         try {
             DB::beginTransaction();
 
-            $store_id = $request->store_id;
+            $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
 
-            if (!$store_id) {
+            if (!$encryptedId) {
                 return response()->json([
                     'error'   => true,
                     'message' => trans('messages.required')
                 ]);
             }
 
-            $previousData = GeneralTimeSetting::where('store_id', $store_id)->first();
+            $previousData = GeneralTimeSetting::where('store_id', $encryptedId)->first();
 
             if (!$previousData) {
                 DB::rollBack();
@@ -112,20 +112,19 @@ class StoreHoursController extends Controller
                 ]);
             }
 
-            $store = Store::find($store_id);
+            $store = Store::find($encryptedId);
             $store_name = $store->store_name;
 
             $previousStart = $previousData->start_time;
             $previousEnd   = $previousData->end_time;
 
             $previousData->update([
-                'store_id' => $request->store_id,
                 'start_time' => $request->start_time,
                 'end_time'   => $request->end_time,
             ]);
 
             $start = $request->start_time;
-            $end = $request->end_time;
+            $end   = $request->end_time;
 
             $message = "{$store_name} => Update Time: $previousStart (Opening) & $previousEnd (Closing) change into {$start} (Opening) & {$end} (Closing)";
 
@@ -135,38 +134,30 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'error' => false,
-                'message' => trans('messages.success'),
-                'data' => $previousData,
+            return response() -> json([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $previousData,
                 'audit_trail' => $message
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error("Error: $e");
             return response()->json([
-                'error' => true,
+                'error'   => true,
                 'message' => trans('messages.error'),
             ]);
         }
     }
 
-    public function displayStoreHours(Request $request)
+    public function getStoreHours(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $store_id = $request->store_id;
-
-            if ($store_id) {
-                $data = GeneralTimeSetting::where('store_id', $store_id)
-                    ->join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                    ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
-            } else {
-                $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                    ->orderBy('general_time_setting.created_at', 'desc')
-                    ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
-            }
+            $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                  ->orderBy('general_time_setting.created_at', 'desc')
+                  ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
 
             DB::commit();
 
@@ -185,21 +176,56 @@ class StoreHoursController extends Controller
         }
     }
 
-    public function delete(Request $request)
+
+    public function displayStoreHours(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $store_id = $request->store_id;
+            $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
 
-            if (!$store_id) {
+            if ($encryptedId) {
+                $data = GeneralTimeSetting::where('store_id', $encryptedId)
+                      ->join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                      ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            } else {
+                $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
+                      ->orderBy('general_time_setting.created_at', 'desc')
+                      ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            }
+
+            DB::commit();
+
+            return response() -> json([
+                'error'       => false,
+                'message'     => trans('messages.success'),
+                'data'        => $data,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            //dd(Crypt::encrypt(152));
+            $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
+
+            if (!$encryptedId) {
                 return response()->json([
                     'error'   => true,
                     'message' => trans('messages.required')
                 ]);
             }
 
-            $previousData = GeneralTimeSetting::where('store_id', $store_id)->first();
+            $previousData = GeneralTimeSetting::where('store_id', $encryptedId)->first();
 
             if (!$previousData) {
                 DB::rollBack();
@@ -209,12 +235,20 @@ class StoreHoursController extends Controller
                 ]);
             }
 
-            $store_hours = GeneralTimeSetting::where('store_id', $store_id)->delete();
+            $storeHoursDeleted = GeneralTimeSetting::where('store_id', $encryptedId)->delete();
 
-            $store = Store::find($store_id);
-            $store_name = $store->store_name;
+            $store = Store::find($encryptedId);
 
-            $message = "Deleted {$store_name} (store hours)";
+            if (!$store) {
+                DB::rollBack();
+                return response()->json([
+                    'error'   => true,
+                    'message' => trans('messages.store.notFound')
+                ]);
+            }
+
+            $storeName = $store->store_name;
+            $message = "Deleted {$storeName} (store hours)";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -222,21 +256,22 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response()->json([
+            return response() -> json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
-                'data'        => $store_hours,
+                'data'        => $storeHoursDeleted,
                 'audit_trail' => $message
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info("Error: $e");
+            Log::info("Error:$e");
             return response()->json([
-                'error'       => true,
-                'message'     => trans('messages.error'),
+                'error'   => true,
+                'message' => trans('messages.error'),
             ]);
         }
     }
+
 
     public function filterStoreHours(Request $request)
     {
@@ -247,10 +282,10 @@ class StoreHoursController extends Controller
             $end_time = $request->end_time;
 
             $items = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                ->whereTime('general_time_setting.start_time', '>=', $start_time)
-                ->whereTime('general_time_setting.end_time', '<=', $end_time)
-                ->orderBy('general_time_setting.created_at', 'desc')
-                ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+                   ->whereTime('general_time_setting.start_time', '>=', $start_time)
+                   ->whereTime('general_time_setting.end_time', '<=', $end_time)
+                   ->orderBy('general_time_setting.created_at', 'desc')
+                   ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
 
             DB::commit();
 

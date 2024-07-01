@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\web\stores;
 use App\Http\Controllers\Controller;
 use App\Models\GeneralTimeSetting;
 use App\Models\Store;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -39,8 +40,8 @@ class StoreHoursController extends Controller
             $store_name = $store->store_name;
 
             $existingStore = GeneralTimeSetting::where('store_id', $store_id)
-                          -> where('id', '!=', $id)
-                          -> first();
+                ->where('id', '!=', $id)
+                ->first();
 
             if ($existingStore) {
                 return response()->json([
@@ -64,7 +65,7 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response() -> json([
+            return response()->json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $store_hours,
@@ -73,9 +74,9 @@ class StoreHoursController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error("Error: $e");
-            return response() -> json([
-                'error'       => true,
-                'message'     => trans('messages.error'),
+            return response()->json([
+                'error'      => true,
+                'message'    => trans('messages.error'),
             ]);
         }
     }
@@ -85,6 +86,7 @@ class StoreHoursController extends Controller
         try {
             DB::beginTransaction();
 
+            //$store_id = $request -> store_id;
             $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
 
             if (!$encryptedId) {
@@ -134,11 +136,12 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response() -> json([
+            return response()->json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $previousData,
-                'audit_trail' => $message
+                'audit_trail' => $message,
+                //'store_id'    => $store_id,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -155,11 +158,21 @@ class StoreHoursController extends Controller
         try {
             DB::beginTransaction();
 
-            $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                  ->orderBy('general_time_setting.created_at', 'desc')
-                  ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            $query = GeneralTimeSetting::with(['general_time_store' => function ($query) {
+                $query->select('id', 'store_name');
+            }])
+                ->orderByDesc('created_at')
+                ->select(['store_id', 'start_time', 'end_time', 'created_at']);
 
-            DB::commit();
+            $data = $query->get()->map(function ($item) {
+                return [
+                    'store_id'   => Crypt::encrypt($item->store_id),
+                    'store_name' => $item->general_time_store->store_name ?? null,
+                    'start_time' => $item->start_time,
+                    'end_time'   => $item->end_time,
+                    'created_at' => $item->created_at->format('M d, Y h:i A'),
+                ];
+            });
 
             return response()->json([
                 'error'   => false,
@@ -177,33 +190,40 @@ class StoreHoursController extends Controller
     }
 
 
-    public function displayStoreHours(Request $request)
+    public function searchStoreHours(Request $request)
     {
         try {
-            DB::beginTransaction();
-
+            //$store_id = $request -> store_id;
             $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
 
+            $query = GeneralTimeSetting::with(['general_time_store' => function ($query) {
+                $query->select('id', 'store_name');
+            }])
+                ->orderByDesc('created_at')
+                ->select(['store_id', 'start_time', 'end_time', 'created_at']);
+
             if ($encryptedId) {
-                $data = GeneralTimeSetting::where('store_id', $encryptedId)
-                      ->join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                      ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
-            } else {
-                $data = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                      ->orderBy('general_time_setting.created_at', 'desc')
-                      ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+                $query->where('store_id', $encryptedId);
             }
 
-            DB::commit();
+            $data = $query->get()->map(function ($item) {
+                return [
+                    'store_id'   => Crypt::encrypt($item->store_id),
+                    'store_name' => $item->general_time_store->store_name ?? null,
+                    'start_time' => $item->start_time,
+                    'end_time'   => $item->end_time,
+                    'created_at' => $item->created_at->format('M d, Y h:i A'),
+                ];
+            });
 
-            return response() -> json([
-                'error'       => false,
-                'message'     => trans('messages.success'),
-                'data'        => $data,
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+                //'store_id'    => $store_id
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
-            Log::info("Error: $e");
+            Log::info("Error:$e");
             return response()->json([
                 'error'   => true,
                 'message' => trans('messages.error'),
@@ -211,11 +231,13 @@ class StoreHoursController extends Controller
         }
     }
 
+
     public function delete(Request $request)
     {
         try {
             DB::beginTransaction();
             //dd(Crypt::encrypt(152));
+            //$store_id = $request -> store_id;
             $encryptedId = $request->store_id ? Crypt::decrypt($request->store_id) : null;
 
             if (!$encryptedId) {
@@ -256,11 +278,12 @@ class StoreHoursController extends Controller
 
             DB::commit();
 
-            return response() -> json([
+            return response()->json([
                 'error'       => false,
                 'message'     => trans('messages.success'),
                 'data'        => $storeHoursDeleted,
-                'audit_trail' => $message
+                'audit_trail' => $message,
+                //'store_id'    => $store_id
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -281,22 +304,32 @@ class StoreHoursController extends Controller
             $start_time = $request->start_time;
             $end_time = $request->end_time;
 
-            $items = GeneralTimeSetting::join('stores', 'general_time_setting.store_id', '=', 'stores.id')
-                   ->whereTime('general_time_setting.start_time', '>=', $start_time)
-                   ->whereTime('general_time_setting.end_time', '<=', $end_time)
-                   ->orderBy('general_time_setting.created_at', 'desc')
-                   ->get(['stores.store_name as store_name', 'general_time_setting.start_time', 'general_time_setting.end_time']);
+            $data = GeneralTimeSetting::with(['general_time_store' => function ($query) {
+                $query->select('id', 'store_name');
+            }])
+                ->whereTime('start_time', '>=', $start_time)
+                ->whereTime('end_time', '<=', $end_time)
+                ->orderByDesc('created_at')
+                ->get(['store_id', 'start_time', 'end_time']);
 
             DB::commit();
+
+            $encryptedData = $data->map(function ($item) {
+                $item->store_id = Crypt::encrypt($item->store_id);
+                $item->store_name = $item->general_time_store->store_name;
+                unset($item->general_time_store);
+                $item->created_at_formatted = Carbon::parse($item->created_at)->format('M d, Y h:i A');
+                return $item;
+            });
 
             return response()->json([
                 'error'   => false,
                 'message' => trans('messages.success'),
-                'data'    => $items,
+                'data'    => $encryptedData,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error("Error: {$e->getMessage()}");
+            Log::info("Error:$e");
             return response()->json([
                 'error'   => true,
                 'message' => trans('messages.error'),

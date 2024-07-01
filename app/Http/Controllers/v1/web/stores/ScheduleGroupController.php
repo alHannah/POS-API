@@ -69,16 +69,17 @@ class ScheduleGroupController extends Controller
         }
     }
 
-    public function edit(Request $request){
-        try{
+    public function edit(Request $request)
+    {
+        try {
             DB::beginTransaction();
 
             $decryptedId = Crypt::decrypt($request->encryptedId);
 
             $scheduleData = ScheduleGroup::where('id', $decryptedId)->first();
-            $storeData =  StorePerSchedule::where('schedule_id',$decryptedId)->get();
+            $storeData =  StorePerSchedule::where('schedule_id', $decryptedId)->get();
 
-            $storeIds = $storeData->map(function ($item){
+            $storeIds = $storeData->map(function ($item) {
                 $storeId = $item->store_id;
                 return $storeId;
             });
@@ -227,10 +228,25 @@ class ScheduleGroupController extends Controller
 
             $storeCount = ScheduleGroup::withCount('schedule_groups_per_store as store_count')->latest()->get();
 
-            $datasEncryptedId = $storeCount->map(function ($item){
+            $datasEncryptedId = $storeCount->map(function ($item) {
                 $item->encryptedId = Crypt::encrypt($item->id);
-                return $item;
+                $date = $item->created_at;
+                return [
+                    'id'          => $item->id,
+                    'name'        => $item->name,
+                    'monday'      => $item->monday,
+                    'tuesday'     => $item->tuesday,
+                    'wednesday'   => $item->wednesday,
+                    'thursday'    => $item->thursday,
+                    'friday'      => $item->friday,
+                    'saturday'    => $item->saturday,
+                    'sunday'      => $item->sunday,
+                    'store_count' => $item->store_count,
+                    'create_at'   => $date->format("M d, Y h:i A"),
+                    'encryptedId' => $item->encryptedId,
+                ];
             });
+
 
             DB::commit();
 

@@ -6,24 +6,25 @@ use Exception;
 use App\Models\Store;
 use App\Models\Device;
 use App\Models\Product;
+use App\Models\Category;
+use App\Models\PriceTier;
 use App\Models\OicPerStore;
 use Illuminate\Http\Request;
+use App\Models\ProductPerStore;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\PriceTier;
-use App\Models\ProductPerStore;
+use App\Models\ManagerInCharge;
+use Illuminate\Support\Facades\Crypt;
 
 class StoresController extends Controller
 {
-    public function create_store(Request $request)
-    {
+    public function create_store(Request $request) {
         try {
 
             $createName = $request->name;
             if ($createName) {
-                $checkDupe = Store::where('store_name',$createName)->count();
+                $checkDupe = Store::where('store_name', $createName)->count();
 
                 if ($checkDupe > 0) {
                     return response()->json([
@@ -65,15 +66,27 @@ class StoresController extends Controller
                 }
             } else {
                 return response()->json([
-                    "error"             =>true,
-                    "message"           =>trans('messages.store.stores.missing_mob_id'),
+                    "error"             => true,
+                    "message"           => trans('messages.store.stores.missing_mob_id'),
+                ]);
+            }
+
+            if ($request->has('manager_id')) {
+                $manager = ManagerInCharge::create([
+                    'store_id' => $request->id,
+                    'user_id'  => $request->user_id,
+                ]);
+            } else {
+                return response()->json([
+                    "error"             => true,
+                    "message"           => trans('messages.store.stores.missing_manager_id'),
                 ]);
             }
 
             DB::commit();
 
             if ($store->wasRecentlyCreated) {
-                $message    = "Created Store: ". $request->store_name;
+                $message    = "Created Store: " . $request->store_name;
             }
 
             $request["remarks"] = $message;
@@ -81,13 +94,9 @@ class StoresController extends Controller
             $this->audit_trail($request);
 
             return response()->json([
-                "error"             =>false,
-                "message"           =>trans('messages.success'),
-                "data"              =>$store,
-                "data2"             =>$device,
-                "data3"             =>$oic,
+                "error"             => false,
+                "message"           => trans('messages.success'),
             ]);
-
         } catch (Exception $e) {
             DB::rollback();
             Log::info("Error: $e");
@@ -98,15 +107,14 @@ class StoresController extends Controller
         }
     }
 
-    public function update_store(Request $request)
-    {
+    public function update_store(Request $request) {
         try {
-
             $id = $request->id;
+
             $storeCount = Store::where('status', 1)->where('store_name', $request->store_name)->whereNot('id', $id)->get()->count();
 
             if ($id) {
-                $previousStore = Store::with(['store_oic','store_devices'])->where('status', 1)->where('id', $id)->get();
+                $previousStore = Store::with(['store_oic', 'store_devices'])->where('status', 1)->where('id', $id)->get();
             } else {
                 return response()->json([
                     'error'     => true,
@@ -122,7 +130,7 @@ class StoresController extends Controller
             }
 
             $previousStoreMobileUserId = $previousStore[0]->store_oic->pluck('mobile_user_id');
-            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$previousStoreMobileUserId)->where('store_id', $request->id)->get();
+            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $previousStoreMobileUserId)->where('store_id', $request->id)->get();
 
             DB::beginTransaction();
 
@@ -141,6 +149,10 @@ class StoresController extends Controller
                 'area_id'           => $request->area_id,
             ]);
 
+            $manager = ManagerInCharge::with('manager_user')->where('store_id', $id)->first();
+            $previousManager = $manager->manager_user->name;
+            $newManager = ManagerInCharge::with('manager_user')->where('user_id',$request->user_id)->first()->manager_user->name;
+            $manager->update(['user_id' => $request->user_id]);
 
             Device::where('store_id', $request->id)->update([
                 'device_id' => $request->device_id
@@ -154,9 +166,10 @@ class StoresController extends Controller
                 OicPerStore::create([
                     'mobile_user_id' => $mob_id,
                     'store_id'       => $request->id
-                ]);    }
+                ]);
+            }
 
-            $newStore = Store::with(['store_oic','store_devices'])->where('id',$id)->get();
+            $newStore = Store::with(['store_oic', 'store_devices'])->where('id', $id)->get();
 
             $previousStoreData = $previousStore->map(function ($items) {
                 $brand     = $items->brand_id;
@@ -226,7 +239,7 @@ class StoresController extends Controller
 
             $updated = json_encode($compareStore);
 
-            $newOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$request->mobile_user_id)->where('store_id', $request->id)->get();
+            $newOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $request->mobile_user_id)->where('store_id', $request->id)->get();
 
             foreach ($newOic as $newOics) {
                 $newOicName[] = $newOics->oic_mobile_user->name;
@@ -239,8 +252,11 @@ class StoresController extends Controller
             $newOics = collect($newOicName)->implode(', ');
             $oldOics = collect($oldOicName)->implode(', ');
 
-            $oldOics == $newOics ? $message = "Updated the following in store: $updated":
-            $message = "Updated the following in store: $updated, and OICS from $oldOics to $newOics";
+            $oldOics == $newOics ? $message = "Updated the following in store: $updated" :
+                $message = "Updated the following in store: $updated, and OICS from $oldOics to $newOics";
+
+            $previousManager == $newManager ? $message = $message :
+                $message = $message." and manager from $previousManager to $newManager";
 
             $request["remarks"] = $message;
             $request["type"] = 2;
@@ -249,10 +265,9 @@ class StoresController extends Controller
             DB::commit();
 
             return response()->json([
-                "error"             =>false,
-                "message"           =>trans('messages.success'),
+                "error"             => false,
+                "message"           => trans('messages.success'),
             ]);
-
         } catch (Exception $e) {
             DB::rollback();
             Log::info("Error: $e");
@@ -263,14 +278,13 @@ class StoresController extends Controller
         }
     }
 
-    public function delete_store_device (Request $request)
-    {
+    public function archive_store_device(Request $request) {
         try {
-            $id = $request->id;
+            $id = Crypt::decrypt($request->id);
 
             if ($id) {
-                $previousStore = Store::where('status',1)->where('id', $id)->first();
-                $previousName = $previousStore->store_name;
+                $store = Store::where('id', $id)->first();
+                $previousName = $store->store_name;
             } else {
                 return response()->json([
                     'error'     => true,
@@ -279,14 +293,26 @@ class StoresController extends Controller
             }
 
             DB::beginTransaction();
-            $store = Store::where('id', $request->id)->first()->update([
-                'status'=>0,
-            ]);
-            $device = Device::where('store_id', $request->id)->first()->update([
-                'status'=>0,
-            ]);
 
-            $message = "$previousName has been archived.";
+            if($store->status==1) {
+                $store = Store::where('id', $request->id)->first()->update([
+                    'status' => 0,
+                ]);
+                $device = Device::where('store_id', $request->id)->first()->update([
+                    'status' => 0,
+                ]);
+                $message = "$previousName has been archived.";
+
+            } else {
+                $store = Store::where('id', $request->id)->first()->update([
+                    'status' => 1,
+                ]);
+                $device = Device::where('store_id', $request->id)->first()->update([
+                    'status' => 1,
+                ]);
+                $message = "$previousName has been reactivated.";
+            }
+
             $request["remarks"] = $message;
             $request["type"] = 2;
             $this->audit_trail($request);
@@ -297,7 +323,6 @@ class StoresController extends Controller
                 'error'             => false,
                 'message'           => trans('messages.success'),
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
@@ -310,22 +335,21 @@ class StoresController extends Controller
 
     public function get_stores_devices(Request $request) {
         try {
-
             DB::beginTransaction();
 
+            $brandFilter        = $request->brandFilter;
             $storeGroupsFilter  = $request->storeGroupsFilter;
             $areaFilter         = $request->areaFilter;
-            $status             = $request->status;
 
             $data = Store::with([
-                    'store_brands',
-                    'group_per_store',
-                    'store_per_area',
-                    'store_per_area',
-                    'store_price_tier',
-                    'store_devices',
-                    'store_oic',
-                    ])
+                'store_brands',
+                'group_per_store',
+                'store_per_area',
+                'store_per_area',
+                'store_price_tier',
+                'store_devices',
+                'store_oic',
+            ])
                 ->whereIn('group_id', $storeGroupsFilter)
                 ->whereIn('area_id', $areaFilter);
 
@@ -337,34 +361,43 @@ class StoresController extends Controller
 
             $tableData = collect($data)->map(function ($items) {
 
-                    $array = $items->store_oic->pluck('mobile_user_id');
-                    $oic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id',$array)->where('store_id', $items->id)->get();
+                $array = $items->store_oic->pluck('mobile_user_id');
+                $oic = OicPerStore::with('oic_mobile_user')
+                    ->whereIn('mobile_user_id', $array)
+                    ->where('store_id', $items->id)->get();
 
-                    foreach ($oic as $oics) {
-                        $oicname[] = $oics->oic_mobile_user->name;
-                    }
+                foreach ($oic as $oics) {
+                    $oicname[] = $oics->oic_mobile_user->name;
+                }
 
-                    $brand     = $items->store_brands->brand;
-                    $code      = $items->store_code;
-                    $name      = $items->store_name;
-                    $group     = $items->group_per_store->group_name;
-                    $area      = $items->store_per_area->name;
-                    $priceTier = $items->store_price_tier->name;
-                    $oicName   = collect($oicname)->implode(', ');
-                    $status    = $items->status;
-                    $device    = $items->store_devices->first()->device_id;
+                $mobileUserIdArray = [];
+                foreach ($items->store_oic as $oic) {
+                    array_push($mobileUserIdArray, $oic->mobile_user_id);
+                }
 
-                    return [
-                        'brand'      => $brand,
-                        'code'       => $code,
-                        'name'       => $name,
-                        'group_name' => $group,
-                        'area_name'  => $area,
-                        'status'     => $status,
-                        'oic'        => $oicName,
-                        'price_tier' => $priceTier,
-                        'device_id'  => $device,
-                    ];
+                $brand       = $items->store_brands->brand;
+                $code        = $items->store_code;
+                $name        = $items->store_name;
+                $group       = $items->group_per_store->group_name;
+                $area        = $items->store_per_area->name;
+                $priceTier   = $items->store_price_tier->name;
+                $status      = $items->status;
+                $device      = $items->store_devices->first()->device_id;
+                $encryptedId = Crypt::encrypt($items->id);
+
+                return [
+                    'brand'          => $brand,
+                    'code'           => $code,
+                    'name'           => $name,
+                    'group_name'     => $group,
+                    'area_name'      => $area,
+                    'status'         => $status,
+                    'oic'            => $oicname,
+                    'price_tier'     => $priceTier,
+                    'device_id'      => $device,
+                    'encrypted_id'   => $encryptedId,
+                    'mobile_user_id' => $mobileUserIdArray,
+                ];
             });
 
             DB::commit();
@@ -373,7 +406,6 @@ class StoresController extends Controller
                 'message'           => trans('messages.success'),
                 'data'              => $tableData,
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
@@ -384,16 +416,104 @@ class StoresController extends Controller
         }
     }
 
-    public function show_product(Request $request) {
+    public function edit_store($id) {
+        try {
+            DB::beginTransaction();
+
+            $storeId = Crypt::decrypt($id);
+
+            $storeData = Store::with([
+                'store_brands',
+                'group_per_store',
+                'store_per_area',
+                'store_per_area',
+                'store_price_tier',
+                'store_devices',
+                'store_oic',
+            ])
+                ->where('id', $storeId);
+
+            if (isset($status)) {
+                $storeData = $storeData->where('status', $status);
+            }
+
+            $storeData = $storeData->get();
+
+            $tableData = collect($storeData)->map(function ($items) {
+
+                $manager = ManagerInCharge::with('manager_user')->where('store_id', $items->id)->first();
+                $managerName = $manager->manager_user->name;
+                $array = $items->store_oic->pluck('mobile_user_id');
+                $oic = OicPerStore::with('oic_mobile_user')
+                    ->whereIn('mobile_user_id', $array)
+                    ->where('store_id', $items->id)->get();
+
+                foreach ($oic as $oics) {
+                    $oicname[] = $oics->oic_mobile_user->name;
+                }
+
+                $mobileUserIdArray = [];
+                foreach ($items->store_oic as $oic) {
+                    array_push($mobileUserIdArray, $oic->mobile_user_id);
+                }
+
+                $brand       = $items->store_brands->brand;
+                $code        = $items->store_code;
+                $name        = $items->store_name;
+                $group       = $items->group_per_store->group_name;
+                $area        = $items->store_per_area->name;
+                $priceTier   = $items->store_price_tier->name;
+                $status      = $items->status;
+                $device      = $items->store_devices->first()->device_id;
+                $encryptedId = Crypt::encrypt($items->id);
+
+                return [
+                    'brand'          => $brand,
+                    'code'           => $code,
+                    'name'           => $name,
+                    'group_name'     => $group,
+                    'area_name'      => $area,
+                    'manager_name'   => $managerName,
+                    'status'         => $status,
+                    'oic'            => $oicname,
+                    'price_tier'     => $priceTier,
+                    'device_id'      => $device,
+                    'encrypted_id'   => $encryptedId,
+                    'mobile_user_id' => $mobileUserIdArray,
+                    'group_id'       => $items->group_id,
+                    'area_id'        => $items->area_id,
+                    'tier_id'        => $items->tier_id,
+                    'brand_id'       => $items->brand_id,
+                    'user_id'        => $manager->user_id,
+                ];
+            });
+
+            DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $tableData,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'             => true,
+                'message'           => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function show_product($id) {
         try {
 
             DB::beginTransaction();
 
-            $storeFilter = $request->storeId;
+            $storeFilter = Crypt::decrypt($id);
 
-            $storeData = Store::with('store_product_per_store')->where('id',$storeFilter)->where('status', 1)->first();
+            $storeData = Store::with('store_product_per_store')->where('id', $storeFilter)->where('status', 1)->first();
             $productId = $storeData->store_product_per_store->pluck('product_id');
-            $products = Product::with('product_category')->whereIn('id',$productId)->get();
+            $products = Product::with('product_category')->whereIn('id', $productId)->get();
 
             $tableData = $products->map(function ($items) {
 
@@ -409,10 +529,58 @@ class StoresController extends Controller
                     "category"     => $category,
                     "price"        => $price,
                     "status"       => $status,
+                    "product_id"   => $items->id,
+
                 ];
             });
 
             DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $tableData,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'             => true,
+                'message'           => trans('messages.error'),
+            ]);
+        }
+    }
+
+    public function add_product($id) {
+        try {
+            DB::beginTransaction();
+
+            $storeFilter = decrypt($id);
+
+            $storeData = Store::with('store_product_per_store')->where('id', $storeFilter)->where('status', 1)->first();
+            $productId = $storeData->store_product_per_store->pluck('product_id');
+            $productData = Product::with('product_category')->whereNotIn('id', $productId)->where('brand_id', $storeData->brand_id)
+                ->where('product_tag', 's')->get();
+
+            $tableData = $productData->map(function ($items) {
+
+                $productCode = $items->product_code;
+                $productName = $items->name;
+                $category    = $items->product_category->name;
+                $price       = 100;
+                $status      = $items->status;
+
+                return [
+                    "product_code" => $productCode,
+                    "product_name" => $productName,
+                    "category"     => $category,
+                    "price"        => $price,
+                    "status"       => $status,
+                    "product_id"   => $items->id,
+                ];
+            });
+
+            DB::commit();
+
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
@@ -429,50 +597,29 @@ class StoresController extends Controller
         }
     }
 
-    public function add_product(Request $request) {
+    public function save_product(Request $request) {
         try {
             DB::beginTransaction();
 
-            $storeFilter = $request->storeId;
+            $productId = $request->product_Id;
+            $productData = Product::whereIn('id', $productId)->get();
+            $storeData = ProductPerStore::with('store_product_per_store')->whereIn('product_id', $productId)->first();
+            $storeName = $storeData->store_product_per_store->store_name;
 
-            $storeData = Store::with('store_product_per_store')->where('id',$storeFilter)->where('status', 1)->first();
-            $productId = $storeData->store_product_per_store->pluck('product_id');
-            $productData = Product::with('product_category')->whereNotIn('id', $productId)->where('brand_id', $storeData->brand_id)
-            ->where('product_tag','s')->get();
-
-            $tableData = $productData->map(function ($items) {
-
-                $productCode = $items->product_code;
-                $productName = $items->name;
-                $category    = $items->product_category->name;
-                $price       = 100;
-                $status      = $items->status;
-
-                return [
-                    "product_code" => $productCode,
-                    "product_name" => $productName,
-                    "category"     => $category,
-                    "price"        => $price,
-                    "status"       => $status,
-                ];
-            });
-
-            $productFilter = $request->product_Id;
-
-            foreach($productFilter as $productId) {
-                $productDatas = $productData->where('id', $productId)->first();
+            foreach ($productId as $productIds) {
+                $productDatas = $productData->where('id', $productIds)->first();
                 $productNames[] = $productDatas->name;
-                $storeFilter;
+                $storeId = $storeData->store_product_per_store->id;
                 $hey = ProductPerStore::create([
                     "product_id" => $productDatas->id,
-                    "store_id"   => $storeFilter,
+                    "store_id"   => $storeId,
                     "status"     => 1,
                 ]);
             }
 
             DB::commit();
 
-            $message = "$productNames has been added to $storeData->store_name";
+            $message = "$productNames has been added to $storeName";
             $request["remarks"] = $message;
             $request["type"] = 2;
             $this->audit_trail($request);
@@ -499,28 +646,33 @@ class StoresController extends Controller
             $storeFilter = $request->storeId;
             $productId = $request->product_Id;
 
-            $storeData = Store::where('id',$storeFilter)->where('status', 1)->first();
+            $storeData = Store::where('id', $storeFilter)->first();
             $storeName = $storeData->store_name;
             $product = ProductPerStore::with('products_product_per_store')->where('product_id', $productId)
-            ->where('store_id',$storeFilter)->first();
+                ->where('store_id', $storeFilter)->first();
             $productName = $product->products_product_per_store->name;
 
-            $product->update([
-                'status' => 0,
-            ]);
+            if($product->status == 1) {
+                $product->update([
+                    'status' => 0,
+                ]);
+                $message = "$productName in $storeName has been deactivated";
+            } else {
+                $product->update([
+                    'status' => 1,
+                ]);
+                $message = "$productName in $storeName has been activated";
+            }
 
-            DB::commit();
-
-            $message = "$productName in $storeName has been deactivated";
             $request["remarks"] = $message;
             $request["type"] = 2;
             $this->audit_trail($request);
+            DB::commit();
 
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");

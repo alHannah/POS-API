@@ -71,5 +71,11 @@ class Store extends Model
 
     public function store_general_time(): HasMany {
         return $this->hasMany(GeneralTimeSetting::class, 'store_id');
+
+    }
+
+    public function store_manager () : HasMany
+    {
+        return $this->hasMany(ManagerInCharge::class,'store_id', 'id');
     }
 }

@@ -3,20 +3,22 @@
 namespace App\Http\Controllers\v1\web\dropdowns;
 
 use Exception;
+use App\Models\Area;
 use App\Models\Brand;
+use App\Models\Store;
+use App\Models\Users;
+use App\Models\PriceTier;
+use App\Models\MobileUser;
+use App\Models\StoreGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\PriceTier;
-use App\Models\Store;
-use App\Models\StoreGroup;
-use Illuminate\Support\Facades\Crypt;
 
 class DropdownController extends Controller
 {
-    public function brand_dropdown(Request $request)
-    {
+    /*--------------STORES DROPDOWN---------------*/
+    public function brand_dropdown(Request $request) {
         try {
             DB::beginTransaction();
 
@@ -42,12 +44,13 @@ class DropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $storegroupdropdown = StoreGroup::get();
+            $brandId = $request->brand_id;
+            $storeGroupDropdown = StoreGroup::where('brand_id', $brandId)->get();
 
             return response()->json([
-                "error"         => false,
-                "message"       => trans('messages.success'),
-                "data"          => $storegroupdropdown,
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$storeGroupDropdown,
             ]);
         } catch (Exception $e) {
             DB::rollback();
@@ -59,8 +62,30 @@ class DropdownController extends Controller
         }
     }
 
-    public function price_tier_dropdown(Request $request)
+    public function area_dropdown(Request $request)
     {
+        try {
+            DB::beginTransaction();
+
+            $brandId = $request->brand_id;
+            $areaDropdown = Area::where('brand_id', $brandId)->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$areaDropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function price_tier_dropdown(Request $request) {
         try {
             DB::beginTransaction();
 
@@ -103,6 +128,28 @@ class DropdownController extends Controller
         }
     }
 
+    public function user_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $userDropdown = Users::where('status', "1")->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$userDropdown,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
     public function add_product_dropdown(Request $request)
     {
         try {
@@ -114,6 +161,27 @@ class DropdownController extends Controller
                 "error"         => false,
                 "message"       => trans('messages.success'),
                 "data"          => $managerDropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function mobile_user_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $mobDropdown = MobileUser::where('status', "active")->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$mobDropdown,
             ]);
         } catch (Exception $e) {
             DB::rollback();
@@ -152,4 +220,6 @@ class DropdownController extends Controller
             ]);
         }
     }
+
+    /*--------------STORES DROPDOWN---------------*/
 }

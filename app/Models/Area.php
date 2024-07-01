@@ -10,9 +10,11 @@ class Area extends Model
 {
     protected $table = 'areas';
     protected $fillable = [
+        'id',
         'name',
         'status',
-        'brand_id'
+        'brand_id',
+        'created_at'
     ];
 
     public function brand_areas(): BelongsTo

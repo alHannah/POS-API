@@ -106,14 +106,18 @@ class AreaController extends Controller
             $getData = $thisData->get();
 
             $generateData   = $getData->map(function ($items) {
+                    $id         = $items->store_per_area->id ?? 'N/A';
                     $name       = $items->store_per_area->name ?? 'N/A';
                     $brand      = $items->store_brands->brand ?? 'N/A';
                     $status     = $items->status ?? 'N/A';
+                    $created    = $items->store_per_area->created_at ?? 'N/A';
 
                     return [
+                        'id'            => $id,
                         'area_name'     => $name,
                         'brand'         => $brand,
                         'status'        => $status,
+                        'created'       => $created
                     ];
             });
 

@@ -44,7 +44,9 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $previousData       = Crypt::encrypt($encryptedId) ? StoreGroup::with('brand_storeGroup')->find($encryptedId) : null;
+            $previousData       = Crypt::encrypt($encryptedId)
+                                ? StoreGroup::with('brand_storeGroup')->find($encryptedId)
+                                : null;
             $previousStore      = $previousData->group_name ?? 'N/A';
             $previousBrand      = $previousData->brand_storeGroup->brand ?? 'N/A';
 
@@ -105,16 +107,24 @@ class StoreGroupController extends Controller
 
             $getData = $thisData->get();
 
-            $generateData = $getData->map(function ($items) {
-                $id             = $items->group_per_store->id           ?? 'N/A';
-                $name           = $items->group_per_store->group_name   ?? 'N/A';
-                $brand          = $items->store_brands->brand           ?? 'N/A';
-                $created_at     = $items->group_per_store->created_at   ?? 'N/A';
+            // Group the data by store name and count the stores
+            $groupedData = $getData->groupBy(function ($item) {
+                return $item->group_per_store->group_name ?? 'N/A';
+            });
+
+            $generateData = $groupedData->map(function ($items, $groupName) {
+                $store_count      = $items->count();
+                $item             = $items->first();
+                $id               = $item->group_per_store->id          ?? 'N/A';
+                $name             = $item->group_per_store->group_name  ?? 'N/A';
+                $brand            = $item->store_brands->brand          ?? 'N/A';
+                $created_at       = $item->group_per_store->created_at  ?? 'N/A';
 
                 return [
                     'id'            => Crypt::encrypt($id),
                     'store_name'    => $name,
                     'brand'         => $brand,
+                    'store_count'   => $store_count,
                     'created_at'    => $created_at->format('M d, Y h:i A'),
                 ];
             });

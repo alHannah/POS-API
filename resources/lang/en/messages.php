@@ -43,10 +43,11 @@ return [
             'alreadyArchived'  => 'Store has been archived',
         ],
         'stores' => [
-            'exists'          => "Store already exists!",
-            'notexist'        => "Store does not exist!",
-            'recentlycreated' => "Store was recently created",
-            'missing_mob_id'  => "Please choose Mobile User ID/s"
+            'exists'             => "Store already exists!",
+            'notexist'           => "Store does not exist!",
+            'recentlycreated'    => "Store was recently created",
+            'missing_mob_id'     => "Please choose Mobile User ID/s",
+            'missing_manager_id' => "Please choose Manager in Charge",
         ],
         'schedule_group' => [
             'notexist'        => "Schedule Group does not exist!"

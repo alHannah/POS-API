@@ -19,4 +19,9 @@ class ProductPerStore extends Model
     {
         return $this->belongsTo(Product::class,'product_id', 'id');
     }
+
+    public function store_product_per_store () : BelongsTo
+    {
+        return $this->belongsTo(Store::class,'store_id', 'id');
+    }
 }

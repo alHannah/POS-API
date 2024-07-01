@@ -107,13 +107,16 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                        'v1\web\stores\StoresController@create_store');
-                $router->post('/update',                        'v1\web\stores\StoresController@update_store');
-                $router->post('/delete',                        'v1\web\stores\StoresController@delete_store_device');
-                $router->post('/get',                           'v1\web\stores\StoresController@get_stores_devices');
-                $router->post('/showProduct',                   'v1\web\stores\StoresController@show_product');
-                $router->post('/addProduct',                    'v1\web\stores\StoresController@add_product');
-                $router->post('/activateProduct',               'v1\web\stores\StoresController@activate_product');
+                $router->post('/create',                    'v1\web\stores\StoresController@create_store');
+                $router->post('/update',                    'v1\web\stores\StoresController@update_store');
+                $router->post('/delete',                    'v1\web\stores\StoresController@archive_store_device');
+                $router->post('/get',                       'v1\web\stores\StoresController@get_stores_devices');
+                $router->get('/showProduct/{id}',           'v1\web\stores\StoresController@show_product');
+                $router->get('/addProduct/{id}',            'v1\web\stores\StoresController@add_product');
+                $router->post('/saveProduct',               'v1\web\stores\StoresController@save_product');
+                $router->post('/activateProduct',           'v1\web\stores\StoresController@activate_product');
+                $router->get('/editStore/{id}',             'v1\web\stores\StoresController@edit_store');
+                $router->post('/dropdown',                   'v1\web\dropdowns\DropdownController@store_group_dropdown');
             });
 
             $router->group(["prefix" => "/schedule_group", "middleware" => "auth"], function () use ($router) {

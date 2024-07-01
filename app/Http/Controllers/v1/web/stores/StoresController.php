@@ -395,6 +395,7 @@ class StoresController extends Controller
                     'oic'            => $oicname,
                     'price_tier'     => $priceTier,
                     'device_id'      => $device,
+                    'id'             => $items->id,
                     'encrypted_id'   => $encryptedId,
                     'mobile_user_id' => $mobileUserIdArray,
                 ];

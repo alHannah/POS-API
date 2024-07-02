@@ -34,4 +34,19 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class,'category_id', 'id');
     }
+
+    public function product_per_brand () : BelongsTo
+    {
+        return $this->belongsTo(Brand::class,'brand_id', 'id');
+    }
+
+    public function product_per_posCategories () : BelongsTo
+    {
+        return $this->belongsTo(PosCategorie::class,'pos_category_id', 'id');
+    }
+
+    public function product_per_BOM () : HasMany
+    {
+        return $this->hasMany(BillOfMaterial::class,'product_id', 'id');
+    }
 }

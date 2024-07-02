@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PosCategorie extends Model
 {
@@ -13,5 +14,8 @@ class PosCategorie extends Model
         'brand_id'
     ];
 
-
+    public function posCategory_per_product () : HasMany
+    {
+        return $this->hasMany(Product::class,'pos_category_id', 'id');
+    }
 }

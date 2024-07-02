@@ -1,16 +1,36 @@
 <!-- Area:
 
 http://127.0.0.1:8000/api/v1/store/area/create_update
+
+id
+name
+brand_id
+
 http://127.0.0.1:8000/api/v1/store/area/get
+
+brandFilter[]
+
 http://127.0.0.1:8000/api/v1/store/area/delete
+
+id
 
 
 Store Group:
 
 http://127.0.0.1:8000/api/v1/store/store_group/create_update
+
+id
+group_name
+brand_id
+
 http://127.0.0.1:8000/api/v1/store/store_group/get
+
+areaFilter[]
+brandFilter[]
+
 http://127.0.0.1:8000/api/v1/store/store_group/delete
 
+id
 
 Stores:
 

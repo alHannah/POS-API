@@ -127,7 +127,7 @@ class StoreGroupController extends Controller
                     'store_count'   => $store_count,
                     'created_at'    => $created_at->format('M d, Y h:i A'),
                 ];
-            });
+            })->values()->toArray();
 
             DB::commit();
 

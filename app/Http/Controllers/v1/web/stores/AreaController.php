@@ -22,7 +22,7 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $encryptedId        = $request ? Crypt::decrypt($request->id) : null;
+            $encryptedId        = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $name               = $request->name;
             $brandId            = $request->brand_id;
 
@@ -144,6 +144,7 @@ class AreaController extends Controller
     {
         try {
             DB::beginTransaction();
+            // dd(Crypt::encrypt(19));
 
             $encryptedId = Crypt::decrypt($request->id);
 

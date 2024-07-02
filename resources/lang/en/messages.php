@@ -53,6 +53,14 @@ return [
             'notexist'        => "Schedule Group does not exist!"
         ]
     ],
+    'product' => [
+        'productClassification' => [
+            'exists'    => 'Product Classification already exists!',
+        ],
+        'orderType' => [
+            'exists'    => 'Order Type already exists!',
+        ],
+    ],
     'required'                  => 'This value is required.',
     "success_feedback"          => "Feedback successfully submitted",
     "error_filename"            => ":name file cannot be uploaded. Filename contains a comma.",

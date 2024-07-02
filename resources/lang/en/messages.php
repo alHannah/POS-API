@@ -60,6 +60,16 @@ return [
         'orderType' => [
             'exists'    => 'Order Type already exists!',
         ],
+        'posCat' => [
+            'notFound'         => 'Brand was not found',
+            'alreadyExist'     => 'The category already exists',
+            'existed'          => 'Already exists',
+        ],
+        'discount' => [
+            'notFound'         => 'Discount was not found',
+            'alreadyExist'     => 'Discount already exists',
+            'existed'          => 'Already exists',
+        ],
     ],
     'required'                  => 'This value is required.',
     "success_feedback"          => "Feedback successfully submitted",

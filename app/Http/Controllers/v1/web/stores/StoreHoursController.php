@@ -153,43 +153,6 @@ class StoreHoursController extends Controller
         }
     }
 
-    public function getStoreHours(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $query = GeneralTimeSetting::with(['general_time_store' => function ($query) {
-                $query->select('id', 'store_name');
-            }])
-                ->orderByDesc('created_at')
-                ->select(['store_id', 'start_time', 'end_time', 'created_at']);
-
-            $data = $query->get()->map(function ($item) {
-                return [
-                    'store_id'   => Crypt::encrypt($item->store_id),
-                    'store_name' => $item->general_time_store->store_name ?? null,
-                    'start_time' => $item->start_time,
-                    'end_time'   => $item->end_time,
-                    'created_at' => $item->created_at->format('M d, Y h:i A'),
-                ];
-            });
-
-            return response()->json([
-                'error'   => false,
-                'message' => trans('messages.success'),
-                'data'    => $data,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::info("Error: $e");
-            return response()->json([
-                'error'   => true,
-                'message' => trans('messages.error'),
-            ]);
-        }
-    }
-
-
     public function searchStoreHours(Request $request)
     {
         try {
@@ -296,7 +259,7 @@ class StoreHoursController extends Controller
     }
 
 
-    public function filterStoreHours(Request $request)
+    public function displayStoreHours(Request $request)
     {
         try {
             DB::beginTransaction();
@@ -304,28 +267,34 @@ class StoreHoursController extends Controller
             $start_time = $request->start_time;
             $end_time = $request->end_time;
 
-            $data = GeneralTimeSetting::with(['general_time_store' => function ($query) {
+            $query = GeneralTimeSetting::with(['general_time_store' => function ($query) {
                 $query->select('id', 'store_name');
-            }])
-                ->whereTime('start_time', '>=', $start_time)
-                ->whereTime('end_time', '<=', $end_time)
-                ->orderByDesc('created_at')
-                ->get(['store_id', 'start_time', 'end_time']);
+            }]);
+
+            if ($start_time && $end_time) {
+                $query->whereTime('start_time', '>=', $start_time)
+                      ->whereTime('end_time', '<=', $end_time);
+            }
+
+            $data = $query->orderByDesc('created_at')->get(['store_id', 'start_time', 'end_time', 'created_at']);
+
+            $data = $data->map(function ($item) {
+                return [
+                    'store_id'   => Crypt::encryptString($item->store_id),
+                    'store_name' => $item->general_time_store ? $item->general_time_store->store_name : null,
+                    'start_time' => $item->start_time,
+                    'end_time'   => $item->end_time,
+                    'created_at' => $item->created_at->format('M d, Y h:i A'),
+                    'store_id_nE'=> $item->store_id,
+                ];
+            });
 
             DB::commit();
-
-            $encryptedData = $data->map(function ($item) {
-                $item->store_id = Crypt::encrypt($item->store_id);
-                $item->store_name = $item->general_time_store->store_name;
-                unset($item->general_time_store);
-                $item->created_at_formatted = Carbon::parse($item->created_at)->format('M d, Y h:i A');
-                return $item;
-            });
 
             return response()->json([
                 'error'   => false,
                 'message' => trans('messages.success'),
-                'data'    => $encryptedData,
+                'data'    => $data,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -336,4 +305,5 @@ class StoreHoursController extends Controller
             ]);
         }
     }
+
 }

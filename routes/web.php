@@ -140,7 +140,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/delete',                     'v1\web\stores\StoreHoursController@delete');
                 $router->post('/searchStoreHours',          'v1\web\stores\StoreHoursController@searchStoreHours');
                 $router->post('/filterStoreHours',           'v1\web\stores\StoreHoursController@filterStoreHours');
-                $router->post('/getStoreHours',              'v1\web\stores\StoreHoursController@getStoreHours');
+                $router->post('/displayStoreHours',           'v1\web\stores\StoreHoursController@displayStoreHours');
             });
 
         });
@@ -342,6 +342,28 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
 
 
+
+            $router->group(["prefix" => "/posCategory", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/displayCategory',           'v1\web\products\PosCategoryController@displayCategory');
+                $router->post('/create',                    'v1\web\products\PosCategoryController@create');
+                $router->post('/update',                    'v1\web\products\PosCategoryController@update');
+                $router->post('/archiveCategory',           'v1\web\products\PosCategoryController@archiveCategory');
+            });
+
+            $router->group(["prefix" => "/discount", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/displayDiscount',           'v1\web\products\DiscountController@displayDiscount');
+                $router->post('/create',                    'v1\web\products\DiscountController@create');
+                $router->post('/update',                    'v1\web\products\DiscountController@update');
+                $router->post('/archiveDiscount',           'v1\web\products\DiscountController@archiveDiscount');
+            });
 
         });
 

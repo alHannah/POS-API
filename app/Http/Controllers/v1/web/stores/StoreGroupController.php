@@ -21,7 +21,7 @@ class StoreGroupController extends Controller
     {
         try {
             DB::beginTransaction();
-            $encryptedId    = $request->id ? Crypt::decrypt($request->id) : null;
+            $encryptedId    = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $groupName      = $request->group_name;
             $brandId        = $request->brand_id;
 
@@ -152,7 +152,7 @@ class StoreGroupController extends Controller
         try {
             DB::beginTransaction();
 
-            $encryptedId = $request->id ? Crypt::decrypt($request->id) : null;
+            $encryptedId = !empty($request->id) ? Crypt::decrypt($request->id) : null;
 
             $storeGroup  = StoreGroup::where('id', $encryptedId)
                             ->delete();

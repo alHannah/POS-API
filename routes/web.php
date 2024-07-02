@@ -316,11 +316,11 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                        'v1\web\products\ModeOfPaymentController@create');
-                $router->post('/edit',                          'v1\web\products\ModeOfPaymentController@edit');
-                $router->post('/update',                        'v1\web\products\ModeOfPaymentController@update');
-                $router->post('/delete',                        'v1\web\products\ModeOfPaymentController@delete');
-                $router->get('/get',                            'v1\web\products\ModeOfPaymentController@get');
+                $router->post('/create',                        'v1\web\products\BillOfMaterialController@create');
+                $router->post('/edit',                          'v1\web\products\BillOfMaterialController@edit');
+                $router->post('/update',                        'v1\web\products\BillOfMaterialController@update');
+                $router->post('/delete',                        'v1\web\products\BillOfMaterialController@delete');
+                $router->get('/get',                            'v1\web\products\BillOfMaterialController@get');
             });
 
             $router->group(["prefix" => "/uom", "middleware" => "auth"], function () use ($router) {

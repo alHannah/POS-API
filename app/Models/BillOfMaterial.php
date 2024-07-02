@@ -19,4 +19,8 @@ class BillOfMaterial extends Model
         return $this->belongsTo(Uom::class, 'uom_id');
     }
 
+    public function bom_per_product(): BelongsTo {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
 }

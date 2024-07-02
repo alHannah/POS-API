@@ -22,4 +22,7 @@ class Brand extends Model
     public function brand_storeGroup(): HasMany {
         return $this->hasMany(StoreGroup::class, 'brand_id');
     }
+    public function brand_product(): HasMany {
+        return $this->hasMany(Product::class, 'brand_id');
+    }
 }

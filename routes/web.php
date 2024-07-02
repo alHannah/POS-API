@@ -265,6 +265,18 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/productClassification", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create',                    'v1\web\products\ProductClassificicationControllerr@create_classification');
+                $router->post('/update',                    'v1\web\products\ProductClassificicationControllerr@update_classification');
+                $router->post('/delete',                    'v1\web\products\ProductClassificicationControllerr@archive_classification');
+                $router->post('/get',                       'v1\web\products\ProductClassificicationControllerr@get_classification');
+
+            });
+
         });
 
         // ----------------------- POS CATEGORY --------------------------------------

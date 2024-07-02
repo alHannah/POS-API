@@ -109,12 +109,13 @@ class StoresController extends Controller
 
     public function update_store(Request $request) {
         try {
-            $id = $request->id;
+            $id = Crypt::decrypt($request->id);
 
             $storeCount = Store::where('status', 1)->where('store_name', $request->store_name)->whereNot('id', $id)->get()->count();
 
             if ($id) {
                 $previousStore = Store::with(['store_oic', 'store_devices'])->where('status', 1)->where('id', $id)->get();
+
             } else {
                 return response()->json([
                     'error'     => true,
@@ -130,7 +131,7 @@ class StoresController extends Controller
             }
 
             $previousStoreMobileUserId = $previousStore[0]->store_oic->pluck('mobile_user_id');
-            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $previousStoreMobileUserId)->where('store_id', $request->id)->get();
+            $oldOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $previousStoreMobileUserId)->where('store_id', $id)->get();
 
             DB::beginTransaction();
 
@@ -154,18 +155,18 @@ class StoresController extends Controller
             $newManager = ManagerInCharge::with('manager_user')->where('user_id',$request->user_id)->first()->manager_user->name;
             $manager->update(['user_id' => $request->user_id]);
 
-            Device::where('store_id', $request->id)->update([
+            Device::where('store_id', $id)->update([
                 'device_id' => $request->device_id
             ]);
 
             $mobile_user_id = $request->mobile_user_id;
 
-            OicPerStore::where('store_id', $request->id)->delete();
+            OicPerStore::where('store_id', $id)->delete();
 
             foreach ($mobile_user_id as $mob_id) {
                 OicPerStore::create([
                     'mobile_user_id' => $mob_id,
-                    'store_id'       => $request->id
+                    'store_id'       => $id
                 ]);
             }
 
@@ -239,7 +240,7 @@ class StoresController extends Controller
 
             $updated = json_encode($compareStore);
 
-            $newOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $request->mobile_user_id)->where('store_id', $request->id)->get();
+            $newOic = OicPerStore::with('oic_mobile_user')->whereIn('mobile_user_id', $request->mobile_user_id)->where('store_id', $id)->get();
 
             foreach ($newOic as $newOics) {
                 $newOicName[] = $newOics->oic_mobile_user->name;
@@ -295,19 +296,19 @@ class StoresController extends Controller
             DB::beginTransaction();
 
             if($store->status==1) {
-                $store = Store::where('id', $request->id)->first()->update([
+                $store = Store::where('id', $id)->first()->update([
                     'status' => 0,
                 ]);
-                $device = Device::where('store_id', $request->id)->first()->update([
+                $device = Device::where('store_id', $id)->first()->update([
                     'status' => 0,
                 ]);
                 $message = "$previousName has been archived.";
 
             } else {
-                $store = Store::where('id', $request->id)->first()->update([
+                $store = Store::where('id', $id)->first()->update([
                     'status' => 1,
                 ]);
-                $device = Device::where('store_id', $request->id)->first()->update([
+                $device = Device::where('store_id', $id)->first()->update([
                     'status' => 1,
                 ]);
                 $message = "$previousName has been reactivated.";

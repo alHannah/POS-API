@@ -96,7 +96,7 @@ class AreaController extends Controller
             // Flatten the filters in case they are nested
             $brandFilter = Arr::flatten($brandFilter, 1);
 
-            $thisData = Store::with(['store_brands', 'store_per_area'])->where('status', 1);
+            $thisData = Area::with(['brand_areas', 'areas_per_stores'])->where('status', 1);
 
             if (!empty($brandFilter)) {
                 $thisData->whereIn('brand_id', $brandFilter);
@@ -105,11 +105,11 @@ class AreaController extends Controller
             $getData = $thisData->get();
 
             $generateData   = $getData->map(function ($items) {
-                    $id             = $items->store_per_area->id            ?? 'N/A';
-                    $name           = $items->store_per_area->name          ?? 'N/A';
-                    $brand          = $items->store_brands->brand           ?? 'N/A';
-                    $created_at     = $items->store_per_area->created_at    ?? 'N/A';
-                    $status         = $items->status                        ?? 'N/A';
+                    $id             = $items->id                        ?? 'N/A';
+                    $name           = $items->name                      ?? 'N/A';
+                    $brand          = $items->brand_areas->brand        ?? 'N/A';
+                    $created_at     = $items->created_at                ?? 'N/A';
+                    $status         = $items->status                    ?? 'N/A';
 
                     return [
                         'id'            => Crypt::encrypt($id),

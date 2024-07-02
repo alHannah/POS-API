@@ -71,12 +71,12 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/brand_dropdown',                'v1\web\dropdowns\DropdownController@brand_dropdown');
-                $router->post('/store_group_dropdown',          'v1\web\dropdowns\DropdownController@store_group_dropdown');
-                $router->post('/price_tier_dropdown',           'v1\web\dropdowns\DropdownController@price_tier_dropdown');
-                $router->post('/manager_dropdown',              'v1\web\dropdowns\DropdownController@manager_dropdown');
-                $router->post('/add_product_dropdown',          'v1\web\dropdowns\DropdownController@add_product_dropdown');
-                $router->post('/stores_dropdown',               'v1\web\dropdowns\DropdownController@price_tier_dropdown');
+                $router->post('/brand_dropdown',                'v1\web\dropdowns\StoreDropdownController@brand_dropdown');
+                $router->post('/store_group_dropdown',          'v1\web\dropdowns\StoreDropdownController@store_group_dropdown');
+                $router->post('/price_tier_dropdown',           'v1\web\dropdowns\StoreDropdownController@price_tier_dropdown');
+                $router->post('/manager_dropdown',              'v1\web\dropdowns\StoreDropdownController@manager_dropdown');
+                $router->post('/add_product_dropdown',          'v1\web\dropdowns\StoreDropdownController@add_product_dropdown');
+                $router->post('/stores_dropdown',               'v1\web\dropdowns\StoreDropdownController@price_tier_dropdown');
             });
 
             $router->group(["prefix" => "/area", "middleware" => "auth"], function () use ($router) {
@@ -265,6 +265,15 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/drop_down", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/uom_category_dropdown',                'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
+
+            });
+
             $router->group(["prefix" => "/productClassification", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
@@ -289,6 +298,50 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/set',                       'v1\web\products\OrderTypeController@set_default');
 
             });
+
+            $router->group(["prefix" => "/modeofpayment", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create',                        'v1\web\products\ModeOfPaymentController@create');
+                $router->post('/edit',                          'v1\web\products\ModeOfPaymentController@edit');
+                $router->post('/update',                        'v1\web\products\ModeOfPaymentController@update');
+                $router->post('/archived',                        'v1\web\products\ModeOfPaymentController@archived');
+                $router->post('/get',                            'v1\web\products\ModeOfPaymentController@get');
+            });
+
+            $router->group(["prefix" => "/bom", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create',                        'v1\web\products\ModeOfPaymentController@create');
+                $router->post('/edit',                          'v1\web\products\ModeOfPaymentController@edit');
+                $router->post('/update',                        'v1\web\products\ModeOfPaymentController@update');
+                $router->post('/delete',                        'v1\web\products\ModeOfPaymentController@delete');
+                $router->get('/get',                            'v1\web\products\ModeOfPaymentController@get');
+            });
+
+            $router->group(["prefix" => "/uom", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create',                        'v1\web\products\UomController@create');
+                $router->post('/edit',                          'v1\web\products\UomController@edit');
+                $router->post('/update',                        'v1\web\products\UomController@update');
+                $router->post('/delete',                        'v1\web\products\UomController@delete');
+                $router->get('/get',                            'v1\web\products\UomController@get');
+                $router->post('/createCategory',                'v1\web\products\UomController@createCategory');
+                $router->post('/editCategory',                  'v1\web\products\UomController@editCategory');
+                $router->post('/updateCategory',                'v1\web\products\UomController@updateCategory');
+                $router->post('/deleteCategory',                'v1\web\products\UomController@deleteCategory');
+                $router->get('/getCategory',                    'v1\web\products\UomController@getCategory');
+            });
+
+
+
 
         });
 

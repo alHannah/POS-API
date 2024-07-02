@@ -96,7 +96,7 @@ class StoreGroupController extends Controller
             $areaFilter         = Arr::flatten($areaFilter, 1);
             $brandFilter        = Arr::flatten($brandFilter, 1);
 
-            $thisData = Store::with(['store_brands', 'group_per_store']);
+            $thisData = StoreGroup::with('storeGroup_brand');
             if (!empty($brandFilter)) {
                 $thisData->whereIn('brand_id', $brandFilter);
             }
@@ -109,16 +109,16 @@ class StoreGroupController extends Controller
 
             // Group the data by store name and count the stores
             $groupedData = $getData->groupBy(function ($item) {
-                return $item->group_per_store->group_name ?? 'N/A';
+                return $item->group_name ?? 'N/A';
             });
 
-            $generateData = $groupedData->map(function ($items, $groupName) {
+            $generateData = $groupedData->map(function ($items) {
                 $store_count      = $items->count();
                 $item             = $items->first();
-                $id               = $item->group_per_store->id          ?? 'N/A';
-                $name             = $item->group_per_store->group_name  ?? 'N/A';
-                $brand            = $item->store_brands->brand          ?? 'N/A';
-                $created_at       = $item->group_per_store->created_at  ?? 'N/A';
+                $id               = $item->id                            ?? 'N/A';
+                $name             = $item->group_name                    ?? 'N/A';
+                $brand            = $item->storeGroup_brand->brand       ?? 'N/A';
+                $created_at       = $item->created_at                    ?? 'N/A';
 
                 return [
                     'id'            => Crypt::encrypt($id),

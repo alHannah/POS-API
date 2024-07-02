@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 
-class DropdownController extends Controller
+class StoreDropdownController extends Controller
 {
     /*--------------STORES DROPDOWN---------------*/
     public function brand_dropdown(Request $request) {

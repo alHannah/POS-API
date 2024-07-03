@@ -25,7 +25,7 @@ class ProductListController extends Controller
             $productName                = $request->product_name;
             $productTag                 = $request->product_tag;
             $packaging                  = 0;
-            // $image                      = $request->image;
+            $image                      = $request->imageFile;
             $uom                        = $request->uom;
             $min_uom                    = $request->min_uom;
             $productClassification      = $request->product_classification;
@@ -36,10 +36,12 @@ class ProductListController extends Controller
                 'productCode'               => 'required',
                 'productName'               => 'required',
                 'productTag'                => 'required',
+                'packaging'                 => 'nullable',
                 'uom'                       => 'required',
                 'min_uom'                   => 'required',
                 'product_classification'    => 'required',
-                'category'                  => 'required'
+                'category'                  => 'required',
+                'image'                     => 'nullable|image|max:1024' // validate image file, max 1MB
             ]);
 
 
@@ -71,12 +73,19 @@ class ProductListController extends Controller
             $previousProductName                = $previousData->name                    ?? 'N/A';
             $previousProductTag                 = $previousData->product_tag             ?? 'N/A';
             $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
-            $previousImage                      = 'Last Image'                           ?? 'N/A';
+            $previousImage                      = $previousData->product_image           ?? 'N/A';
             $previousUom                        = $previousData->uom                     ?? 'N/A';
             $previousMinUom                     = $previousData->min_level_uom           ?? 'N/A';
             $previousProductClassification      = $previousData->product_classification  ?? 'N/A';
             $previousCategory                   = $previousData->category                ?? 'N/A';
 
+
+            // Handling image upload
+            $imageBase64 = null;
+            if ($image->hasFile('image')) {
+                $image = $request->file('image');
+                $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
+            }
 
             $createUpdate = Product::updateOrCreate([
                 'id'            => $encryptedId
@@ -86,7 +95,7 @@ class ProductListController extends Controller
                 'productName'               => $productName,
                 'productTag'                => $productTag,
                 'packaging'                 => $packaging,
-                // 'image'                     => $image,
+                'image'                     => $imageBase64,
                 'uom'                       => $uom,
                 'min_uom'                   => $min_uom,
                 'product_classification'    => $productClassification,
@@ -101,8 +110,8 @@ class ProductListController extends Controller
                              . "Category: $previousCategory";
 
             $newDetails = "Brand: $brand, Product Code: $productCode, Product Name: $productName, Product Tag: $productTag, "
-                        . "Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, Classification: $productClassification, "
-                        . "Category: $category";
+                        . "Image: $imageBase64, Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, "
+                        . "Classification: $productClassification, Category: $category";
 
             $message = $encryptedId
                     ? "Updated Previous $previousDetails to New: $newDetails"
@@ -115,8 +124,9 @@ class ProductListController extends Controller
             DB::commit();
 
             return response()->json([
-                "error" => false,
-                "message" => trans('messages.success'),
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $createUpdate
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -141,7 +151,7 @@ class ProductListController extends Controller
             $tagFilter          = Arr::flatten($tagFilter, 1);
             $statusFilter       = Arr::flatten($statusFilter, 1);
 
-            $thisData = Product::with('product_category', 'product_brand', 'product_uom');
+            $thisData = Product::with('product_category', 'product_per_brand', 'product_uom');
 
             if (!empty($categoryFilter)) {
                 $thisData->whereIn('category_id', $categoryFilter);
@@ -157,15 +167,15 @@ class ProductListController extends Controller
             $getData = $thisData->get();
 
             $generateData = $getData->map(function ($items) {
-                $id                     = $items->id                        ?? 'N/A';
-                $product_code           = $items->product_code              ?? 'N/A';
-                $product_name           = $items->name                      ?? 'N/A';
-                $brand                  = $items->product_brand->brand      ?? 'N/A';
-                $category               = $items->product_category->name    ?? 'N/A';
-                $uom                    = $items->product_uom->name         ?? 'N/A';
-                $min_uom                = $items->min_level_uom             ?? 'N/A';
-                $tag                    = $items->product_tag               ?? 'N/A';
-                $status                 = $items->status                    ?? 'N/A';
+                $id                     = $items->id                            ?? 'N/A';
+                $product_code           = $items->product_code                  ?? 'N/A';
+                $product_name           = $items->name                          ?? 'N/A';
+                $brand                  = $items->product_per_brand->brand      ?? 'N/A';
+                $category               = $items->product_category->name        ?? 'N/A';
+                $uom                    = $items->product_uom->name             ?? 'N/A';
+                $min_uom                = $items->min_level_uom                 ?? 'N/A';
+                $tag                    = $items->product_tag                   ?? 'N/A';
+                $status                 = $items->status                        ?? 'N/A';
 
                 return [
                     'id'               => Crypt::encrypt($id),

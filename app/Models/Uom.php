@@ -22,4 +22,7 @@ class Uom extends Model
     public function uom_per_bom(): HasMany {
         return $this->hasMany(BillOfMaterial::class, 'uom_id');
     }
+    public function uom_product(): HasMany {
+        return $this->hasMany(Product::class, 'uom_id');
+    }
 }

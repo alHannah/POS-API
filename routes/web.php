@@ -270,8 +270,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/uom_category_dropdown',                'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
-
+                $router->post('/uom_category_dropdown',          'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
+                $router->post('/category_dropdown',              'v1\web\dropdowns\ProductDropdownController@category_dropdown');
             });
 
             $router->group(["prefix" => "/productClassification", "middleware" => "auth"], function () use ($router) {
@@ -279,10 +279,10 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                    'v1\web\products\ProductClassificationController@create_classification');
-                $router->post('/update',                    'v1\web\products\ProductClassificationController@edit_classification');
-                $router->post('/delete',                    'v1\web\products\ProductClassificationController@archive_classification');
-                $router->post('/get',                       'v1\web\products\ProductClassificationController@get_classification');
+                $router->post('/create',                        'v1\web\products\ProductClassificationController@create_classification');
+                $router->post('/update',                        'v1\web\products\ProductClassificationController@edit_classification');
+                $router->post('/delete',                        'v1\web\products\ProductClassificationController@archive_classification');
+                $router->post('/get',                           'v1\web\products\ProductClassificationController@get_classification');
 
             });
 

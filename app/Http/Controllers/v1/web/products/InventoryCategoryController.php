@@ -99,14 +99,14 @@ class InventoryCategoryController extends Controller
             $generateData = $getData->map(function ($items) {
                 $id                     = $items->id               ?? 'N/A';
                 $category_name          = $items->name             ?? 'N/A';
-                $created_at_string      = $items->created_at       ?? 'N/A';
+                // $created_at_string      = $items->created_at       ?? 'N/A';
                 $status                 = $items->status           ?? 'N/A';
-                $created_at             = Carbon::parse($created_at_string);
+                // $created_at             = Carbon::parse($created_at_string);
 
                 return [
                     'id'                => Crypt::encrypt($id),
                     'category_name'     => $category_name,
-                    'created_at'        => $created_at->format('M d, Y h:i A'),
+                    // 'created_at'        => $created_at->format('M d, Y h:i A'),
                     'status'            => $status
                 ];
             });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\web\dropdowns;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Uom;
 use App\Models\UomCategory;
 use Illuminate\Http\Request;
@@ -24,6 +25,38 @@ class ProductDropdownController extends Controller
                     'id'            => $item->id,
                     'name'          => $item->name,
                     'created_at'    => $item->created_at,
+                ];
+            });
+
+            DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $tableDetails,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+    public function category_dropdown(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $uomCategoryName = Category::get();
+
+            $tableDetails = $uomCategoryName->map(function($item){
+                return[
+                    'id'            => $item->id,
+                    'name'          => $item->name,
+                    'tag'           => $item->tag,
+                    'status'        => $item->status,
+                    // 'created_at'    => $item->created_at,
                 ];
             });
 

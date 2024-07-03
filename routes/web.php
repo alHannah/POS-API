@@ -384,7 +384,17 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/create_update',              'v1\web\products\ProductListController@create_update');
                 $router->post('/get',                        'v1\web\products\ProductListController@get');
-                $router->post('/archive',                    'v1\web\products\ProductListController@archive');
+                $router->post('/archive_activate',           'v1\web\products\ProductListController@archive_activate');
+            });
+
+            $router->group(["prefix" => "/inventory_category", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',              'v1\web\products\InventoryCategoryController@create_update');
+                $router->post('/get',                        'v1\web\products\InventoryCategoryController@get');
+                $router->post('/archive_activate',           'v1\web\products\InventoryCategoryController@archive_activate');
             });
 
         });

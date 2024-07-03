@@ -49,7 +49,7 @@ class Product extends Model
         return $this->belongsTo(PosCategory::class,'pos_category_id', 'id');
     }
 
-    public function product_per_BOM () : HasMany
+    public function product_per_bom () : HasMany
     {
         return $this->hasMany(BillOfMaterial::class,'product_id', 'id');
     }
@@ -57,5 +57,10 @@ class Product extends Model
     public function product_per_price_per_tiers () : HasMany
     {
         return $this->hasMany(PricePerTier::class,'product_id');
+    }
+
+    public function product_per_bomId () : HasMany
+    {
+        return $this->hasMany(BillOfMaterial::class,'bom_id', 'id');
     }
 }

@@ -270,8 +270,11 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/uom_category_dropdown',          'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
-                $router->post('/category_dropdown',              'v1\web\dropdowns\ProductDropdownController@category_dropdown');
+                $router->post('/uom_category_dropdown',         'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
+                $router->post('/store_dropdown',                'v1\web\dropdowns\ProductDropdownController@store_dropdown');
+                $router->post('/product_store_dropdown',        'v1\web\dropdowns\ProductDropdownController@product_dropdown_per_store');
+                $router->post('/uom_per_product',               'v1\web\dropdowns\ProductDropdownController@uom_per_product');
+                $router->post('/category_dropdown',             'v1\web\dropdowns\ProductDropdownController@category_dropdown');
             });
 
             $router->group(["prefix" => "/productClassification", "middleware" => "auth"], function () use ($router) {
@@ -307,8 +310,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/create',                        'v1\web\products\ModeOfPaymentController@create');
                 $router->post('/edit',                          'v1\web\products\ModeOfPaymentController@edit');
                 $router->post('/update',                        'v1\web\products\ModeOfPaymentController@update');
-                $router->post('/archived',                        'v1\web\products\ModeOfPaymentController@archived');
-                $router->post('/get',                            'v1\web\products\ModeOfPaymentController@get');
+                $router->post('/archived',                      'v1\web\products\ModeOfPaymentController@archived');
+                $router->post('/get',                           'v1\web\products\ModeOfPaymentController@get');
             });
 
             $router->group(["prefix" => "/bom", "middleware" => "auth"], function () use ($router) {

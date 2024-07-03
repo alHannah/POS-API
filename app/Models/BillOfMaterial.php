@@ -23,4 +23,8 @@ class BillOfMaterial extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function bom_per_bomId(): BelongsTo {
+        return $this->belongsTo(Product::class, 'bom_id');
+    }
+
 }

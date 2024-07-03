@@ -365,6 +365,28 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/archiveDiscount',           'v1\web\products\DiscountController@archiveDiscount');
             });
 
+            $router->group(["prefix" => "/price_tier", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/displayPriceTier',          'v1\web\products\PriceTierController@displayPriceTier');
+                $router->post('/create',                    'v1\web\products\DiscountController@create');
+                $router->post('/update',                    'v1\web\products\DiscountController@update');
+                $router->post('/archiveDiscount',           'v1\web\products\DiscountController@archiveDiscount');
+            });
+
+
+            $router->group(["prefix" => "/product_list", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',              'v1\web\products\ProductListController@create_update');
+                $router->post('/get',                        'v1\web\products\ProductListController@get');
+                $router->post('/archive',                    'v1\web\products\ProductListController@archive');
+            });
+
         });
 
         // ----------------------- POS CATEGORY --------------------------------------

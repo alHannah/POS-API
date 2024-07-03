@@ -42,11 +42,16 @@ class Product extends Model
 
     public function product_per_posCategories () : BelongsTo
     {
-        return $this->belongsTo(PosCategorie::class,'pos_category_id', 'id');
+        return $this->belongsTo(PosCategory::class,'pos_category_id', 'id');
     }
 
     public function product_per_BOM () : HasMany
     {
         return $this->hasMany(BillOfMaterial::class,'product_id', 'id');
+    }
+
+    public function product_per_price_per_tiers () : HasMany
+    {
+        return $this->hasMany(PricePerTier::class,'product_id');
     }
 }

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 class BillOfMaterialController extends Controller
 {
@@ -20,42 +21,48 @@ class BillOfMaterialController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $productIds = $request->product_id;
-            $quantity = $request->qty;
-            //$bomId = $request->bom_id;
+            //--------------------------CREATE BOM------------------------------------
+            $productIds     = $request->product_id;
+            $quantity       = $request->qty;
+            $bomId          = $request->bom_id;
 
             foreach ($productIds as $key => $productId) {
-                $qty = $quantity[$key];
-                //$bom = $bomId[$key];
+                $qty       = $quantity[$key];
+                $bom       = $bomId[$key];
 
                 $getUom = Product::where('id', $productId)->value('uom_id');
                 $createBom = BillOfMaterial::create([
-                    'product_id' => $productId,
-                    'uom_id' => $getUom,
-                    'qty' => $qty,
-                    //'bom_id' => $bom
+                    'product_id'    => $productId,
+                    'uom_id'        => $getUom,
+                    'qty'           => $qty,
+                    'bom_id'        => $bom
                 ]);
             }
 
-            $orderTypeIds = $request->order_type;
-            $packagingProducts = $request->packaging_product;
-            $packagingQuantities = $request->packaging_qty;
-            $packagingUoms = Product::whereIn('id', $packagingProducts)->pluck('uom_id');
+            //-------------------------CREATE PACKAGING-------------------------------
+            $orderTypeIds       = $request->order_type;
+            $quantities         = $request->quantity;
+            $products           = $request->product;
+            $flatProductIds     = Arr::flatten($products);
+            $packagingUoms      = Product::whereIn('id', $flatProductIds)->pluck('uom_id', 'id');
 
-            foreach ($packagingProducts as $key => $packagingProduct) {
-                foreach ($orderTypeIds as $orderTypeId){
-                    $createPackaging = Packaging::create([
-                        'product_id'    => $packagingProduct,
-                        'order_type_id' => $orderTypeId
+            foreach ($orderTypeIds as $index => $orderTypeId) {
+                foreach ($products[$index] as $productIndex => $productId) {
+                    $packagingUom       = $packagingUoms[$productId];
+                    $quantity           = $quantities[$index][$productIndex];
+
+                    $createBom = Packaging::create([
+                        'order_type_id' => $orderTypeId,
+                        'product_id'    => $productId,
+                    ]);
+
+                    PackagingDetail::create([
+                        'packaging_id'  => $createBom->id,
+                        'product_id'    => $productId,
+                        'qty'           => $quantity,
+                        'uom_id'        => $packagingUom,
                     ]);
                 }
-                /* PackagingDetail::create([
-                    'packaging_id' => $createPackaging->id,
-                    'product_id'   => $packagingProduct,
-                    'qty'          => $packagingQuantities[$packagingProduct],
-                    'uom_id'       => $packagingUoms[$packagingProduct]
-                ]); */
             }
             DB::commit();
 
@@ -63,8 +70,9 @@ class BillOfMaterialController extends Controller
                 'error'             => false,
                 'message'           => trans('messages.success'),
                 'data'              => $createBom,
-                'data2'             => $createPackaging
+                //'data2'           => $createPackaging
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");

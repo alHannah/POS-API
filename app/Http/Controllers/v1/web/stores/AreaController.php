@@ -6,10 +6,14 @@ use Exception;
 use App\Models\Area;
 use App\Models\Brand;
 use App\Models\Store;
+use App\Models\CashReport;
+use App\Models\GeneralTimeSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Inventory;
+use App\Models\InventoryDetail;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
 
@@ -21,8 +25,9 @@ class AreaController extends Controller
     {
         try {
             DB::beginTransaction();
+            // dd(Crypt::encrypt(13));
 
-            $encryptedId        = !empty($request->id) ? Crypt::decrypt($request->id) : null;
+            $encryptedId        = Crypt::decrypt($request->id);
             $name               = $request->name;
             $brandId            = $request->brand_id;
 
@@ -96,7 +101,7 @@ class AreaController extends Controller
             // Flatten the filters in case they are nested
             $brandFilter = Arr::flatten($brandFilter, 1);
 
-            $thisData = Area::with(['brand_areas', 'areas_per_stores'])->where('status', 1);
+            $thisData = Area::with(['brand_areas', 'areas_per_stores']);
 
             if (!empty($brandFilter)) {
                 $thisData->whereIn('brand_id', $brandFilter);
@@ -138,40 +143,39 @@ class AreaController extends Controller
         }
     }
 
-
-
-    public function delete(Request $request)
-    {
+    public function archive_activate(Request $request) {
         try {
-            DB::beginTransaction();
-            // dd(Crypt::encrypt(19));
+            DB:: beginTransaction();
+            // dd(Crypt::encrypt(820));
 
             $encryptedId = Crypt::decrypt($request->id);
 
-            $area = Area::where('id', $encryptedId)
-                  -> delete();
+            $thisData = Area::where('id', $encryptedId)->first();
 
-            $message = "Deleted Successfully!";
+            $thisData->status == 1 || 'active' ? $thisData->update(['status' => 0]) : $thisData->update(['status' => 1]);
 
-            $request['remarks'] = $message;
-            $request['type']    = 2;
+            $name = Area::where('id', $encryptedId)->first()->name;
+
+            // AUDIT TRAIL LOG
+
+            $thisData->status == 0 ? $message = "Archived an category: $name." : $message = "Activated an category: $name.";
+
+            $request['remarks']     = $message;
+            $request['type']        = 2;
             $this->audit_trail($request);
 
             DB::commit();
 
             return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $area
-                // 'type'      => $type
+                "error" => false,
+                'message' =>trans('messages.success'),
+                'data'      => $thisData
             ]);
-
         } catch (Exception $e) {
-            DB::rollBack();
-            Log::info("Error: $e");
+            Log::info("Error $e");
             return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
+                "error"=> true,
+                "message"=> trans('messages.error'),
             ]);
         }
     }

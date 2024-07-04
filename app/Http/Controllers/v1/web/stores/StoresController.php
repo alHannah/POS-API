@@ -344,7 +344,7 @@ class StoresController extends Controller
 
             $data = Store::with([
                 'store_brands',
-                'group_per_store',
+                'store_storeGroup',
                 'store_per_area',
                 'store_per_area',
                 'store_price_tier',
@@ -379,7 +379,7 @@ class StoresController extends Controller
                 $brand       = $items->store_brands->brand;
                 $code        = $items->store_code;
                 $name        = $items->store_name;
-                $group       = $items->group_per_store->group_name;
+                $group       = $items->store_storeGroup->group_name;
                 $area        = $items->store_per_area->name;
                 $priceTier   = $items->store_price_tier->name;
                 $status      = $items->status;
@@ -426,7 +426,7 @@ class StoresController extends Controller
 
             $storeData = Store::with([
                 'store_brands',
-                'group_per_store',
+                'store_storeGroup',
                 'store_per_area',
                 'store_per_area',
                 'store_price_tier',
@@ -462,7 +462,7 @@ class StoresController extends Controller
                 $brand       = $items->store_brands->brand;
                 $code        = $items->store_code;
                 $name        = $items->store_name;
-                $group       = $items->group_per_store->group_name;
+                $group       = $items->store_storeGroup->group_name;
                 $area        = $items->store_per_area->name;
                 $priceTier   = $items->store_price_tier->name;
                 $status      = $items->status;

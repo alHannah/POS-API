@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SalesReport extends Model
 {
@@ -24,4 +25,11 @@ class SalesReport extends Model
         'end_date',
         'refund'
     ];
+    // ---------------------------BELONGS TO
+
+    public function salesReports_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 }

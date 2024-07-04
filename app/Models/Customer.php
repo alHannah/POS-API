@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Customer extends Model
 {
@@ -14,4 +15,11 @@ class Customer extends Model
         'number',
         'email'
     ];
+    // ---------------------------BELONGS TO
+
+    public function customer_store () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 }

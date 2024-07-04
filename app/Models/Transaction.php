@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaction extends Model
 {
@@ -33,4 +34,11 @@ class Transaction extends Model
         'settlement_type',
         'manager_id'
     ];
+
+    // ---------------------------BELONGS TO
+    public function transaction_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 }

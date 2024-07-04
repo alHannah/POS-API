@@ -45,10 +45,10 @@ class StoreGroupController extends Controller
             }
 
             $previousData       = Crypt::encrypt($encryptedId)
-                                ? StoreGroup::with('brand_storeGroup')->find($encryptedId)
+                                ? StoreGroup::with('storeGroup_brand')->find($encryptedId)
                                 : null;
             $previousStore      = $previousData->group_name ?? 'N/A';
-            $previousBrand      = $previousData->brand_storeGroup->brand ?? 'N/A';
+            $previousBrand      = $previousData->storeGroup_brand->brand ?? 'N/A';
 
             $createUpdate = StoreGroup::updateOrCreate([
                 'id'            => $encryptedId
@@ -96,7 +96,7 @@ class StoreGroupController extends Controller
             $areaFilter         = Arr::flatten($areaFilter, 1);
             $brandFilter        = Arr::flatten($brandFilter, 1);
 
-            $thisData = StoreGroup::with('storeGroup_brand');
+            $thisData = StoreGroup::withCount(['storeGroup_brand', 'storeGroup_store as store_count']);
             if (!empty($brandFilter)) {
                 $thisData->whereIn('brand_id', $brandFilter);
             }
@@ -105,29 +105,20 @@ class StoreGroupController extends Controller
                 $thisData->whereIn('area_id', $areaFilter);
             }
 
-            $getData = $thisData->get();
+            $getData = $thisData->latest()->get();
 
-            // Group the data by store name and count the stores
-            $groupedData = $getData->groupBy(function ($item) {
-                return $item->group_name ?? 'N/A';
-            });
-
-            $generateData = $groupedData->map(function ($items) {
-                $store_count      = $items->count();
-                $item             = $items->first();
-                $id               = $item->id                            ?? 'N/A';
-                $name             = $item->group_name                    ?? 'N/A';
-                $brand            = $item->storeGroup_brand->brand       ?? 'N/A';
-                $created_at       = $item->created_at                    ?? 'N/A';
-
+            $generateData = $getData->map(function ($item) {
+                $item->encryptedId  = Crypt::encrypt($item->id);
+                $created_at         = $item->created_at;
                 return [
-                    'id'            => Crypt::encrypt($id),
-                    'store_name'    => $name,
-                    'brand'         => $brand,
-                    'store_count'   => $store_count,
-                    'created_at'    => $created_at->format('M d, Y h:i A'),
+                    'store_count'      => $item->store_count                        ?? 'N/A',
+                    'id'               => $item->id                                 ?? 'N/A',
+                    'store_name'       => $item->group_name                         ?? 'N/A',
+                    'brand'            => $item->storeGroup_brand->brand            ?? 'N/A',
+                    'created_at'       => $created_at->format("M d, Y h:i A")       ?? 'N/A',
                 ];
-            })->values()->toArray();
+
+            });
 
             DB::commit();
 
@@ -151,17 +142,30 @@ class StoreGroupController extends Controller
     {
         try {
             DB::beginTransaction();
+            // dd(Crypt::encrypt(33));
 
-            $encryptedId = !empty($request->id) ? Crypt::decrypt($request->id) : null;
+            $decryptedId = Crypt::decrypt($request->id);
 
-            $storeGroup  = StoreGroup::where('id', $encryptedId)
-                            ->delete();
+            $storeGroup = StoreGroup::find($decryptedId);
+            if (!$storeGroup) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'Store Group not found.',
+                ]);
+            }
 
-            $message = "Deleted Successfully!";
+            $storeNames = $storeGroup->storeGroup_stores->pluck('store_name')->toArray();
+            $storeGroupName = $storeGroup->group_name;
+
+            // Delete the store group (cascading deletes will handle related stores and their relations)
+            $storeGroup->delete();
+
+            $message = "Deleted Store Group: '{$storeGroupName}' (" . implode(', ', $storeNames) . ")";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
             $this->audit_trail($request);
+            // dd(DB::getQueryLog());
 
             DB::commit();
 
@@ -174,6 +178,7 @@ class StoreGroupController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
+            // dd(DB::getQueryLog());
             Log::info("Error: $e");
             return response()->json([
                 'error'     => true,

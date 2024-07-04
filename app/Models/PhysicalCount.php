@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PhysicalCount extends Model
 {
@@ -20,6 +21,12 @@ class PhysicalCount extends Model
         'status',
         'mi_tag'
     ];
+    // ---------------------------BELONGS TO
 
+    public function physicalCount_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 
 }

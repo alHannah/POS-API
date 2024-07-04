@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CashReport extends Model
 {
@@ -15,4 +16,11 @@ class CashReport extends Model
         'amount',
         'remarks'
     ];
+    // ---------------------------BELONGS TO
+
+    public function cashReport_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 }

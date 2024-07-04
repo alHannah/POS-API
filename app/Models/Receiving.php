@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Receiving extends Model
 {
@@ -20,4 +21,11 @@ class Receiving extends Model
         'received_by',
         'status'
     ];
+    // ---------------------------BELONGS TO
+
+    public function receiving_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+    // ---------------------------HAS MANY
 }

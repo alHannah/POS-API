@@ -14,7 +14,12 @@ class BillOfMaterial extends Model
         'qty',
         'uom_id'
     ];
+    // ---------------------------BELONGS TO
 
+    public function store_billOfMaterial () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
     public function bom_per_uom(): BelongsTo {
         return $this->belongsTo(Uom::class, 'uom_id');
     }
@@ -26,5 +31,6 @@ class BillOfMaterial extends Model
     public function bom_per_bomId(): BelongsTo {
         return $this->belongsTo(Product::class, 'bom_id');
     }
+    // ---------------------------HAS MANY
 
 }

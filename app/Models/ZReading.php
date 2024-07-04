@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ZReading extends Model
 {
@@ -20,4 +21,12 @@ class ZReading extends Model
         'rounding_adjustment',
         'refund'
     ];
+    // ---------------------------BELONGS TO
+
+    public function zReading_stores () : BelongsTo
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+
+    // ---------------------------HAS MANY
 }

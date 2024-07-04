@@ -19,7 +19,7 @@ class ProductListController extends Controller
         try {
             DB::beginTransaction();
 
-            $encryptedId                = $request->id ? Crypt::decrypt($request->id) : null;
+            $decryptedId                = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $brand                      = $request->brand;
             $productCode                = $request->product_code;
             $productName                = $request->product_name;
@@ -54,7 +54,7 @@ class ProductListController extends Controller
 
             $existingGroup = Product::where('name', $productName)
             ->where('brand_id', $brand)
-            ->where('id', '!=', $encryptedId)
+            ->where('id', '!=', $decryptedId)
             ->first();
 
             if ($existingGroup) {
@@ -65,8 +65,8 @@ class ProductListController extends Controller
             }
 
 
-            $previousData = Crypt::encrypt($encryptedId)
-            ? Product::with('product_category', 'product_brand', 'product_uom')->find($encryptedId)
+            $previousData = Crypt::encrypt($decryptedId)
+            ? Product::with('product_category', 'product_brand', 'product_uom')->find($decryptedId)
             : null;
             $previousBrand                      = $previousData->brand                   ?? 'N/A';
             $previousProductCode                = $previousData->product_code            ?? 'N/A';
@@ -88,7 +88,7 @@ class ProductListController extends Controller
             }
 
             $createUpdate = Product::updateOrCreate([
-                'id'            => $encryptedId
+                'id'            => $decryptedId
             ], [
                 'brand'                     => $brand,
                 'productCode'               => $productCode,
@@ -113,7 +113,7 @@ class ProductListController extends Controller
                         . "Image: $imageBase64, Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, "
                         . "Classification: $productClassification, Category: $category";
 
-            $message = $encryptedId
+            $message = $decryptedId
                     ? "Updated Previous $previousDetails to New: $newDetails"
                     : "Created Product Name: $productName";
 
@@ -212,13 +212,13 @@ class ProductListController extends Controller
             DB:: beginTransaction();
             // dd(Crypt::encrypt(820));
 
-            $encryptedId = Crypt::decrypt($request->id);
+            $decryptedId = Crypt::decrypt($request->id);
 
-            $thisData = Product::where('id', $encryptedId)->first();
+            $thisData = Product::where('id', $decryptedId)->first();
 
             $thisData->status == 'active' ? $thisData->update(['status' => 0]) : $thisData->update(['status' => 1]);
 
-            $name = Product::where('id', $encryptedId)->first()->name;
+            $name = Product::where('id', $decryptedId)->first()->name;
 
             // AUDIT TRAIL LOG
 

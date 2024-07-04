@@ -21,7 +21,7 @@ class StoreGroupController extends Controller
     {
         try {
             DB::beginTransaction();
-            $encryptedId    = !empty($request->id) ? Crypt::decrypt($request->id) : null;
+            $decryptedId    = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $groupName      = $request->group_name;
             $brandId        = $request->brand_id;
 
@@ -34,7 +34,7 @@ class StoreGroupController extends Controller
 
             $existingGroup = StoreGroup::where('group_name', $groupName)
                             ->where('brand_id', $brandId)
-                            ->where('id', '!=', $encryptedId)
+                            ->where('id', '!=', $decryptedId)
                             ->first();
 
             if ($existingGroup) {
@@ -44,14 +44,14 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $previousData       = Crypt::encrypt($encryptedId)
-                                ? StoreGroup::with('storeGroup_brand')->find($encryptedId)
+            $previousData       = Crypt::encrypt($decryptedId)
+                                ? StoreGroup::with('storeGroup_brand')->find($decryptedId)
                                 : null;
             $previousStore      = $previousData->group_name ?? 'N/A';
             $previousBrand      = $previousData->storeGroup_brand->brand ?? 'N/A';
 
             $createUpdate = StoreGroup::updateOrCreate([
-                'id'            => $encryptedId
+                'id'            => $decryptedId
             ], [
                 'group_name'    => $groupName,
                 'brand_id'      => $brandId
@@ -59,7 +59,7 @@ class StoreGroupController extends Controller
 
             $brandName = Brand::find($brandId)->brand;
 
-            $message = $encryptedId
+            $message = $decryptedId
                     ? "Updated Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
                     : "Created $groupName (Brand: $brandName)";
 
@@ -108,11 +108,11 @@ class StoreGroupController extends Controller
             $getData = $thisData->latest()->get();
 
             $generateData = $getData->map(function ($item) {
-                $item->encryptedId  = Crypt::encrypt($item->id);
-                $created_at         = $item->created_at;
+                $id                    = Crypt::encrypt($item->id);
+                $created_at            = $item->created_at;
                 return [
                     'store_count'      => $item->store_count                        ?? 'N/A',
-                    'id'               => $item->id                                 ?? 'N/A',
+                    'id'               => $id                                       ?? 'N/A',
                     'store_name'       => $item->group_name                         ?? 'N/A',
                     'brand'            => $item->storeGroup_brand->brand            ?? 'N/A',
                     'created_at'       => $created_at->format("M d, Y h:i A")       ?? 'N/A',

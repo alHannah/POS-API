@@ -27,7 +27,7 @@ class AreaController extends Controller
             DB::beginTransaction();
             // dd(Crypt::encrypt(13));
 
-            $encryptedId        = Crypt::decrypt($request->id);
+            $decryptedId        = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $name               = $request->name;
             $brandId            = $request->brand_id;
 
@@ -39,7 +39,7 @@ class AreaController extends Controller
             }
 
             $existingGroup = Area::where('name', $name)
-                            ->where('id', '!=', $encryptedId)
+                            ->where('id', '!=', $decryptedId)
                             ->first();
 
             if ($existingGroup) {
@@ -49,14 +49,16 @@ class AreaController extends Controller
                 ]);
             }
 
-            $previousData       = Crypt::encrypt($encryptedId) ? Area::with('brand_areas')->where('id', $encryptedId)->first() : null;
+            $previousData       = Crypt::encrypt($decryptedId) ? Area::with('brand_areas')
+                                                                ->where('id', $decryptedId)
+                                                                ->first() : null;
             $previousArea       = $previousData->name ?? 'N/A';
             $previousBrand      = $previousData->brand_areas->brand ?? 'N/A';
 
             // --------------------------updateOrCreate-----------------------------------------
 
             $createUpdate = Area::updateOrCreate([
-                'id'        => $encryptedId
+                'id'        => $decryptedId
             ], [
                 'name'      => $name,
                 'brand_id'  => $brandId
@@ -64,7 +66,7 @@ class AreaController extends Controller
 
             $brandName = Brand::find($brandId)->brand;
 
-            $message = $encryptedId
+            $message = $decryptedId
                     ? "Update Previous: $previousArea (Brand: $previousBrand) New: $name (Brand: $brandName)"
                     : "Created $name (Brand: $brandName)";
 
@@ -148,13 +150,21 @@ class AreaController extends Controller
             DB:: beginTransaction();
             // dd(Crypt::encrypt(820));
 
-            $encryptedId = Crypt::decrypt($request->id);
+            $decryptedId = Crypt::decrypt($request->id);
 
-            $thisData = Area::where('id', $encryptedId)->first();
+            $thisData = Area::where('id', $decryptedId)->first();
+
+            if (!$thisData) {
+                return response()->json([
+                    'error'   => true,
+                    'message' => 'Store Group not found.',
+                ]);
+            }
+
 
             $thisData->status == 1 || 'active' ? $thisData->update(['status' => 0]) : $thisData->update(['status' => 1]);
 
-            $name = Area::where('id', $encryptedId)->first()->name;
+            $name = Area::where('id', $decryptedId)->first()->name;
 
             // AUDIT TRAIL LOG
 

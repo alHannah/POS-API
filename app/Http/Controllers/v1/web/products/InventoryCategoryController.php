@@ -20,7 +20,7 @@ class InventoryCategoryController extends Controller
             DB::beginTransaction();
             // dd(Crypt::encrypt(19));
 
-            $encryptedId        = $request->id ? Crypt::decrypt($request->id) : null;
+            $decryptedId        = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $tag                = $request->tag;
             $name               = $request->name;
             $status             = $request->status;
@@ -33,7 +33,7 @@ class InventoryCategoryController extends Controller
             }
 
             $existingCategory = Category::where('name', $name)
-                                ->where('id', '!=', $encryptedId)
+                                ->where('id', '!=', $decryptedId)
                                 ->first();
 
             if ($existingCategory) {
@@ -43,20 +43,20 @@ class InventoryCategoryController extends Controller
                 ]);
             }
 
-            $previousData       = Crypt::encrypt($encryptedId) ? Category::with('category_product')->where('id', $encryptedId)->first() : null;
+            $previousData       = Crypt::encrypt($decryptedId) ? Category::with('category_product')->where('id', $decryptedId)->first() : null;
             $previousName       = $previousData->name ?? 'N/A';
 
             // --------------------------updateOrCreate-----------------------------------------
 
             $createUpdate = Category::updateOrCreate([
-                'id'        => $encryptedId
+                'id'        => $decryptedId
             ], [
                 'name'      => $name,
                 'tag'       => $tag,
                 'status'    => $status,
             ]);
 
-            $message = $encryptedId
+            $message = $decryptedId
                     ? "Update Previous: $previousName New: $name"
                     : "Created $name";
 
@@ -134,13 +134,13 @@ class InventoryCategoryController extends Controller
         try {
             DB:: beginTransaction();
 
-            $encryptedId = Crypt::decrypt($request->id);
+            $decryptedId = Crypt::decrypt($request->id);
 
-            $thisData = Category::where('id', $encryptedId)->first();
+            $thisData = Category::where('id', $decryptedId)->first();
 
             $thisData->status == 1 ? $thisData->update(['status' => 0]) : $thisData->update(['status' => 1]);
 
-            $name = Category::where('id', $encryptedId)->first()->name;
+            $name = Category::where('id', $decryptedId)->first()->name;
 
             // AUDIT TRAIL LOG
             $request['remarks']  = "Archived an category: $name.";

@@ -275,6 +275,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/product_store_dropdown',            'v1\web\dropdowns\ProductDropdownController@product_dropdown_per_store');
                 $router->post('/uom_per_product',                   'v1\web\dropdowns\ProductDropdownController@uom_per_product');
                 $router->post('/category_dropdown',                 'v1\web\dropdowns\ProductDropdownController@category_dropdown');
+                $router->post('/product_s_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_s_dropdown');
+                $router->post('/product_w_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_w_dropdown');
             });
 
             $router->group(["prefix" => "/product_list", "middleware" => "auth"], function () use ($router) {

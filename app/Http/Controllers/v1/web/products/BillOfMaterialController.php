@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1\web\products;
 
 use App\Http\Controllers\Controller;
 use App\Models\BillOfMaterial;
+use App\Models\Brand;
 use App\Models\Packaging;
 use App\Models\PackagingDetail;
 use App\Models\Product;
@@ -22,24 +23,23 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
             //--------------------------CREATE BOM------------------------------------
-            $productIds     = $request->product_id;
+            $SproductIds    = $request->sproduct_id;
+            $WproductIds    = $request->wproduct_id;
             $quantity       = $request->qty;
-            $bomId          = $request->bom_id;
 
-            foreach ($productIds as $key => $productId) {
+            foreach ($WproductIds as $key => $wproductId) {
                 $qty       = $quantity[$key];
-                $bom       = $bomId[$key];
 
-                $getUom = Product::where('id', $productId)->value('uom_id');
+                $getUom = Product::where('id', $wproductId)->value('uom_id');
                 $createBom = BillOfMaterial::create([
-                    'product_id'    => $productId,
+                    'product_id'    => $SproductIds,
                     'uom_id'        => $getUom,
                     'qty'           => $qty,
-                    'bom_id'        => $bom
+                    'bom_id'        => $wproductId
                 ]);
             }
 
-            //-------------------------CREATE PACKAGING-------------------------------
+            //-------------------------CREATE PACKAGING and PACKAGING DETAILS-------------------------------
             $orderTypeIds       = $request->order_type;
             $quantities         = $request->quantity;
             $products           = $request->product;
@@ -53,7 +53,7 @@ class BillOfMaterialController extends Controller
 
                     $createBom = Packaging::create([
                         'order_type_id' => $orderTypeId,
-                        'product_id'    => $productId,
+                        'product_id'    => $SproductIds,
                     ]);
 
                     PackagingDetail::create([
@@ -88,31 +88,40 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            $bomDetails = BillOfMaterial::with([
-                'bom_per_product',
-                'bom_per_uom'
-            ])
-                ->get();
+            $bom = BillOfMaterial::with('bom_per_product')->where('id',$request->id)->get();
 
-            $productDetails = Product::with([
-                'product_per_brand',
-                'product_per_posCategories'
-            ])->where('status',)->get();
+            $tableDetails = $bom->map(function ($item) {
+                $productComponents = BillOfMaterial::where('product_id', $item->product_id)->get([
+                    'bom_id',
+                    'qty',
+                    'uom_id'
+                ]);
+                $brandName = Brand::find($item->bom_per_product->brand_id);
 
-            $tableDetails = $productDetails->map(function ($item) {
+                $packaging = Packaging::where('product_id', $item->product_id)->get();
+
+
                 return [
-                    'id'            => $item->id,
-                    'name'          => $item->name,
-                    'brand'         => $item->product_per_brand->brand,
+                    'id'                    => $item->id,
+                    'product_id'            => $item->product_id,
+                    'product_name'          => $item->bom_per_product->name,
+                    'product_code'          => $item->bom_per_product->product_code,
+                    'brand'                 => $brandName->brand,
+                    'product_components'    => $productComponents,
+                    'created_at'            => $item->created_at->format("M d, Y h:i A"),
 
+                    'packaging'             =>$packaging
                 ];
             });
+
+
 
             DB::commit();
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $tableDetails,
+                'Product'           => $tableDetails,
+                //'Packaging'         => $tableDetails,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

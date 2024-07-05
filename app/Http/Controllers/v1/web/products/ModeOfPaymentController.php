@@ -152,13 +152,13 @@ class ModeOfPaymentController extends Controller
         try{
             DB::beginTransaction();
 
-            $mopDetails = ModeOfPayment::get();
+            $mopDetails = ModeOfPayment::whereNotNull('created_at')->get();
 
             $tableDetails = $mopDetails->map(function($item){
                 return[
                     'id'            => $item->id,
                     'name'          => $item->name,
-                    'created_at'    => $item->created_at,
+                    'created_at'    => $item->created_at->format("M d, Y h:i A") ?? null,
                     'status'        => $item->status,
                 ];
             });

@@ -102,24 +102,41 @@ class ProductDropdownController extends Controller
         }
     }
 
-    public function product_dropdown_per_store(Request $request)
+    public function product_s_dropdown(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $storeProducts = ProductPerStore::where('store_id',$request->store_id)->get();
-            foreach ($storeProducts as $storeProduct) {
-                $productIds[] = $storeProduct->product_id;
-            }
-            foreach($productIds as $productId){
-                $products[] = Product::where('product_tag','s')->where('id',$productId)->get();
-            }
+            $productIds = Product::where('product_tag','s')->where('status', 1)->get();
 
             DB::commit();
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $products,
+                'data'              => $productIds,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function product_w_dropdown(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $productIds = Product::where('product_tag','w')->where('status',1)->get();
+
+            DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $productIds,
             ]);
         } catch (Exception $e) {
             DB::rollback();

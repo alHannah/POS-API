@@ -13,14 +13,10 @@ class StoreGroup extends Model
         'group_name',
         'brand_id',
     ];
-    public function storeGroup_stores()
-    {
-        return $this->hasManyThrough(Area::class, Store::class, 'area_id', 'id', 'id', 'group_id');
-    }
 
     public function storeGroup_store(): HasMany
     {
-        return $this->HasMany(Store::class, 'group_id');
+        return $this->HasMany(Store::class, 'group_id', 'id');
     }
     public function storeGroup_brand(): BelongsTo
     {

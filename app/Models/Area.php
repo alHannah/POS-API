@@ -14,10 +14,6 @@ class Area extends Model
         'status',
         'brand_id',
     ];
-    public function areas()
-    {
-        return $this->hasManyThrough(Store::class, AreaAssignment::class, 'area_id', 'id', 'id', 'store_id');
-    }
 
     public function brand_areas(): BelongsTo
     {

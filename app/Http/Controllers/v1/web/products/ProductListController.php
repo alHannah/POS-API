@@ -20,28 +20,24 @@ class ProductListController extends Controller
             DB::beginTransaction();
 
             $decryptedId                = !empty($request->id) ? Crypt::decrypt($request->id) : null;
-            $brand                      = $request->brand;
-            $productCode                = $request->product_code;
             $productName                = $request->product_name;
-            $productTag                 = $request->product_tag;
-            $packaging                  = 0;
-            $image                      = $request->imageFile;
+            $productCode                = $request->product_code;
+            $Category                   = $request->category;
+            $productClassification      = $request->product_classification;
+            $posCategory                = $request->pos_category;
             $uom                        = $request->uom;
             $min_uom                    = $request->min_uom;
-            $productClassification      = $request->product_classification;
-            $category                   = $request->category;
+            $productTag                 = $request->product_tag;
+            $image                      = $request->imageFile;
+            $packaging                  = 0;
+            $brand                      = $request->brand;
 
             $validator = Validator::make($request->all(), [
-                'brand'                     => 'required',
-                'productCode'               => 'required',
-                'productName'               => 'required',
-                'productTag'                => 'required',
-                'packaging'                 => 'nullable',
-                'uom'                       => 'required',
-                'min_uom'                   => 'required',
-                'product_classification'    => 'required',
-                'category'                  => 'required',
-                'image'                     => 'nullable|image|max:1024' // validate image file, max 1MB
+                'product_name'               => 'required',
+                'product_code'               => 'required',
+                'uom'                        => 'required',
+                'min_uom'                    => 'required',
+                'product_tag'                => 'required',
             ]);
 
 
@@ -53,9 +49,9 @@ class ProductListController extends Controller
             }
 
             $existingGroup = Product::where('name', $productName)
-            ->where('brand_id', $brand)
-            ->where('id', '!=', $decryptedId)
-            ->first();
+                            ->where('brand_id', $brand)
+                            ->where('id', '!=', $decryptedId)
+                            ->first();
 
             if ($existingGroup) {
                 return response()->json([
@@ -66,40 +62,43 @@ class ProductListController extends Controller
 
 
             $previousData = Crypt::encrypt($decryptedId)
-            ? Product::with('product_category', 'product_brand', 'product_uom')->find($decryptedId)
-            : null;
-            $previousBrand                      = $previousData->brand                   ?? 'N/A';
-            $previousProductCode                = $previousData->product_code            ?? 'N/A';
+                            ? Product::with('product_per_posCategories', 'product_brand', 'product_uom')->find($decryptedId)
+                            : null;
+
             $previousProductName                = $previousData->name                    ?? 'N/A';
-            $previousProductTag                 = $previousData->product_tag             ?? 'N/A';
-            $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
-            $previousImage                      = $previousData->product_image           ?? 'N/A';
+            $previousProductCode                = $previousData->product_code            ?? 'N/A';
+            $previousCategory                   = $previousData->category_id       ?? 'N/A';
+            $previousProductClassification      = $previousData->product_classification  ?? 'N/A';
+            $previousPosCategory                = $previousData->pos_category_name       ?? 'N/A';
             $previousUom                        = $previousData->uom                     ?? 'N/A';
             $previousMinUom                     = $previousData->min_level_uom           ?? 'N/A';
-            $previousProductClassification      = $previousData->product_classification  ?? 'N/A';
-            $previousCategory                   = $previousData->category                ?? 'N/A';
+            $previousProductTag                 = $previousData->product_tag             ?? 'N/A';
+            $previousImage                      = $previousData->product_image           ?? 'N/A';
+            $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
+            $previousBrand                      = $previousData->brand                   ?? 'N/A';
 
 
             // Handling image upload
             $imageBase64 = null;
-            if ($image->hasFile('image')) {
+            if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
             }
 
             $createUpdate = Product::updateOrCreate([
-                'id'            => $decryptedId
+                'id'                        => $decryptedId
             ], [
-                'brand'                     => $brand,
-                'productCode'               => $productCode,
-                'productName'               => $productName,
-                'productTag'                => $productTag,
-                'packaging'                 => $packaging,
-                'image'                     => $imageBase64,
-                'uom'                       => $uom,
-                'min_uom'                   => $min_uom,
-                'product_classification'    => $productClassification,
-                'category'                  => $category
+                'name'                          => $productName,
+                'product_code'                  => $productCode,
+                'category_id'                   => $Category,
+                'product_classification_id'     => $productClassification,
+                'pos_category_id'               => $posCategory,
+                'uom_id'                        => $uom,
+                'min_level_uom'                 => $min_uom,
+                'product_tag'                   => $productTag,
+                'product_image'                 => $imageBase64,
+                'for_packaging'                 => $packaging,
+                'brand_id'                      => $brand,
             ]);
 
             $brand = Brand::find($brand)->brand;
@@ -107,11 +106,11 @@ class ProductListController extends Controller
             $previousDetails = "Brand: $previousBrand, Product Code: $previousProductCode, Product Name: $previousProductName, "
                              . "Product Tag: $previousProductTag, Packaging: $previousPackaging, Image: $previousImage, "
                              . "UOM: $previousUom, Min UOM: $previousMinUom, Classification: $previousProductClassification, "
-                             . "Category: $previousCategory";
+                             . "Pos Category: $previousPosCategory, Category: $previousCategory";
 
             $newDetails = "Brand: $brand, Product Code: $productCode, Product Name: $productName, Product Tag: $productTag, "
                         . "Image: $imageBase64, Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, "
-                        . "Classification: $productClassification, Category: $category";
+                        . "Classification: $productClassification, Category: $Category, POS Category: $posCategory";
 
             $message = $decryptedId
                     ? "Updated Previous $previousDetails to New: $newDetails"
@@ -151,10 +150,10 @@ class ProductListController extends Controller
             $tagFilter          = Arr::flatten($tagFilter, 1);
             $statusFilter       = Arr::flatten($statusFilter, 1);
 
-            $thisData = Product::with('product_category', 'product_per_brand', 'product_uom');
+            $thisData = Product::with('product_per_posCategories', 'product_per_brand', 'product_uom');
 
             if (!empty($categoryFilter)) {
-                $thisData->whereIn('category_id', $categoryFilter);
+                $thisData->whereIn('pos_category_id', $categoryFilter);
             }
 
             if (!empty($tagFilter)) {
@@ -167,26 +166,17 @@ class ProductListController extends Controller
             $getData = $thisData->get();
 
             $generateData = $getData->map(function ($items) {
-                $id                     = $items->id                            ?? 'N/A';
-                $product_code           = $items->product_code                  ?? 'N/A';
-                $product_name           = $items->name                          ?? 'N/A';
-                $brand                  = $items->product_per_brand->brand      ?? 'N/A';
-                $category               = $items->product_category->name        ?? 'N/A';
-                $uom                    = $items->product_uom->name             ?? 'N/A';
-                $min_uom                = $items->min_level_uom                 ?? 'N/A';
-                $tag                    = $items->product_tag                   ?? 'N/A';
-                $status                 = $items->status                        ?? 'N/A';
-
+                $id           = $items->id                            ?? 'N/A';
                 return [
-                    'id'               => Crypt::encrypt($id),
-                    'product_code'     => $product_code,
-                    'product_name'     => $product_name,
-                    'brand'            => $brand,
-                    'category'         => $category,
-                    'uom'              => $uom,
-                    'min_uom'          => $min_uom,
-                    'tag'              => $tag,
-                    'status'           => $status
+                    'id'                     => Crypt::encrypt($id)                                         ?? 'N/A',
+                    'product_code'           => $items->product_code                                        ?? 'N/A',
+                    'product_name'           => $items->name                                                ?? 'N/A',
+                    'brand'                  => $items->product_per_brand->brand                            ?? 'N/A',
+                    'pos_category'           => $items->product_per_posCategories->pos_category_name        ?? 'N/A',
+                    'uom'                    => $items->product_uom->name                                   ?? 'N/A',
+                    'min_uom'                => $items->min_level_uom                                       ?? 'N/A',
+                    'tag'                    => $items->product_tag                                         ?? 'N/A',
+                    'status'                 => $items->status                                              ?? 'N/A',
                 ];
             });
 

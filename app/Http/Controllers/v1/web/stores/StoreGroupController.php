@@ -142,11 +142,12 @@ class StoreGroupController extends Controller
     {
         try {
             DB::beginTransaction();
-            // dd(Crypt::encrypt(33));
+            // dd(Crypt::encrypt(40));
 
             $decryptedId = Crypt::decrypt($request->id);
 
             $storeGroup = StoreGroup::find($decryptedId);
+
             if (!$storeGroup) {
                 return response()->json([
                     'error'   => true,
@@ -154,13 +155,22 @@ class StoreGroupController extends Controller
                 ]);
             }
 
-            $storeNames = $storeGroup->storeGroup_stores->pluck('store_name')->toArray();
-            $storeGroupName = $storeGroup->group_name;
+            $storeData = Store::with('store_storeGroup')->get();
 
-            // Delete the store group (cascading deletes will handle related stores and their relations)
+            foreach ($storeData as $item) {
+                if ($item->group_id == $storeGroup->id) {
+                    return response()->json([
+                        'error'   => true,
+                        'message' => 'Deletion failed, This Store Group is used in Stores Table.',
+                    ]);
+                }
+            }
+
+            // Proceed with the deletion if no match is found
             $storeGroup->delete();
 
-            $message = "Deleted Store Group: '{$storeGroupName}' (" . implode(', ', $storeNames) . ")";
+
+            $message = "Deleted Store Group: $storeGroup->group_name";
 
             $request['remarks'] = $message;
             $request['type']    = 2;
@@ -173,7 +183,6 @@ class StoreGroupController extends Controller
                 'error'     => false,
                 'message'   => trans('messages.success'),
                 'data'      => $storeGroup,
-                // 'type'      => $type
             ]);
 
         } catch (Exception $e) {
@@ -186,36 +195,4 @@ class StoreGroupController extends Controller
             ]);
         }
     }
-
-    // public function archive(Request $request) {
-    //     try {
-    //         DB:: beginTransaction();
-
-    //         $userId = Crypt::decrypt($request->encryptedId);
-
-    //         $name = Users::where('id', $userId)->first()->name;
-
-    //         Users::where('id', $userId)->update([
-    //             'status' => 0
-    //         ]);
-
-    //         // AUDIT TRAIL LOG
-    //         // $request['remarks'] = "Archived an user: $name.";
-    //         $request['activity'] = "Archived an user: $name.";
-    //         $this->audit_trail($request);
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             "error" => false,
-    //             'message' =>trans('messages.success'),
-    //         ]);
-    //     } catch (Exception $e) {
-    //         Log::info("Error $e");
-    //         return response()->json([
-    //             "error"=> true,
-    //             "message"=> trans('messages.error'),
-    //         ]);
-    //     }
-    // }
 }

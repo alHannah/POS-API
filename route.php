@@ -57,3 +57,15 @@ Store Hours:
 http://127.0.0.1:8000/api/v1/store/schedule_group/create_update
 http://127.0.0.1:8000/api/v1/store/schedule_group/delete
 http://127.0.0.1:8000/api/v1/store/schedule_group/get -->
+
+<!-- 
+brand:
+productCode:
+productName:
+productTag:
+packaging:
+uom:
+min_uom:
+product_classification:
+category:
+image: -->

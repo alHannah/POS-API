@@ -306,10 +306,10 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 });
 
                 $router->post('/create',                            'v1\web\products\BillOfMaterialController@create');
-                $router->post('/edit',                              'v1\web\products\BillOfMaterialController@edit');
+                $router->post('/view',                              'v1\web\products\BillOfMaterialController@view');
                 $router->post('/update',                            'v1\web\products\BillOfMaterialController@update');
                 $router->post('/delete',                            'v1\web\products\BillOfMaterialController@delete');
-                $router->get('/get',                                'v1\web\products\BillOfMaterialController@get');
+                $router->post('/get',                                'v1\web\products\BillOfMaterialController@get');
             });
 
             $router->group(["prefix" => "/uom_maintenance", "middleware" => "auth"], function () use ($router) {

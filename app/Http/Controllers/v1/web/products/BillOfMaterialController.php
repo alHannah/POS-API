@@ -7,6 +7,7 @@ use App\Models\BillOfMaterial;
 use App\Models\Brand;
 use App\Models\Packaging;
 use App\Models\PackagingDetail;
+use App\Models\PosCategory;
 use App\Models\Product;
 use App\Models\ProductPerStore;
 use App\Models\Store;
@@ -58,7 +59,7 @@ class BillOfMaterialController extends Controller
 
                     PackagingDetail::create([
                         'packaging_id'  => $createBom->id,
-                        'product_id'    => $productId,
+                        'product_id'    => $SproductIds,
                         'qty'           => $quantity,
                         'uom_id'        => $packagingUom,
                     ]);
@@ -72,7 +73,6 @@ class BillOfMaterialController extends Controller
                 'data'              => $createBom,
                 //'data2'           => $createPackaging
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
@@ -83,23 +83,26 @@ class BillOfMaterialController extends Controller
         }
     }
 
-    public function edit(Request $request)
+    public function view(Request $request)
     {
         try {
             DB::beginTransaction();
 
-            $bom = BillOfMaterial::with('bom_per_product')->where('id',$request->id)->get();
+            $bom = BillOfMaterial::with('bom_per_product')->where('id', $request->id)->get();
 
             $tableDetails = $bom->map(function ($item) {
                 $productComponents = BillOfMaterial::where('product_id', $item->product_id)->get([
                     'bom_id',
-                    'qty',
-                    'uom_id'
+                    'uom_id',
+                    'qty'
                 ]);
                 $brandName = Brand::find($item->bom_per_product->brand_id);
 
-                $packaging = Packaging::where('product_id', $item->product_id)->get();
-
+                $packaging = Packaging::where('product_id', $item->product_id)->get([
+                    'id',
+                    'product_id',
+                    'order_type_id'
+                ]);
 
                 return [
                     'id'                    => $item->id,
@@ -108,13 +111,9 @@ class BillOfMaterialController extends Controller
                     'product_code'          => $item->bom_per_product->product_code,
                     'brand'                 => $brandName->brand,
                     'product_components'    => $productComponents,
-                    'created_at'            => $item->created_at->format("M d, Y h:i A"),
-
-                    'packaging'             =>$packaging
+                    'packaging'             => $packaging
                 ];
             });
-
-
 
             DB::commit();
             return response()->json([
@@ -138,31 +137,12 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            $bomDetails = BillOfMaterial::with([
-                'bom_per_product',
-                'bom_per_uom'
-            ])
-                ->get();
-
-            $productDetails = Product::with([
-                'product_per_brand',
-                'product_per_posCategories'
-            ])->where('status',)->get();
-
-            $tableDetails = $productDetails->map(function ($item) {
-                return [
-                    'id'            => $item->id,
-                    'name'          => $item->name,
-                    'brand'         => $item->product_per_brand->brand,
-
-                ];
-            });
 
             DB::commit();
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $tableDetails,
+                //'data'              => ,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -179,31 +159,29 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            $bomDetails = BillOfMaterial::with([
-                'bom_per_product',
-                'bom_per_uom'
-            ])
-                ->get();
+            $bomId = $request->id;
 
-            $productDetails = Product::with([
-                'product_per_brand',
-                'product_per_posCategories'
-            ])->where('status',)->get();
+            $bomDetails = BillOfMaterial::with('bom_per_product')->where('id', $bomId)->get();
 
-            $tableDetails = $productDetails->map(function ($item) {
+            $previousDetails = $bomDetails->map(function ($item) {
+                $brand = Brand::find($item->bom_per_product->brand_id);
+                $posCategory = PosCategory::find($item->bom_per_product->pos_category_id);
                 return [
                     'id'            => $item->id,
-                    'name'          => $item->name,
-                    'brand'         => $item->product_per_brand->brand,
-
+                    'name'          => $item->bom_per_product->name,
+                    'brand'         => $brand->brand,
+                    'pos_category'  => $posCategory->pos_category_name,
+                    'created_at'    => $item->created_at->format("M d, Y h:i A"),
                 ];
             });
+
+            $deleteBom = BillOfMaterial::find($bomId)->delete();
 
             DB::commit();
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $tableDetails,
+                'data'              => $previousDetails,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -220,24 +198,31 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            $bomDetails = BillOfMaterial::with([
-                'bom_per_product',
-                'bom_per_uom'
-            ])
-                ->get();
+            $brandFilter = (array) $request->brandFilter;
+            $brandFilter = Arr::flatten($brandFilter, 1);
 
-            $productDetails = Product::with([
-                'product_per_brand',
-                'product_per_posCategories',
-            ])->where('status', 'active')->where('product_tag', 's')->get();
+            $product = Product::with(['product_per_bom', 'product_per_brand', 'product_per_posCategories']);
+            if (!empty($brandFilter)) {
+                $product->whereIn('brand_id', $brandFilter)
+                    ->where('product_tag', 's');
+            }
 
-            $tableDetails = $productDetails->map(function ($item) {
+            $filteredData = $product->get();
 
+            $tableDetails = $filteredData->map(function ($item) {
                 return [
-                    'id'    => $item->id,
-                    'name'  => $item->name,
+                    'name' => $item->name,
                     'brand' => $item->product_per_brand->brand,
-                    'pos'   => $item->product_per_posCategories->pos_category_name,
+                    'pos_category' => $item->product_per_posCategories->pos_category_name,
+                    'bill_of_materials' => $item->product_per_bom->map(function ($bom) {
+                        return [
+                            'id' => $bom->id,
+                            'bom_id' => $bom->bom_id,
+                            'qty' => $bom->qty,
+                            'uom_id' => $bom->uom_id,
+                            'created_at' =>$bom->created_at->format("M d, Y h:i A")
+                        ];
+                    }),
                 ];
             });
 

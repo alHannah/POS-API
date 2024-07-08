@@ -277,6 +277,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/category_dropdown',                 'v1\web\dropdowns\ProductDropdownController@category_dropdown');
                 $router->post('/product_s_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_s_dropdown');
                 $router->post('/product_w_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_w_dropdown');
+                $router->post('/brand_dropdown',                       'v1\web\dropdowns\ProductDropdownController@brand_dropdown');
+                $router->post('/mop_dropdown',                         'v1\web\dropdowns\ProductDropdownController@mop_dropdown');
             });
 
             $router->group(["prefix" => "/product_list", "middleware" => "auth"], function () use ($router) {
@@ -289,15 +291,17 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/archive_activate',                  'v1\web\products\ProductListController@archive_activate');
             });
 
-            $router->group(["prefix" => "/price_tiers", "middleware" => "auth"], function () use ($router) {
+            $router->group(["prefix" => "/price_tier", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/displayPriceTier',                  'v1\web\products\PriceTierController@displayPriceTier');
-                $router->post('/create',                            'v1\web\products\DiscountController@create');
-                $router->post('/update',                            'v1\web\products\DiscountController@update');
-                $router->post('/archiveDiscount',                   'v1\web\products\DiscountController@archiveDiscount');
+                $router->post('/displayPriceTier',          'v1\web\products\PriceTierController@displayPriceTier');
+                $router->post('/create',                    'v1\web\products\PriceTierController@create');
+                $router->post('/displayTierProduct',        'v1\web\products\PriceTierController@displayTierProduct');
+                $router->post('/update',                    'v1\web\products\PriceTierController@update');
+                $router->post('/archivePriceTier',          'v1\web\products\PriceTierController@archivePriceTier');
+                $router->post('/displayDetails',            'v1\web\products\PriceTierController@displayDetails');
             });
 
             $router->group(["prefix" => "/bom_and_packaging", "middleware" => "auth"], function () use ($router) {
@@ -378,11 +382,10 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                            'v1\web\products\ModeOfPaymentController@create');
-                $router->post('/edit',                              'v1\web\products\ModeOfPaymentController@edit');
-                $router->post('/update',                            'v1\web\products\ModeOfPaymentController@update');
-                $router->post('/archived',                          'v1\web\products\ModeOfPaymentController@archived');
-                $router->post('/get',                               'v1\web\products\ModeOfPaymentController@get');
+                $router->post('/displayPriceTier',          'v1\web\products\PriceTierController@displayPriceTier');
+                $router->post('/create',                    'v1\web\products\DiscountController@create');
+                $router->post('/update',                    'v1\web\products\DiscountController@update');
+                $router->post('/archiveDiscount',           'v1\web\products\DiscountController@archiveDiscount');
             });
 
             $router->group(["prefix" => "/order_type", "middleware" => "auth"], function () use ($router) {

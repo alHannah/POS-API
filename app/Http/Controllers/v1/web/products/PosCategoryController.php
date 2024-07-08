@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PosCategoryController extends Controller
 {
@@ -21,42 +22,43 @@ class PosCategoryController extends Controller
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
+            $pos_category_name = $request->name;
             $brand_id = $request->brand_id;
 
-            if (!$id) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'brand_id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
                 return response()->json([
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('messages.required')
                 ]);
             }
 
-            $posCategory = Brand::find($brand_id);
-            if (!$posCategory) {
-                return response()->json([
-                    'error'   => true,
-                    'message' => trans('messages.product.posCat.notFound')
-                ]);
-            }
+            $existingCat = PosCategory::where('pos_category_name', $pos_category_name)
+                                      ->where('brand_id', $brand_id)
+                                      ->where('status', '=', 1)
+                                      ->first();
 
-            $brand_name = $posCategory->brand;
-
-            $existingCat = PosCategory::where('id', $id)->first();
             if ($existingCat) {
                 return response()->json([
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('messages.product.posCat.existed'),
                 ]);
             }
 
+            $brand = Brand::find($brand_id);
+            $brand_name = $brand->brand;
+
             $pos_category = PosCategory::create([
-                'id'               => $id,
-                'brand_id'         => $brand_id,
-                'pos_category_name' => $request->pos_category_name,
-                'status'           => 1,
+                'brand_id' => $brand_id,
+                'pos_category_name' => $pos_category_name,
+                'status' => 1,
             ]);
 
-            $message = "{$brand_name} New POS Category => Category Name: {$request->pos_category_name} & Brand: {$brand_name}";
+            $message = "{$brand_name} New POS Category => Category Name: {$pos_category_name} & Brand: {$brand_name}";
 
             $request['remarks'] = $message;
             $request['type'] = 2;
@@ -65,15 +67,15 @@ class PosCategoryController extends Controller
             DB::commit();
 
             return response()->json([
-                'error'       => false,
-                'message'     => trans('messages.success'),
-                'data'        => [
-                    'id'                => $pos_category->id,
-                    'brand_id'          => $pos_category->brand_id,
-                    'brand_name'        => $brand_name,
+                'error' => false,
+                'message' => trans('messages.success'),
+                'data' => [
+                    'id' => $pos_category->id,
+                    'brand_id' => $pos_category->brand_id,
+                    'brand_name' => $brand_name,
                     'pos_category_name' => $pos_category->pos_category_name,
-                    'status'            => $pos_category->status,
-                    'created_at'        => $pos_category->created_at->format('M d, Y h:i A'),
+                    'status' => $pos_category->status,
+                    'created_at' => $pos_category->created_at->format('M d, Y h:i A'),
                 ],
                 'audit_trail' => $message
             ]);
@@ -81,11 +83,12 @@ class PosCategoryController extends Controller
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
-                'error'      => true,
-                'message'    => trans('messages.error'),
+                'error' => true,
+                'message' => trans('messages.error'),
             ]);
         }
     }
+
 
 
     public function displayCategory(Request $request)
@@ -129,7 +132,7 @@ class PosCategoryController extends Controller
                 'data'    => $data,
             ]);
         } catch (Exception $e) {
-            Log::error("Error: $e");
+            Log::info("Error: $e");
             return response()->json([
                 'error'   => true,
                 'message' => trans('messages.error'),

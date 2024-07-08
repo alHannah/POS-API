@@ -24,11 +24,16 @@ class PriceTier extends Model
 
     public function price_tier_per_price () : HasMany
     {
-        return $this->hasMany(PricePerTier::class, 'tier_id');
+        return $this->hasMany(PricePerTier::class, 'tier_id', 'id');
     }
 
     public function price_tier_per_brand () : BelongsTo
     {
-        return $this->belongsTo(PricePerTier::class, 'brand_id');
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    public function price_tier_per_mop () : BelongsTo
+    {
+        return $this->belongsTo(ModeOfPayment::class, 'mop_id', 'id');
     }
 }

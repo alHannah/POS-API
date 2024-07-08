@@ -191,6 +191,31 @@ class ProductDropdownController extends Controller
             ]);
         }
     }
+    public function for_packaging_dropdown(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $productIds = Product::where('product_tag','w')
+                ->where('status',1)
+                ->where('for_packaging', 1)
+                ->get();
+
+            DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $productIds,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
 
     public function uom_per_product(Request $request)
     {

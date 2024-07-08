@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Uom;
 use Illuminate\Http\Request;
 use App\Models\UomCategory;
+use Illuminate\Support\Facades\Crypt;
 
 class UomController extends Controller
 {
@@ -91,9 +92,8 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            //$decryptedId = Crypt::decrypt($request->encryptedId);
-
-            $uomDetails = Uom::find($request->id)->first();
+            $decryptedId = Crypt::decrypt($request->id);
+            $uomDetails = Uom::find($decryptedId)->first();
 
             //$encryptedId = Crypt::encrypt($request->id);
 
@@ -120,9 +120,8 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $uomCategoryDetails = UomCategory::find($request->id);
-
+            $decryptedId = Crypt::decrypt($request->id);
+            $uomCategoryDetails = UomCategory::find( $decryptedId);
             DB::commit();
 
             return response()->json([
@@ -146,11 +145,12 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
+            $decryptedId = Crypt::decrypt($request->id);
             //audit
-            $previousDetails = Uom::with('uom_per_categories')->where('id',$request->id)->first();
+            $previousDetails = Uom::with('uom_per_categories')->where('id',$decryptedId)->first();
             $previousCategoryName = $previousDetails->uom_per_categories->name;
 
-            $updateUom = Uom::where('id',$request->id)->update([
+            $updateUom = Uom::where('id',$decryptedId)->update([
                 'name'                => $request->name,
                 'uom_category_id'     => $request->uom_category_id,
                 'quantity'            => $request->quantity,
@@ -188,10 +188,10 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
+            $decryptedId = Crypt::decrypt($request->id);
+            $previousName = UomCategory::find($decryptedId);
 
-            $previousName = UomCategory::find($request->id);
-
-            $updateUom = UomCategory::where('id',$request->id)->update([
+            $updateUom = UomCategory::where('id',$decryptedId)->update([
                 'name'                => $request->name,
             ]);
 
@@ -224,11 +224,11 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $previousDetails = Uom::find($request->id);
+            $decryptedId = Crypt::decrypt($request->id);
+            $previousDetails = Uom::find($decryptedId);
             $previousCategoryName = $previousDetails->uom_per_categories->name;
 
-            $deleteUom = Uom::where('id', $request->id)->delete();
+            $deleteUom = Uom::where('id', $decryptedId)->delete();
 
             DB::commit();
             $message    = "Deleted UoM: '$previousDetails->name', $previousCategoryName, $previousDetails->quantity";
@@ -258,10 +258,10 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
+            $decryptedId = Crypt::decrypt($request->id);
+            $previousDetails = UomCategory::find($decryptedId);
 
-            $previousDetails = UomCategory::find($request->id);
-
-            $deleteUom = UomCategory::where('id', $request->id)->delete();
+            $deleteUom = UomCategory::where('id', $decryptedId)->delete();
 
             DB::commit();
 
@@ -297,7 +297,7 @@ class UomController extends Controller
 
             $tableDetails = $uomDetails->map(function ($item){
                 return[
-                    'id'            =>$item->id,
+                    'id'            =>Crypt::encrypt($item->id),
                     'name'          =>$item->name,
                     'category'      =>$item->uom_per_categories->name,
                     'quantity'      =>$item->quantity,
@@ -332,7 +332,7 @@ class UomController extends Controller
 
             $tableDetails = $uomCategory->map(function ($item){
                 return[
-                    'id'            =>$item->id,
+                    'id'            =>Crypt::encrypt($item->id),
                     'name'          =>$item->name,
                     'created_at'    =>$item->created_at->format("M d, Y h:i A"),
                 ];

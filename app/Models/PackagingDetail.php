@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PackagingDetail extends Model
 {
@@ -14,5 +15,9 @@ class PackagingDetail extends Model
         'uom_id'
     ];
 
+    public function detail_per_packaging () : BelongsTo
+    {
+        return $this->belongsTo(Packaging::class, 'packaging_id');
+    }
 
 }

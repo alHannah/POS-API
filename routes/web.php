@@ -275,8 +275,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/product_store_dropdown',            'v1\web\dropdowns\ProductDropdownController@product_dropdown_per_store');
                 $router->post('/uom_per_product',                   'v1\web\dropdowns\ProductDropdownController@uom_per_product');
                 $router->post('/category_dropdown',                 'v1\web\dropdowns\ProductDropdownController@category_dropdown');
-                $router->post('/product_s_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_s_dropdown');
-                $router->post('/product_w_dropdown',                 'v1\web\dropdowns\ProductDropdownController@product_w_dropdown');
+                $router->post('/product_s_dropdown',                'v1\web\dropdowns\ProductDropdownController@product_s_dropdown');
+                $router->post('/product_w_dropdown',                'v1\web\dropdowns\ProductDropdownController@product_w_dropdown');
+                $router->post('/for_packaging_dropdown',            'v1\web\dropdowns\ProductDropdownController@for_packaging_dropdown');
                 $router->post('/brand_dropdown',                       'v1\web\dropdowns\ProductDropdownController@brand_dropdown');
                 $router->post('/mop_dropdown',                         'v1\web\dropdowns\ProductDropdownController@mop_dropdown');
             });

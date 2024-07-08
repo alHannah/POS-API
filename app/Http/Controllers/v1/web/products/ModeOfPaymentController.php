@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\ModeOfPayment;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Arr;
 
 class ModeOfPaymentController extends Controller
 {
@@ -52,9 +53,8 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-
-            $mopName = ModeOfPayment::find($request->id);
-
+            $decryptedId = Crypt::decrypt($request->id);
+            $mopName = ModeOfPayment::find($decryptedId);
             DB::commit();
 
             return response()->json([
@@ -76,9 +76,9 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-
-            $previousName = ModeOfPayment::find($request->id);
-            $updateMop = ModeOfPayment::where('id', $request->id)->update([
+            $decryptedId = Crypt::decrypt($request->id);
+            $previousName = ModeOfPayment::find($decryptedId);
+            $updateMop = ModeOfPayment::where('id', $decryptedId)->update([
                 'name' => $request->name
             ]);
 
@@ -110,16 +110,16 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-
-            $mopStatus = ModeOfPayment::find($request->id);
+            $decryptedId = Crypt::decrypt($request->id);
+            $mopStatus = ModeOfPayment::find($decryptedId);
 
             if($mopStatus->status==1){
-                $mopArchived = ModeOfPayment::where('id',$request->id)->update([
+                $mopArchived = ModeOfPayment::where('id',$decryptedId)->update([
                     'status' => 0
                 ]);
                 $message = "Archived MOP: '$mopStatus->name' archived";
             } else {
-                $mopArchived = ModeOfPayment::where('id',$request->id)->update([
+                $mopArchived = ModeOfPayment::where('id',$decryptedId)->update([
                     'status' => 1
                 ]);
                 $message = "Archived MOP: '$mopStatus->name' reactivated";
@@ -151,14 +151,16 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
+            $statusFilter = (array) $request->status;
+            $statusFilter = Arr::flatten($statusFilter, 1);
 
-            $mopDetails = ModeOfPayment::whereNotNull('created_at')->get();
+            $mopDetails = ModeOfPayment::whereIn('status',$statusFilter)->get();
 
             $tableDetails = $mopDetails->map(function($item){
                 return[
-                    'id'            => $item->id,
+                    'id'            => Crypt::encrypt($item->id),
                     'name'          => $item->name,
-                    'created_at'    => $item->created_at->format("M d, Y h:i A") ?? null,
+                    'created_at'    => optional($item->created_at)->format("M d, Y h:i A"),
                     'status'        => $item->status,
                 ];
             });

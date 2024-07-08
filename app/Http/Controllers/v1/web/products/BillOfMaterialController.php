@@ -43,23 +43,22 @@ class BillOfMaterialController extends Controller
             //-------------------------CREATE PACKAGING and PACKAGING DETAILS-------------------------------
             $orderTypeIds       = $request->order_type;
             $quantities         = $request->quantity;
-            $products           = $request->product;
-            $flatProductIds     = Arr::flatten($products);
+            $for_packaging      = $request->for_packaging;
+            $flatProductIds     = Arr::flatten($for_packaging);
             $packagingUoms      = Product::whereIn('id', $flatProductIds)->pluck('uom_id', 'id');
 
             foreach ($orderTypeIds as $index => $orderTypeId) {
-                foreach ($products[$index] as $productIndex => $productId) {
+                $createPackaging = Packaging::create([
+                    'order_type_id' => $orderTypeId,
+                    'product_id'    => $SproductIds,
+                ]);
+                foreach ($for_packaging[$index] as $productIndex => $productId) {
                     $packagingUom       = $packagingUoms[$productId];
                     $quantity           = $quantities[$index][$productIndex];
 
-                    $createBom = Packaging::create([
-                        'order_type_id' => $orderTypeId,
-                        'product_id'    => $SproductIds,
-                    ]);
-
                     PackagingDetail::create([
-                        'packaging_id'  => $createBom->id,
-                        'product_id'    => $SproductIds,
+                        'packaging_id'  => $createPackaging->id,
+                        'product_id'    => $productId,
                         'qty'           => $quantity,
                         'uom_id'        => $packagingUom,
                     ]);
@@ -83,6 +82,30 @@ class BillOfMaterialController extends Controller
         }
     }
 
+    public function remove_packaging(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $remove = PackagingDetail::find($request->id)->delete();
+
+            DB::commit();
+            return response()->json([
+                'error'             => false,
+                'message'           => trans('messages.success'),
+                'data'              => $remove,
+                //'Packaging'         => $tableDetails,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info("Error: $e");
+            return response()->json([
+                'error'             => true,
+                'message'           => trans('messages.error'),
+            ]);
+        }
+    }
+
     public function view(Request $request)
     {
         try {
@@ -93,15 +116,15 @@ class BillOfMaterialController extends Controller
             $tableDetails = $bom->map(function ($item) {
                 $productComponents = BillOfMaterial::where('product_id', $item->product_id)->get([
                     'bom_id',
-                    'uom_id',
-                    'qty'
+                    'qty',
+                    'uom_id'
                 ]);
                 $brandName = Brand::find($item->bom_per_product->brand_id);
 
-                $packaging = Packaging::where('product_id', $item->product_id)->get([
+                $packaging = Packaging::with('packaging_per_detail')->where('product_id', $item->product_id)->get([
                     'id',
                     'product_id',
-                    'order_type_id'
+                    'order_type_id',
                 ]);
 
                 return [
@@ -110,8 +133,8 @@ class BillOfMaterialController extends Controller
                     'product_name'          => $item->bom_per_product->name,
                     'product_code'          => $item->bom_per_product->product_code,
                     'brand'                 => $brandName->brand,
-                    'product_components'    => $productComponents,
-                    'packaging'             => $packaging
+                    'Product_Components'    => $productComponents,
+                    'Packaging'             => $packaging,
                 ];
             });
 
@@ -136,8 +159,45 @@ class BillOfMaterialController extends Controller
     {
         try {
             DB::beginTransaction();
+            //--------------------------CREATE BOM------------------------------------
+            $id             = $request->id;
+            $SproductIds    = $request->sproduct_id;
+            $WproductIds    = $request->wproduct_id;
+            $quantity       = $request->qty;
 
+            foreach ($WproductIds as $key => $wproductId) {
+                $qty        = $quantity[$key];
+                $getUom     = Product::where('id', $wproductId)->value('uom_id');
+                $updateBom  = BillOfMaterial::where('id', $id)->update([
+                    'bom_id'        => $wproductId,
+                    'uom_id'        => $getUom,
+                    'qty'           => $qty
+                ]);
+            }
 
+            //-------------------------CREATE PACKAGING and PACKAGING DETAILS-------------------------------
+            $orderTypeIds       = $request->order_type;
+            $quantities         = $request->quantity;
+            $for_packaging      = $request->for_packaging;
+            $flatProductIds     = Arr::flatten($for_packaging);
+            $packagingUoms      = Product::whereIn('id', $flatProductIds)->pluck('uom_id', 'id');
+
+            foreach ($orderTypeIds as $index => $orderTypeId) {
+                $updatePackaging = Packaging::where('product_id',$SproductIds)->update([
+                    'order_type_id' => $orderTypeId,
+                ]);
+                dd($updatePackaging);
+                foreach ($for_packaging[$index] as $productIndex => $productId) {
+                    $packagingUom       = $packagingUoms[$productId];
+                    $quantity           = $quantities[$index][$productIndex];
+
+                    PackagingDetail::where('packaging_id',$updatePackaging->id)->update([
+                        'product_id'    => $productId,
+                        'qty'           => $quantity,
+                        'uom_id'        => $packagingUom,
+                    ]);
+                }
+            }
             DB::commit();
             return response()->json([
                 'error'             => false,
@@ -220,7 +280,7 @@ class BillOfMaterialController extends Controller
                             'bom_id' => $bom->bom_id,
                             'qty' => $bom->qty,
                             'uom_id' => $bom->uom_id,
-                            'created_at' =>$bom->created_at->format("M d, Y h:i A")
+                            'created_at' => $bom->created_at->format("M d, Y h:i A")
                         ];
                     }),
                 ];

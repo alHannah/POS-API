@@ -70,6 +70,11 @@ return [
             'alreadyExist'     => 'Discount already exists',
             'existed'          => 'Already exists',
         ],
+        'priceTier' => [
+            'notFound'         => 'Price Tier was not found',
+            'alreadyExist'     => 'Price Tier already exists',
+            'existed'          => 'Already exists',
+        ],
     ],
     'required'                  => 'This value is required.',
     "success_feedback"          => "Feedback successfully submitted",

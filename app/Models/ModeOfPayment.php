@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModeOfPayment extends Model
 {
@@ -13,5 +14,9 @@ class ModeOfPayment extends Model
         'status'
     ];
 
+    public function mop_price_tier () : HasMany
+    {
+        return $this->hasMany(PriceTier::class, 'mop_id');
+    }
 
 }

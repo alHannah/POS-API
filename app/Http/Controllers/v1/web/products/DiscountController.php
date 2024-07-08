@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class DiscountController extends Controller
 {
@@ -22,15 +23,33 @@ class DiscountController extends Controller
         try {
             DB::beginTransaction();
 
-            $id = $request->id;
-            if (!$id) {
+            $name         = $request->name;
+            $type         = $request->type;
+            $amount       = $request->amount;
+            $with_tax     = $request->with_tax;
+
+            $validator = Validator::make($request->all(), [
+                'name'          => 'required',
+                'type'          => 'required',
+                'amount'        => 'required',
+                'with_tax'      => 'required',
+            ]);
+
+
+            if ($validator->fails()) {
                 return response()->json([
-                    'error'   => true,
+                    'error' => true,
                     'message' => trans('messages.required')
                 ]);
             }
 
-            $existingDis = Discount::where('id', $id)->first();
+            $existingDis = Discount::where('name','=', $name)
+                         ->where('type', '=',$type)
+                         ->where('amount','=', $amount)
+                         ->where('with_tax','=', $with_tax)
+                         ->where('status','=', 1)
+                         ->first();
+
             if ($existingDis) {
                 return response()->json([
                     'error'   => true,
@@ -38,14 +57,9 @@ class DiscountController extends Controller
                 ]);
             }
 
-            $name = $request->name;
-            $type = $request->type;
-            $amount = $request->amount;
-            $with_tax = $request->with_tax;
             $status = 1;
 
             $discount = Discount::create([
-                'id'                => $id,
                 'name'              => $name,
                 'type'              => $type,
                 'amount'            => $amount,

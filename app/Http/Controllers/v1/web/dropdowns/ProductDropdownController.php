@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\v1\web\dropdowns;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\ModeOfPayment;
 use App\Models\Category;
 use App\Models\Store;
 use App\Models\Uom;
@@ -36,6 +38,48 @@ class ProductDropdownController extends Controller
                 'error'             => false,
                 'message'           => trans('messages.success'),
                 'data'              => $tableDetails,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function brand_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $branddropdown = Brand::where('status', '1')->get();
+
+            return response()->json([
+                "error"         => false,
+                "message"       => trans('messages.success'),
+                "data"          => $branddropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function mop_dropdown(Request $request) {
+        try {
+            DB::beginTransaction();
+
+            $mopdropdown = ModeOfPayment::where('status', '1')->get();
+
+            return response()->json([
+                "error"         => false,
+                "message"       => trans('messages.success'),
+                "data"          => $mopdropdown,
             ]);
         } catch (Exception $e) {
             DB::rollback();

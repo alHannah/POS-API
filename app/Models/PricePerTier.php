@@ -21,7 +21,12 @@ class PricePerTier extends Model
 
     public function price_per_tier_per_tiers () : BelongsTo
     {
-        return $this->belongsTo(PriceTier::class,'tier_id');
+        return $this->belongsTo(PriceTier::class,'tier_id', 'id');
+    }
+
+    public function price_per_tier_per_product () : BelongsTo
+    {
+        return $this->belongsTo(Product::class,'product_id', 'id');
     }
 
 }

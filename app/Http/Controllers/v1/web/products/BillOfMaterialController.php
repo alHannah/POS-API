@@ -30,7 +30,6 @@ class BillOfMaterialController extends Controller
 
             foreach ($WproductIds as $key => $wproductId) {
                 $qty       = $quantity[$key];
-
                 $getUom = Product::where('id', $wproductId)->value('uom_id');
                 $createBom = BillOfMaterial::create([
                     'product_id'    => $SproductIds,
@@ -64,13 +63,19 @@ class BillOfMaterialController extends Controller
                     ]);
                 }
             }
+
             DB::commit();
+
+            $productName = Product::find($SproductIds)->name;
+            $message    = "Created BOM and Packaging: Product('$productName')";
+            $request["remarks"] = $message;
+            $request["type"] = 2;
+            $this->audit_trail($request);
 
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $createBom,
-                //'data2'           => $createPackaging
+                'data'              => $message,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -94,7 +99,6 @@ class BillOfMaterialController extends Controller
                 'error'             => false,
                 'message'           => trans('messages.success'),
                 'data'              => $remove,
-                //'Packaging'         => $tableDetails,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -143,7 +147,6 @@ class BillOfMaterialController extends Controller
                 'error'             => false,
                 'message'           => trans('messages.success'),
                 'Product'           => $tableDetails,
-                //'Packaging'         => $tableDetails,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -159,50 +162,64 @@ class BillOfMaterialController extends Controller
     {
         try {
             DB::beginTransaction();
-            //--------------------------CREATE BOM------------------------------------
-            $id             = $request->id;
+            //--------------------------UPDATE BOM------------------------------------
             $SproductIds    = $request->sproduct_id;
             $WproductIds    = $request->wproduct_id;
             $quantity       = $request->qty;
 
+            $deleteData = BillOfMaterial::where('product_id',$SproductIds)->delete();
             foreach ($WproductIds as $key => $wproductId) {
-                $qty        = $quantity[$key];
-                $getUom     = Product::where('id', $wproductId)->value('uom_id');
-                $updateBom  = BillOfMaterial::where('id', $id)->update([
-                    'bom_id'        => $wproductId,
+                $qty       = $quantity[$key];
+                $getUom = Product::where('id', $wproductId)->value('uom_id');
+
+                $createNewBom = BillOfMaterial::create([
+                    'product_id'    => $SproductIds,
                     'uom_id'        => $getUom,
-                    'qty'           => $qty
+                    'qty'           => $qty,
+                    'bom_id'        => $wproductId
                 ]);
             }
 
-            //-------------------------CREATE PACKAGING and PACKAGING DETAILS-------------------------------
+            //-------------------------UPDATE PACKAGING and PACKAGING DETAILS-------------------------------
             $orderTypeIds       = $request->order_type;
             $quantities         = $request->quantity;
             $for_packaging      = $request->for_packaging;
             $flatProductIds     = Arr::flatten($for_packaging);
             $packagingUoms      = Product::whereIn('id', $flatProductIds)->pluck('uom_id', 'id');
 
+            $deletePackaging    = Packaging::where('product_id', $SproductIds)->delete();
+
             foreach ($orderTypeIds as $index => $orderTypeId) {
-                $updatePackaging = Packaging::where('product_id',$SproductIds)->update([
+                $createNewPackaging = Packaging::create([
                     'order_type_id' => $orderTypeId,
+                    'product_id'    => $SproductIds,
                 ]);
-                dd($updatePackaging);
+
                 foreach ($for_packaging[$index] as $productIndex => $productId) {
                     $packagingUom       = $packagingUoms[$productId];
                     $quantity           = $quantities[$index][$productIndex];
 
-                    PackagingDetail::where('packaging_id',$updatePackaging->id)->update([
+                    PackagingDetail::create([
+                        'packaging_id'  => $createNewPackaging->id,
                         'product_id'    => $productId,
                         'qty'           => $quantity,
                         'uom_id'        => $packagingUom,
                     ]);
                 }
             }
+
             DB::commit();
+
+            $productName = Product::find($SproductIds)->name;
+            $message    = "Update BOM and Packaging: Product('$productName')";
+            $request["remarks"] = $message;
+            $request["type"] = 2;
+            $this->audit_trail($request);
+
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                //'data'              => ,
+                'data'              => $message
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -221,27 +238,21 @@ class BillOfMaterialController extends Controller
 
             $bomId = $request->id;
 
-            $bomDetails = BillOfMaterial::with('bom_per_product')->where('id', $bomId)->get();
-
-            $previousDetails = $bomDetails->map(function ($item) {
-                $brand = Brand::find($item->bom_per_product->brand_id);
-                $posCategory = PosCategory::find($item->bom_per_product->pos_category_id);
-                return [
-                    'id'            => $item->id,
-                    'name'          => $item->bom_per_product->name,
-                    'brand'         => $brand->brand,
-                    'pos_category'  => $posCategory->pos_category_name,
-                    'created_at'    => $item->created_at->format("M d, Y h:i A"),
-                ];
-            });
-
-            $deleteBom = BillOfMaterial::find($bomId)->delete();
-
+            $bom = BillOfMaterial::find($bomId);
+            $deleteBom = BillOfMaterial::where('product_id',$bom->product_id)->delete();
+            $deletePackaging = Packaging::where('product_id',$bom->product_id)->delete();
+            $productName = Product::find($bom->product_id)->name;
             DB::commit();
+
+            $message    = "Deleted BOM and Packaging: Product('$productName')";
+            $request["remarks"] = $message;
+            $request["type"] = 2;
+            $this->audit_trail($request);
+
             return response()->json([
                 'error'             => false,
                 'message'           => trans('messages.success'),
-                'data'              => $previousDetails,
+                'data'              => $message,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -257,17 +268,17 @@ class BillOfMaterialController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $brandFilter = (array) $request->brandFilter;
             $brandFilter = Arr::flatten($brandFilter, 1);
 
             $product = Product::with(['product_per_bom', 'product_per_brand', 'product_per_posCategories']);
             if (!empty($brandFilter)) {
                 $product->whereIn('brand_id', $brandFilter)
-                    ->where('product_tag', 's');
+                    ->where('product_tag', 's')
+                    ->whereHas('product_per_bom');
             }
 
-            $filteredData = $product->get();
+            $filteredData = $product->latest()->get();
 
             $tableDetails = $filteredData->map(function ($item) {
                 return [

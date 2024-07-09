@@ -23,7 +23,6 @@ class InventoryCategoryController extends Controller
             $decryptedId        = !empty($request->id) ? Crypt::decrypt($request->id) : null;
             $tag                = $request->tag;
             $name               = $request->name;
-            $status             = $request->status;
 
             if (!$name) {
                 return response()->json([
@@ -53,7 +52,6 @@ class InventoryCategoryController extends Controller
             ], [
                 'name'      => $name,
                 'tag'       => $tag,
-                'status'    => $status,
             ]);
 
             $message = $decryptedId

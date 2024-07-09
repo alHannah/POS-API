@@ -112,7 +112,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/update',                    'v1\web\stores\StoresController@update_store');
                 $router->post('/delete',                    'v1\web\stores\StoresController@archive_store_device');
                 $router->post('/get',                       'v1\web\stores\StoresController@get_stores_devices');
-                $router->get('/showProduct/{id}',           'v1\web\stores\StoresController@show_product');
+                $router->get('/showProduct/{id}/{status}',           'v1\web\stores\StoresController@show_product');
                 $router->get('/addProduct/{id}',            'v1\web\stores\StoresController@add_product');
                 $router->post('/saveProduct',               'v1\web\stores\StoresController@save_product');
                 $router->post('/activateProduct',           'v1\web\stores\StoresController@activate_product');

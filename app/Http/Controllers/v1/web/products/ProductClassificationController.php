@@ -98,7 +98,17 @@ class ProductClassificationController extends Controller
         try {
             DB::beginTransaction();
 
-            $classificationData = ProductClassification::get();
+            $statusFilter = $request->status;
+
+            // if ($statusFilter == 0) {
+            //     $classificationData = ProductClassification::where('status', 0)->get();
+            // } elseif ($statusFilter == 1) {
+            //     $classificationData = ProductClassification::where('status', 1)->get();
+            // } else {
+            //     $classificationData = ProductClassification::get();
+            // }
+            $classificationData = ProductClassification::whereIn('status', $statusFilter)->get();
+
             $tableData = $classificationData->map(function ($items) {
                 return [
                     'id'            => $items->id,

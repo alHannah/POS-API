@@ -22,12 +22,12 @@ class StoreDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $branddropdown = Brand::where('status', '1')->get();
+            $brandDropdown = Brand::where('status', 1 || '1' || 'active')->get();
 
             return response()->json([
                 "error"         => false,
                 "message"       => trans('messages.success'),
-                "data"          => $branddropdown,
+                "data"          => $brandDropdown,
             ]);
         } catch (Exception $e) {
             DB::rollback();
@@ -69,6 +69,28 @@ class StoreDropdownController extends Controller
 
             $brandId = $request->brand_id;
             $areaDropdown = Area::where('brand_id', $brandId)->get();
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$areaDropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function area_dropdown_get(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $areaDropdown = Area::where('status', 1 || '1' || 'active')->get();
 
             return response()->json([
                 "error"         =>false,

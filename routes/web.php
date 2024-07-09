@@ -72,6 +72,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 });
 
                 $router->post('/brand_dropdown',             'v1\web\dropdowns\StoreDropdownController@brand_dropdown');
+                $router->post('/area_dropdown',              'v1\web\dropdowns\StoreDropdownController@area_dropdown');
+                $router->post('/area_dropdown_get',          'v1\web\dropdowns\StoreDropdownController@area_dropdown_get');
                 $router->post('/store_group_dropdown',       'v1\web\dropdowns\StoreDropdownController@store_group_dropdown');
                 $router->post('/price_tier_dropdown',        'v1\web\dropdowns\StoreDropdownController@price_tier_dropdown');
                 $router->post('/manager_dropdown',           'v1\web\dropdowns\StoreDropdownController@manager_dropdown');

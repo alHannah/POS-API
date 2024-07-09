@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 
 class ProductListController extends Controller
 {
@@ -67,7 +68,7 @@ class ProductListController extends Controller
 
             $previousProductName                = $previousData->name                    ?? 'N/A';
             $previousProductCode                = $previousData->product_code            ?? 'N/A';
-            $previousCategory                   = $previousData->category_id       ?? 'N/A';
+            $previousCategory                   = $previousData->category_id             ?? 'N/A';
             $previousProductClassification      = $previousData->product_classification  ?? 'N/A';
             $previousPosCategory                = $previousData->pos_category_name       ?? 'N/A';
             $previousUom                        = $previousData->uom                     ?? 'N/A';
@@ -78,12 +79,44 @@ class ProductListController extends Controller
             $previousBrand                      = $previousData->brand                   ?? 'N/A';
 
 
+            // // Handling image upload
+            // $imagePath = null;
+            // if ($request->hasFile('imageFile')) {
+            //     $image = $request->file('imageFile');
+            //     $imageName = time() . '.' . $image->getClientOriginalExtension();
+            //     $imagePath = $image->storeAs('uploads/products', $imageName, 'public');
+            // }
             // Handling image upload
             $imageBase64 = null;
-            if ($request->hasFile('image')) {
-                $image = $request->file('image');
+            if ($request->hasFile('imageFile')) {
+                $image = $request->file('imageFile');
                 $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
             }
+            // elseif ($request->input('base64Image')) {
+            //     $imageBase64 = $request->input('base64Image');
+
+            //     // Decode base64 string
+            //     $imageContent = base64_decode($imageBase64);
+
+            //     // Generate a unique file name
+            //     $fileName = time() . '.jpg';
+
+            //     // Define the file path
+            //     $filePath = public_path('uploads/products/') . $fileName;
+            //     // Ensure the directory exists
+            //     if (!File::isDirectory(public_path('uploads/products'))) {
+            //         File::makeDirectory(public_path('uploads/products'), 0755, true);
+            //     }
+
+            //     // Save the image to the defined path
+            //     file_put_contents($filePath, $imageContent);
+
+            //     // Store the URL in the database
+            //     $imageURL = url('uploads/products/' . $fileName);
+            //     // Save $imageURL to your database instead of $imageBase64
+
+            // }
+
 
             $createUpdate = Product::updateOrCreate([
                 'id'                        => $decryptedId
@@ -150,7 +183,7 @@ class ProductListController extends Controller
             $tagFilter          = Arr::flatten($tagFilter, 1);
             $statusFilter       = Arr::flatten($statusFilter, 1);
 
-            $thisData = Product::with('product_per_posCategories', 'product_per_brand', 'product_uom');
+            $thisData = Product::with('product_category', 'product_per_brand', 'product_uom');
 
             if (!empty($categoryFilter)) {
                 $thisData->whereIn('pos_category_id', $categoryFilter);
@@ -167,12 +200,14 @@ class ProductListController extends Controller
 
             $generateData = $getData->map(function ($items) {
                 $id           = $items->id                            ?? 'N/A';
+                $picture        = url($items->product_image);
                 return [
                     'id'                     => Crypt::encrypt($id)                                         ?? 'N/A',
                     'product_code'           => $items->product_code                                        ?? 'N/A',
                     'product_name'           => $items->name                                                ?? 'N/A',
+                    'product_image'          => $picture                                                    ?? 'N/A',
                     'brand'                  => $items->product_per_brand->brand                            ?? 'N/A',
-                    'pos_category'           => $items->product_per_posCategories->pos_category_name        ?? 'N/A',
+                    'category'               => $items->product_category->name                              ?? 'N/A',
                     'uom'                    => $items->product_uom->name                                   ?? 'N/A',
                     'min_uom'                => $items->min_level_uom                                       ?? 'N/A',
                     'tag'                    => $items->product_tag                                         ?? 'N/A',

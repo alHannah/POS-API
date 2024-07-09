@@ -71,9 +71,9 @@ class StoresController extends Controller
                 ]);
             }
 
-            if ($request->has('manager_id')) {
+            if ($request->has('user_id')) {
                 $manager = ManagerInCharge::create([
-                    'store_id' => $request->id,
+                    'store_id' => $store->id,
                     'user_id'  => $request->user_id,
                 ]);
             } else {
@@ -135,7 +135,7 @@ class StoresController extends Controller
 
             DB::beginTransaction();
 
-            $store =  Store::where('id', $request->id)->update([
+            $store =  Store::where('id', $id)->update([
                 'brand_id'          => $request->brand_id,
                 'store_code'        => $request->store_code,
                 'store_name'        => $request->store_name,
@@ -341,6 +341,7 @@ class StoresController extends Controller
             $brandFilter        = $request->brandFilter;
             $storeGroupsFilter  = $request->storeGroupsFilter;
             $areaFilter         = $request->areaFilter;
+            $statusFilter       = $request->statusFilter;
 
             $data = Store::with([
                 'store_brands',
@@ -353,16 +354,13 @@ class StoresController extends Controller
             ])
                 ->whereIn('group_id', $storeGroupsFilter)
                 ->whereIn('area_id', $areaFilter);
-
-            if (isset($status)) {
-                $data = $data->where('status', $status);
-            }
+                //->whereIn('status', $statusFilter);
 
             $data = $data->get();
 
             $tableData = collect($data)->map(function ($items) {
 
-                $array = $items->store_oic->pluck('mobile_user_id');
+             $array = $items->store_oic->pluck('mobile_user_id');
                 $oic = OicPerStore::with('oic_mobile_user')
                     ->whereIn('mobile_user_id', $array)
                     ->where('store_id', $items->id)->get();
@@ -511,7 +509,7 @@ class StoresController extends Controller
 
             DB::beginTransaction();
 
-            $storeFilter = Crypt::decrypt($id);
+            $storeFilter = Crypt::decrypt($id,);
 
             $storeData = Store::with('store_product_per_store')->where('id', $storeFilter)->where('status', 1)->first();
             $productId = $storeData->store_product_per_store->pluck('product_id');

@@ -99,7 +99,17 @@ class OrderTypeController extends Controller
         try {
             DB::beginTransaction();
 
-            $orderData = OrderType::get();
+            $statusFilter = $request->status;
+
+            // if ($statusFilter == 0) {
+            //     $orderData = OrderType::where('status', 0)->get();
+            // } elseif ($statusFilter == 1) {
+            //     $orderData = OrderType::where('status', 1)->get();
+            // } else {
+            //     $orderData = OrderType::get();
+            // }
+            $orderData = OrderType::whereIn('status', $statusFilter)->get();
+;
             $tableData = $orderData->map(function ($items) {
                 return [
                     'id'            => $items->id,

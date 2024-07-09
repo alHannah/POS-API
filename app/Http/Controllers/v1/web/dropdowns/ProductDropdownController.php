@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1\web\dropdowns;
 
 use App\Http\Controllers\Controller;
+use App\Models\BillOfMaterial;
 use App\Models\Brand;
 use App\Models\ModeOfPayment;
 use App\Models\Category;
@@ -25,8 +26,8 @@ class ProductDropdownController extends Controller
 
             $uomCategoryName = UomCategory::get();
 
-            $tableDetails = $uomCategoryName->map(function($item){
-                return[
+            $tableDetails = $uomCategoryName->map(function ($item) {
+                return [
                     'id'            => $item->id,
                     'name'          => $item->name,
                     'created_at'    => $item->created_at,
@@ -49,7 +50,8 @@ class ProductDropdownController extends Controller
         }
     }
 
-    public function brand_dropdown(Request $request) {
+    public function brand_dropdown(Request $request)
+    {
         try {
             DB::beginTransaction();
 
@@ -70,7 +72,8 @@ class ProductDropdownController extends Controller
         }
     }
 
-    public function mop_dropdown(Request $request) {
+    public function mop_dropdown(Request $request)
+    {
         try {
             DB::beginTransaction();
 
@@ -97,8 +100,8 @@ class ProductDropdownController extends Controller
 
             $uomCategoryName = Category::get();
 
-            $tableDetails = $uomCategoryName->map(function($item){
-                return[
+            $tableDetails = $uomCategoryName->map(function ($item) {
+                return [
                     'id'            => $item->id,
                     'name'          => $item->name,
                     'tag'           => $item->tag,
@@ -128,7 +131,7 @@ class ProductDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $Store = Store::where('status',1)->get();
+            $Store = Store::where('status', 1)->get();
 
             DB::commit();
             return response()->json([
@@ -151,7 +154,10 @@ class ProductDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $productIds = Product::where('product_tag','s')->where('status', 1)->get();
+            $productIds = Product::where('product_tag', 's')
+                ->where('status', 1)
+                ->doesntHave('product_per_bom')
+                ->get(['id', 'name']);
 
             DB::commit();
             return response()->json([
@@ -174,7 +180,7 @@ class ProductDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $productIds = Product::where('product_tag','w')->where('status',1)->get();
+            $productIds = Product::where('product_tag', 'w')->where('status', 1)->get();
 
             DB::commit();
             return response()->json([
@@ -196,8 +202,8 @@ class ProductDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $productIds = Product::where('product_tag','w')
-                ->where('status',1)
+            $productIds = Product::where('product_tag', 'w')
+                ->where('status', 1)
                 ->where('for_packaging', 1)
                 ->get();
 
@@ -224,7 +230,7 @@ class ProductDropdownController extends Controller
 
             $products = Product::find($request->product_id);
 
-            $uom = Uom::where('id',$products->uom_id)->first();
+            $uom = Uom::where('id', $products->uom_id)->first();
 
             DB::commit();
             return response()->json([
@@ -249,7 +255,7 @@ class ProductDropdownController extends Controller
 
             $products = Product::find($request->product_id);
 
-            $uom = Uom::where('id',$products->uom_id)->first();
+            $uom = Uom::where('id', $products->uom_id)->first();
 
             DB::commit();
             return response()->json([

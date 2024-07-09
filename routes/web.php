@@ -317,6 +317,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/update',                            'v1\web\products\BillOfMaterialController@update');
                 $router->post('/delete',                            'v1\web\products\BillOfMaterialController@delete');
                 $router->post('/get',                                'v1\web\products\BillOfMaterialController@get');
+                //$router->post('/remove_packaging',                  'v1\web\products\BillOfMaterialController@remove_packaging');
             });
 
             $router->group(["prefix" => "/uom_maintenance", "middleware" => "auth"], function () use ($router) {

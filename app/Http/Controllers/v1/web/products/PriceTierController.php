@@ -20,17 +20,18 @@ use Illuminate\Support\Facades\Validator;
 
 class PriceTierController extends Controller
 {
-    public function create(Request $request) //done
+    public function create(Request $request)
     {
         DB::beginTransaction();
 
         try {
             $validator = Validator::make($request->all(), [
-                'name'         => 'required',
-                'brand_id'     => 'required',
-                'mop_id'       => 'required',
-                'price'        => 'required',
-                'product_name' => 'required',
+                'name'          => 'required',
+                'brand_id'      => 'required',
+                'mop_id'        => 'required',
+                'products'      => 'required|array',
+                'products.*.name' => 'required',
+                'products.*.price' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
@@ -65,20 +66,32 @@ class PriceTierController extends Controller
             $MOP = $priceTier->price_tier_per_mop->name ?? 'N/A';
             $brand = $priceTier->price_tier_per_brand->brand ?? 'N/A';
 
-            $product = Product::where('name', $request->product_name)->first();
-            $product_id = $product ? $product->id : null;
+            $productDetails = [];
+            foreach ($request->products as $productData) {
+                $product = Product::where('name', $productData['name'])->first();
+                $product_id = $product ? $product->id : null;
 
-            $pricePerTier = PricePerTier::create([
-                'product_id' => $product_id,
-                'tier_id'    => $priceTier->id,
-                'price'      => $request->price,
-            ]);
+                $pricePerTier = PricePerTier::create([
+                    'product_id' => $product_id,
+                    'tier_id'    => $priceTier->id,
+                    'price'      => $productData['price'],
+                ]);
 
-            $pricePerTier->load('price_per_tier_per_product:id,name,product_code');
-            $product_code = $pricePerTier->price_per_tier_per_product->product_code ?? 'N/A';
+                $pricePerTier->load('price_per_tier_per_product:id,name,product_code');
+                $product_code = $pricePerTier->price_per_tier_per_product->product_code ?? 'N/A';
 
-            $message = "New Price Tiers => Name: {$priceTier->name} | Status: 1 | Sales Channel: 1 | MOP: {$MOP} | Brand: {$brand}"
-                . " | Code: {$product_code} | Name: {$request->product_name} | Price: {$pricePerTier->price}";
+                $productDetails[] = [
+                    'product_code' => $product_code,
+                    'product_name' => $productData['name'],
+                    'price'        => $pricePerTier->price,
+                ];
+            }
+
+            $message = "New Price Tier Created => Name: {$priceTier->name} | Status: 1 | Sales Channel: 1 | MOP: {$MOP} | Brand: {$brand} || ";
+            $message .= "Product Details-> ";
+            foreach ($productDetails as $detail) {
+                $message .= "Code: {$detail['product_code']}, Name: {$detail['product_name']}, Price: {$detail['price']} ";
+            }
 
             $request['remarks'] = $message;
             $request['type'] = 2;
@@ -96,14 +109,12 @@ class PriceTierController extends Controller
                     'sales_channel' => $priceTier->sales_channel,
                     'MOP'           => $MOP,
                     'Brand'         => $brand,
-                    'product_code'  => $product_code,
-                    'product_name'  => $request->product_name,
-                    'price'         => $pricePerTier->price,
+                    'products'      => $productDetails,
                     'created_at'    => $priceTier->created_at->format('M d, Y h:i A'),
                 ],
                 'audit_trail' => $message,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::info("Error: $e");
             return response()->json([
@@ -113,7 +124,7 @@ class PriceTierController extends Controller
         }
     }
 
-    public function displayPriceTier(Request $request) //done
+    public function displayPriceTier(Request $request)
     {
         try {
             DB::beginTransaction();
@@ -149,7 +160,7 @@ class PriceTierController extends Controller
         }
     }
 
-    public function displayTierProduct(Request $request) //done
+    public function displayTierProduct(Request $request)
     {
         try {
             $brandFilter = Arr::flatten((array) $request->brandFilter, 1);
@@ -188,18 +199,10 @@ class PriceTierController extends Controller
         }
     }
 
-    public function update(Request $request) //done
+    public function update(Request $request)
     {
         try {
             DB::beginTransaction();
-
-            /*id
-            name
-            mop_id
-            brand_id
-            price
-            product_name
-            */
 
             $encryptedId = $request->id ? Crypt::decrypt($request->id) : null;
 
@@ -250,33 +253,48 @@ class PriceTierController extends Controller
             $newBrand = $dataNew->price_tier_per_brand->brand ?? 'N/A';
             $newName = $request->name;
 
-            $product = Product::where('name', $request->product_name)->first();
-            $product_id = $product ? $product->id : null;
-            $product_name = $product ? $product->name : null;
-            $product_code = $product ? $product->product_code : null;
+            $products = $request->products;
+            $updatedProducts = [];
+            $messages = [];
 
-            $product = PricePerTier::where('product_id', $product_id)->first();
-            $oldPrice = $product ? $product->price : null;
+            foreach ($products as $productData) {
+                $productName = $productData['product_name'];
+                $newPrice = $productData['price'];
 
-            $previousProduct = PricePerTier::where('product_id', $product_id)->get();
-            $previousProductPrice = null;
-            if ($previousProduct->isNotEmpty()) {
-                foreach ($previousProduct as $product) {
-                    $previousProductPrice = $product->price;
-                    $product->update([
-                        'price' => $request->price,
-                    ]);
+                $product = Product::where('name', $productName)->first();
+                $product_id = $product ? $product->id : null;
+                $product_name = $product ? $product->name : null;
+                $product_code = $product ? $product->product_code : null;
+
+                if ($product_id) {
+                    $previousProduct = PricePerTier::where('product_id', $product_id)->first();
+                    $oldPrice = $previousProduct ? $previousProduct->price : null;
+
+                    if ($previousProduct) {
+                        $previousProduct->update([
+                            'price' => $newPrice,
+                        ]);
+
+                        $messages[] = "Product: {$product_name} (Code: {$product_code}) Price: {$oldPrice} => {$newPrice}";
+
+                        $updatedProducts[] = [
+                            'product_code' => $product_code,
+                            'product_name' => $product_name,
+                            'price'        => $newPrice,
+                        ];
+                    } else {
+                        DB::rollBack();
+                        return response()->json([
+                            'error'   => true,
+                            'message' => trans('messages.product.priceTier.notFound')
+                        ]);
+                    }
                 }
-            } else {
-                DB::rollBack();
-                return response()->json([
-                    'error'   => true,
-                    'message' => trans('messages.product.priceTier.notFound')
-                ]);
             }
 
-            $message = "Updated Price Tier -> Name: {$previousName}, MOP: {$previousMOP}, Brand: {$previousBrand}, Code: {$product_code}, Product: {$product_name}, Price: {$oldPrice} || changed into || "
-                     . "Name: {$newName}, MOP: {$newMOP}, Brand: {$newBrand}, Code: {$product_code}, Product: {$product_name}, New Price: {$request->price}";
+            $message = "Updated Price Tier -> Name: {$previousName}, MOP: {$previousMOP}, Brand: {$previousBrand} || changed into || "
+                     . "Name: {$newName}, MOP: {$newMOP}, Brand: {$newBrand}. ";
+            $message .= "Updated Products -> " . implode(", ", $messages);
 
             $request['remarks'] = $message;
             $request['type'] = 2;
@@ -294,9 +312,7 @@ class PriceTierController extends Controller
                     'sales_channel' => $previousData->sales_channel,
                     'MOP'           => $newMOP,
                     'Brand'         => $newBrand,
-                    'product_code'  => $product_code,
-                    'product_name'  => $product_name,
-                    'price'         => $request->price,
+                    'updated_products' => $updatedProducts,
                     'created_at'    => $previousData->created_at->format('M d, Y h:i A'),
                 ],
                 'audit_trail' => $message,
@@ -311,7 +327,7 @@ class PriceTierController extends Controller
         }
     }
 
-    public function archivePriceTier(Request $request) //done
+    public function archivePriceTier(Request $request)
     {
         try {
             $id = Crypt::decrypt($request->id);
@@ -398,6 +414,127 @@ class PriceTierController extends Controller
             ]);
         }
     }
+
+        // public function update(Request $request) //done
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         /*id
+    //         name
+    //         mop_id
+    //         brand_id
+    //         price
+    //         product_name
+    //         */
+
+    //         $encryptedId = $request->id ? Crypt::decrypt($request->id) : null;
+
+    //         if (!$encryptedId) {
+    //             return response()->json([
+    //                 'error'   => true,
+    //                 'message' => trans('messages.required')
+    //             ]);
+    //         }
+
+    //         $previousData = PriceTier::find($encryptedId);
+
+    //         if (!$previousData) {
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'error'   => true,
+    //                 'message' => trans('messages.product.priceTier.notFound')
+    //             ]);
+    //         }
+
+    //         $name = $request->name;
+    //         $mop_id = $request->mop_id;
+    //         $brand_id = $request->brand_id;
+
+    //         $dataOld = PriceTier::where('name', $name)->first();
+
+    //         if ($dataOld) {
+    //             $dataOld->load('price_tier_per_mop:id,name', 'price_tier_per_brand:id,brand');
+    //         }
+
+    //         $previousMOP = $dataOld->price_tier_per_mop->name ?? 'N/A';
+    //         $previousBrand = $dataOld->price_tier_per_brand->brand ?? 'N/A';
+    //         $previousName = $previousData->name;
+
+    //         $previousData->update([
+    //             'name'     => $name,
+    //             'mop_id'   => $mop_id,
+    //             'brand_id' => $brand_id,
+    //         ]);
+
+    //         $dataNew = PriceTier::where('name', $name)->first();
+
+    //         if ($dataNew) {
+    //             $dataNew->load('price_tier_per_mop:id,name', 'price_tier_per_brand:id,brand');
+    //         }
+
+    //         $newMOP = $dataNew->price_tier_per_mop->name ?? 'N/A';
+    //         $newBrand = $dataNew->price_tier_per_brand->brand ?? 'N/A';
+    //         $newName = $request->name;
+
+    //         $product = Product::where('name', $request->product_name)->first();
+    //         $product_id = $product ? $product->id : null;
+    //         $product_name = $product ? $product->name : null;
+    //         $product_code = $product ? $product->product_code : null;
+
+    //         $product = PricePerTier::where('product_id', $product_id)->first();
+    //         $oldPrice = $product ? $product->price : null;
+
+    //         $previousProduct = PricePerTier::where('product_id', $product_id)->get();
+    //         if ($previousProduct->isNotEmpty()) {
+    //             foreach ($previousProduct as $product) {
+    //                 $product->update([
+    //                     'price' => $request->price,
+    //                 ]);
+    //             }
+    //         } else {
+    //             DB::rollBack();
+    //             return response()->json([
+    //                 'error'   => true,
+    //                 'message' => trans('messages.product.priceTier.notFound')
+    //             ]);
+    //         }
+
+    //         $message = "Updated Price Tier -> Name: {$previousName}, MOP: {$previousMOP}, Brand: {$previousBrand}, Code: {$product_code}, Product: {$product_name}, Price: {$oldPrice} || changed into || "
+    //                  . "Name: {$newName}, MOP: {$newMOP}, Brand: {$newBrand}, Code: {$product_code}, Product: {$product_name}, New Price: {$request->price}";
+
+    //         $request['remarks'] = $message;
+    //         $request['type'] = 2;
+    //         $this->audit_trail($request);
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'error'       => false,
+    //             'message'     => trans('messages.success'),
+    //             'data'        => [
+    //                 'id'            => $previousData->id,
+    //                 'name'          => $previousData->name,
+    //                 'status'        => $previousData->status,
+    //                 'sales_channel' => $previousData->sales_channel,
+    //                 'MOP'           => $newMOP,
+    //                 'Brand'         => $newBrand,
+    //                 'product_code'  => $product_code,
+    //                 'product_name'  => $product_name,
+    //                 'price'         => $request->price,
+    //                 'created_at'    => $previousData->created_at->format('M d, Y h:i A'),
+    //             ],
+    //             'audit_trail' => $message,
+    //         ]);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info("Error: $e");
+    //         return response()->json([
+    //             'error'   => true,
+    //             'message' => trans('messages.error'),
+    //         ]);
+    //     }
+    // }
 
     // public function displayDetails(Request $request)
     // {

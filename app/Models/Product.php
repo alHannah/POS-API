@@ -39,6 +39,10 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class,'brand_id', 'id');
     }
+    public function product_brand () : BelongsTo
+    {
+        return $this->belongsTo(Brand::class,'brand_id', 'id');
+    }
     public function product_uom () : BelongsTo
     {
         return $this->belongsTo(Uom::class,'uom_id');

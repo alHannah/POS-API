@@ -36,6 +36,7 @@ class ProductListController extends Controller
             $validator = Validator::make($request->all(), [
                 'product_name'               => 'required',
                 'product_code'               => 'required',
+                'category'                   => 'required',
                 'uom'                        => 'required',
                 'min_uom'                    => 'required',
                 'product_tag'                => 'required',
@@ -76,46 +77,21 @@ class ProductListController extends Controller
             $previousProductTag                 = $previousData->product_tag             ?? 'N/A';
             $previousImage                      = $previousData->product_image           ?? 'N/A';
             $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
-            $previousBrand                      = $previousData->brand                   ?? 'N/A';
+            $previousBrand                      = $previousData->product_brand->brand    ?? 'N/A';
 
+            // $imageBase64 = null;
 
-            // // Handling image upload
-            // $imagePath = null;
             // if ($request->hasFile('imageFile')) {
             //     $image = $request->file('imageFile');
-            //     $imageName = time() . '.' . $image->getClientOriginalExtension();
-            //     $imagePath = $image->storeAs('uploads/products', $imageName, 'public');
+            //     $imageBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($image->getRealPath()));
             // }
-            // Handling image upload
+
             $imageBase64 = null;
+
             if ($request->hasFile('imageFile')) {
                 $image = $request->file('imageFile');
                 $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
             }
-            // elseif ($request->input('base64Image')) {
-            //     $imageBase64 = $request->input('base64Image');
-
-            //     // Decode base64 string
-            //     $imageContent = base64_decode($imageBase64);
-
-            //     // Generate a unique file name
-            //     $fileName = time() . '.jpg';
-
-            //     // Define the file path
-            //     $filePath = public_path('uploads/products/') . $fileName;
-            //     // Ensure the directory exists
-            //     if (!File::isDirectory(public_path('uploads/products'))) {
-            //         File::makeDirectory(public_path('uploads/products'), 0755, true);
-            //     }
-
-            //     // Save the image to the defined path
-            //     file_put_contents($filePath, $imageContent);
-
-            //     // Store the URL in the database
-            //     $imageURL = url('uploads/products/' . $fileName);
-            //     // Save $imageURL to your database instead of $imageBase64
-
-            // }
 
 
             $createUpdate = Product::updateOrCreate([

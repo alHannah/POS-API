@@ -80,3 +80,14 @@ min_uom:
 product_classification:
 category:
 image: -->
+
+
+product_code:
+category:
+product_classification:
+pos_category:
+uom:
+min_uom:
+product_tag:
+imageFile:
+brand:

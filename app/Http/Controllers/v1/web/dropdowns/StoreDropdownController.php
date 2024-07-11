@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Crypt;
 
 class StoreDropdownController extends Controller
 {
@@ -39,7 +40,7 @@ class StoreDropdownController extends Controller
         }
     }
 
-    public function store_group_dropdown(Request $request)
+    public function store_group_dropdown_create (Request $request)
     {
         try {
             DB::beginTransaction();
@@ -62,7 +63,66 @@ class StoreDropdownController extends Controller
         }
     }
 
-    public function area_dropdown(Request $request)
+    public function store_group_dropdown_get (Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $storeGroupDropdown = StoreGroup::get();
+            $storeGroupData = $storeGroupDropdown->map(function ($items) {
+                return [
+                    'id'            => $items->id,
+                    'encrypted_id'  => Crypt::encrypt($items->id),
+                    'group_name'    => $items->group_name,
+                ];
+            });
+
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$storeGroupData,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function area_dropdown_stores_get (Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $areaDropdown = Area::where('status', 1)->get();
+            $areaData = $areaDropdown->map(function ($items) {
+                return [
+                    'id'            => $items->id,
+                    'encrypted_id'  => Crypt::encrypt($items->id),
+                    'name'          => $items->name,
+                ];
+            });
+
+            return response()->json([
+                "error"         =>false,
+                "message"       =>trans('messages.success'),
+                "data"          =>$areaData,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function area_dropdown_create (Request $request)
     {
         try {
             DB::beginTransaction();

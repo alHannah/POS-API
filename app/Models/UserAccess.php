@@ -22,4 +22,9 @@ class UserAccess extends Model
     {
         return $this->belongsTo(Module::class, 'module_id');
     }
+
+    public function user_access_role(): BelongsTo
+    {
+        return $this->belongsTo (Role::class, 'role_id');
+    }
 }

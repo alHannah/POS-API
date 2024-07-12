@@ -36,6 +36,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/logout', 'v1\web\LoginController@logout');
             });
 
+
         });
 
           // ----------------------- AUDIT TRAIL --------------------------------------
@@ -433,6 +434,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             });
 
         });
+        
 
         $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {

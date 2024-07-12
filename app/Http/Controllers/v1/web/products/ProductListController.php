@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\File;
 
 class ProductListController extends Controller
 {
@@ -86,13 +85,19 @@ class ProductListController extends Controller
             //     $imageBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($image->getRealPath()));
             // }
 
-            $imageBase64 = null;
+            // $imageBase64 = null;
 
-            if ($request->hasFile('imageFile')) {
-                $image = $request->file('imageFile');
-                $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
-            }
+            // if ($request->hasFile('imageFile')) {
+            //     $image = $request->file('imageFile');
+            //     $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
+            // }
 
+            $image_file = $request->file('imageFile');
+
+            $fileName = $image_file->getClientOriginalName() ?? 'N/A';
+            // dd($fileName);
+            $imageURL = url('/') . '/storage/uploads/products/' . $fileName;
+            $image_file->storeAs('/uploads/products/', $fileName, 'public');
 
             $createUpdate = Product::updateOrCreate([
                 'id'                        => $decryptedId
@@ -105,7 +110,7 @@ class ProductListController extends Controller
                 'uom_id'                        => $uom,
                 'min_level_uom'                 => $min_uom,
                 'product_tag'                   => $productTag,
-                'product_image'                 => $imageBase64,
+                'product_image'                 => $imageURL,
                 'for_packaging'                 => $packaging,
                 'brand_id'                      => $brand,
             ]);
@@ -118,7 +123,7 @@ class ProductListController extends Controller
                              . "Pos Category: $previousPosCategory, Category: $previousCategory";
 
             $newDetails = "Brand: $brand, Product Code: $productCode, Product Name: $productName, Product Tag: $productTag, "
-                        . "Image: $imageBase64, Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, "
+                        . "Image: $imageURL, Packaging: $packaging, UOM: $uom, Min UOM: $min_uom, "
                         . "Classification: $productClassification, Category: $Category, POS Category: $posCategory";
 
             $message = $decryptedId

@@ -433,5 +433,21 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
         });
 
+        $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
+            $router->get('/', function () use ($router) {
+                return view('index', ['api' => env('APP_NAME')]);
+            });
+
+            $router->group(["prefix" => "/user_access", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create',                            'v1\web\products\UserAccessController@create');
+                $router->post('/update',                            'v1\web\accounts\UserAccessController@update');
+                $router->post('/get',                               'v1\web\products\UserAccessController@get');
+            });
+        });
+
     });
 });

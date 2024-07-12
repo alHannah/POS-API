@@ -29,7 +29,7 @@ class ModeOfPaymentController extends Controller
             DB::commit();
 
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -53,8 +53,8 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $mopName = ModeOfPayment::find($decryptedId);
+            $decryptedId    = Crypt::decrypt($request->id);
+            $mopName        = ModeOfPayment::find($decryptedId);
             DB::commit();
 
             return response()->json([
@@ -76,24 +76,24 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $previousName = ModeOfPayment::find($decryptedId);
-            $updateMop = ModeOfPayment::where('id', $decryptedId)->update([
-                'name' => $request->name
+            $decryptedId    = Crypt::decrypt($request->id);
+            $previousName   = ModeOfPayment::find($decryptedId);
+            $updateMop      = ModeOfPayment::where('id', $decryptedId)->update([
+                'name'      => $request->name
             ]);
 
             DB::commit();
 
-            $message    = "Updated MOP: '$previousName->name' change into $request->name";
+            $message            = "Updated MOP: '$previousName->name' change into $request->name";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
 
             return response()->json([
-                'error'             => false,
-                'message'           => trans('messages.success'),
-                'data'              => $updateMop,
+                'error'         => false,
+                'message'       => trans('messages.success'),
+                'data'          => $updateMop,
                 //'audit_trail'       =>$message
             ]);
         }catch (Exception $e) {
@@ -110,8 +110,8 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $mopStatus = ModeOfPayment::find($decryptedId);
+            $decryptedId    = Crypt::decrypt($request->id);
+            $mopStatus      = ModeOfPayment::find($decryptedId);
 
             if($mopStatus->status==1){
                 $mopArchived = ModeOfPayment::where('id',$decryptedId)->update([
@@ -128,7 +128,7 @@ class ModeOfPaymentController extends Controller
             DB::commit();
 
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -151,12 +151,12 @@ class ModeOfPaymentController extends Controller
     {
         try{
             DB::beginTransaction();
-            $statusFilter = (array) $request->status;
-            $statusFilter = Arr::flatten($statusFilter, 1);
+            $statusFilter   = (array) $request->status;
+            $statusFilter   = Arr::flatten($statusFilter, 1);
 
-            $mopDetails = ModeOfPayment::whereIn('status',$statusFilter)->get();
+            $mopDetails     = ModeOfPayment::whereIn('status',$statusFilter)->get();
 
-            $tableDetails = $mopDetails->map(function($item){
+            $tableDetails   = $mopDetails->map(function($item){
                 return[
                     'id'            => Crypt::encrypt($item->id),
                     'name'          => $item->name,

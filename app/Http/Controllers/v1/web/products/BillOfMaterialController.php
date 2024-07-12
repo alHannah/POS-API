@@ -29,9 +29,9 @@ class BillOfMaterialController extends Controller
             $quantity       = $request->qty;
 
             foreach ($WproductIds as $key => $wproductId) {
-                $qty       = $quantity[$key];
-                $getUom = Product::where('id', $wproductId)->value('uom_id');
-                $createBom = BillOfMaterial::create([
+                $qty        = $quantity[$key];
+                $getUom     = Product::where('id', $wproductId)->value('uom_id');
+                $createBom  = BillOfMaterial::create([
                     'product_id'    => $SproductIds,
                     'uom_id'        => $getUom,
                     'qty'           => $qty,
@@ -47,7 +47,7 @@ class BillOfMaterialController extends Controller
             $packagingUoms      = Product::whereIn('id', $flatProductIds)->pluck('uom_id', 'id');
 
             foreach ($orderTypeIds as $index => $orderTypeId) {
-                $createPackaging = Packaging::create([
+                $createPackaging    = Packaging::create([
                     'order_type_id' => $orderTypeId,
                     'product_id'    => $SproductIds,
                 ]);
@@ -66,10 +66,10 @@ class BillOfMaterialController extends Controller
 
             DB::commit();
 
-            $productName = Product::find($SproductIds)->name;
-            $message    = "Created BOM and Packaging: Product('$productName')";
+            $productName        = Product::find($SproductIds)->name;
+            $message            = "Created BOM and Packaging: Product('$productName')";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -167,10 +167,10 @@ class BillOfMaterialController extends Controller
             $WproductIds    = $request->wproduct_id;
             $quantity       = $request->qty;
 
-            $deleteData = BillOfMaterial::where('product_id',$SproductIds)->delete();
+            $deleteData = BillOfMaterial::where('product_id', $SproductIds)->delete();
             foreach ($WproductIds as $key => $wproductId) {
                 $qty       = $quantity[$key];
-                $getUom = Product::where('id', $wproductId)->value('uom_id');
+                $getUom     = Product::where('id', $wproductId)->value('uom_id');
 
                 $createNewBom = BillOfMaterial::create([
                     'product_id'    => $SproductIds,
@@ -210,10 +210,10 @@ class BillOfMaterialController extends Controller
 
             DB::commit();
 
-            $productName = Product::find($SproductIds)->name;
-            $message    = "Update BOM and Packaging: Product('$productName')";
+            $productName        = Product::find($SproductIds)->name;
+            $message            = "Update BOM and Packaging: Product('$productName')";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -238,15 +238,16 @@ class BillOfMaterialController extends Controller
 
             $bomId = $request->id;
 
-            $bom = BillOfMaterial::find($bomId);
-            $deleteBom = BillOfMaterial::where('product_id',$bom->product_id)->delete();
-            $deletePackaging = Packaging::where('product_id',$bom->product_id)->delete();
-            $productName = Product::find($bom->product_id)->name;
+            $bom                = BillOfMaterial::find($bomId);
+            $deleteBom          = BillOfMaterial::where('product_id', $bom->product_id)->delete();
+            $deletePackaging    = Packaging::where('product_id', $bom->product_id)->delete();
+            $productName        = Product::find($bom->product_id)->name;
+
             DB::commit();
 
-            $message    = "Deleted BOM and Packaging: Product('$productName')";
+            $message            = "Deleted BOM and Packaging: Product('$productName')";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -282,16 +283,16 @@ class BillOfMaterialController extends Controller
 
             $tableDetails = $filteredData->map(function ($item) {
                 return [
-                    'name' => $item->name,
-                    'brand' => $item->product_per_brand->brand,
-                    'pos_category' => $item->product_per_posCategories->pos_category_name,
+                    'name'              => $item->name,
+                    'brand'             => $item->product_per_brand->brand,
+                    'pos_category'      => $item->product_per_posCategories->pos_category_name,
                     'bill_of_materials' => $item->product_per_bom->map(function ($bom) {
                         return [
-                            'id' => $bom->id,
-                            'bom_id' => $bom->bom_id,
-                            'qty' => $bom->qty,
-                            'uom_id' => $bom->uom_id,
-                            'created_at' => $bom->created_at->format("M d, Y h:i A")
+                            'id'            => $bom->id,
+                            'bom_id'        => $bom->bom_id,
+                            'qty'           => $bom->qty,
+                            'uom_id'        => $bom->uom_id,
+                            'created_at'    => $bom->created_at->format("M d, Y h:i A")
                         ];
                     }),
                 ];

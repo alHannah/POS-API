@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 class UserAccessController extends Controller
 {
     public function create(Request $request){
-        dd("Hello World");
+        dd("Hello World Create");
+    }
+
+    public function update(Request $request){
+        dd("Hello World Update");
+    }
+
+    public function get(Request $request){
+        dd("Hello World Get");
     }
 }

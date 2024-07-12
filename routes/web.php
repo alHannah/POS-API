@@ -443,9 +443,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/create',                            'v1\web\products\UserAccessController@create');
+                $router->post('/create',                            'v1\web\accounts\UserAccessController@create');
                 $router->post('/update',                            'v1\web\accounts\UserAccessController@update');
-                $router->post('/get',                               'v1\web\products\UserAccessController@get');
+                $router->post('/get',                               'v1\web\accounts\UserAccessController@get');
             });
         });
 

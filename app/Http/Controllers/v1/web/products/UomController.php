@@ -32,7 +32,7 @@ class UomController extends Controller
             DB::commit();
 
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -59,17 +59,17 @@ class UomController extends Controller
             DB::beginTransaction();
 
             $createUomCategory = UomCategory::create([
-                'name'            => $request->name
+                'name'         => $request->name
             ]);
 
             if ($createUomCategory->wasRecentlyCreated) {
-                $message    = "Created UoM Category: '$request->name'";
+                $message        = "Created UoM Category: '$request->name'";
             }
 
             DB::commit();
 
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -92,8 +92,8 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $uomDetails = Uom::find($decryptedId)->first();
+            $decryptedId    = Crypt::decrypt($request->id);
+            $uomDetails     = Uom::find($decryptedId)->first();
 
             //$encryptedId = Crypt::encrypt($request->id);
 
@@ -120,7 +120,7 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
+            $decryptedId        = Crypt::decrypt($request->id);
             $uomCategoryDetails = UomCategory::find( $decryptedId);
             DB::commit();
 
@@ -145,25 +145,25 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
+            $decryptedId             = Crypt::decrypt($request->id);
             //audit
-            $previousDetails = Uom::with('uom_per_categories')->where('id',$decryptedId)->first();
-            $previousCategoryName = $previousDetails->uom_per_categories->name;
+            $previousDetails        = Uom::with('uom_per_categories')->where('id',$decryptedId)->first();
+            $previousCategoryName   = $previousDetails->uom_per_categories->name;
 
             $updateUom = Uom::where('id',$decryptedId)->update([
-                'name'                => $request->name,
-                'uom_category_id'     => $request->uom_category_id,
-                'quantity'            => $request->quantity,
+                'name'               => $request->name,
+                'uom_category_id'    => $request->uom_category_id,
+                'quantity'           => $request->quantity,
             ]);
             //audit
             $newCategoryName = UomCategory::find( $request->uom_category_id);
 
             DB::commit();
 
-            $message    = "Updated UoM: '$previousDetails->name', $previousCategoryName, $previousDetails->quantity change into '$request->name', $newCategoryName->name, $request->quantity";
+            $message            = "Updated UoM: '$previousDetails->name', $previousCategoryName, $previousDetails->quantity change into '$request->name', $newCategoryName->name, $request->quantity";
 
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -188,18 +188,18 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $previousName = UomCategory::find($decryptedId);
+            $decryptedId    = Crypt::decrypt($request->id);
+            $previousName   = UomCategory::find($decryptedId);
 
             $updateUom = UomCategory::where('id',$decryptedId)->update([
-                'name'                => $request->name,
+                'name'      => $request->name,
             ]);
 
             DB::commit();
 
-            $message    = "Updated UoM Category: '$previousName->name' change into '$request->name'";
+            $message            = "Updated UoM Category: '$previousName->name' change into '$request->name'";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -224,16 +224,16 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $previousDetails = Uom::find($decryptedId);
-            $previousCategoryName = $previousDetails->uom_per_categories->name;
+            $decryptedId            = Crypt::decrypt($request->id);
+            $previousDetails        = Uom::find($decryptedId);
+            $previousCategoryName   = $previousDetails->uom_per_categories->name;
 
-            $deleteUom = Uom::where('id', $decryptedId)->delete();
+            $deleteUom              = Uom::where('id', $decryptedId)->delete();
 
             DB::commit();
-            $message    = "Deleted UoM: '$previousDetails->name', $previousCategoryName, $previousDetails->quantity";
+            $message            = "Deleted UoM: '$previousDetails->name', $previousCategoryName, $previousDetails->quantity";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([
@@ -258,16 +258,16 @@ class UomController extends Controller
     {
         try {
             DB::beginTransaction();
-            $decryptedId = Crypt::decrypt($request->id);
-            $previousDetails = UomCategory::find($decryptedId);
+            $decryptedId        = Crypt::decrypt($request->id);
+            $previousDetails    = UomCategory::find($decryptedId);
 
-            $deleteUom = UomCategory::where('id', $decryptedId)->delete();
+            $deleteUom          = UomCategory::where('id', $decryptedId)->delete();
 
             DB::commit();
 
-            $message    = "Deleted UoM Category: '$previousDetails->name'";
+            $message            = "Deleted UoM Category: '$previousDetails->name'";
             $request["remarks"] = $message;
-            $request["type"] = 2;
+            $request["type"]    = 2;
             $this->audit_trail($request);
 
             return response()->json([

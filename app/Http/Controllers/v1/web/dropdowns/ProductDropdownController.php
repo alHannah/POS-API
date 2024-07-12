@@ -55,7 +55,7 @@ class ProductDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $branddropdown = Brand::where('status', '1')->get();
+            $branddropdown = Brand::where('status', 1)->get(['id','brand']);
 
             return response()->json([
                 "error"         => false,

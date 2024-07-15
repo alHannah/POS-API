@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Lumen\Auth\Authorizable;
 
@@ -35,6 +36,15 @@ class Users extends Model implements AuthenticatableContract, AuthorizableContra
     protected $hidden = [
         'password',
     ];
+
+    // -------------------------BELONGS TO
+
+    public function user_role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    // -------------------------HAS MANY
 
 
     public function brand_assignment(): HasMany {

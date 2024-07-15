@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Module extends Model
 {
@@ -15,4 +16,17 @@ class Module extends Model
         'delete',
         'approve'
     ];
+
+
+    // -----------------BOLONGS TO
+
+
+
+    // -----------------HAS MANY
+
+    public function module_userAccess(): HasMany
+    {
+        return $this->hasMany(UserAccess::class);
+    }
+
 }

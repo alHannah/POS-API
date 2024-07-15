@@ -18,6 +18,8 @@ class UserAccess extends Model
         'approve'
     ];
 
+    // ------------BELONGS TO
+
     public function user_access_module(): BelongsTo
     {
         return $this->belongsTo(Module::class, 'module_id');
@@ -27,4 +29,6 @@ class UserAccess extends Model
     {
         return $this->belongsTo (Role::class, 'role_id');
     }
+
+    // -----------HAS MANY
 }

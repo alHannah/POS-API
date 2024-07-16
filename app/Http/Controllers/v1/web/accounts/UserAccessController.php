@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\Role;
+use Illuminate\Cache\Lock;
 use App\Models\UserAccess;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Crypt;
 
 class UserAccessController extends Controller
 {
@@ -198,7 +200,75 @@ class UserAccessController extends Controller
     }
 
 
-    public function get(Request $request){
-        dd("Hello World Get");
+    public function displayRole(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = Role::orderByDesc('created_at')
+                ->get(['id', 'role_name','created_at'])
+                ->map(function ($item) {
+                    return [
+                        'id'         => Crypt::encryptString($item->id),
+                        'role_name'  => $item->role_name,
+                        'created_at' => $item->created_at->format('M d, Y h:i A'),
+                        'id_nE'      => $item->id,
+                    ];
+                });
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error: {$e->getMessage()}");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
     }
+
+    public function displayModule(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = Module::orderByDesc('created_at')
+                ->get(['id','module_name','add','edit','view','delete','approve','created_at'])
+                ->map(function ($item) {
+                    return [
+                        'id'           => Crypt::encryptString($item->id),
+                        'module_name'  => $item->module_name,
+                        'add'          => $item->add,
+                        'edit'         => $item->edit,
+                        'view'         => $item->view,
+                        'delete'       => $item->delete,
+                        'approve'      => $item->approve,
+                        'created_at'   => $item->created_at ? $item->created_at->format('M d, Y h:i A') : null,
+                        'id_nE'        => $item->id,
+                    ];
+                });
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error: {$e->getMessage()}");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
 }

@@ -434,7 +434,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             });
 
         });
-        
+
 
         $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {
@@ -450,6 +450,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/update',                            'v1\web\accounts\UserAccessController@update');
                 $router->post('/get_update',                        'v1\web\accounts\UserAccessController@get_update');
                 $router->post('/get',                               'v1\web\accounts\UserAccessController@get');
+                $router->post('/displayRole',                       'v1\web\accounts\UserAccessController@displayRole');
+                $router->post('/displayModule',                     'v1\web\accounts\UserAccessController@displayModule');
             });
         });
 

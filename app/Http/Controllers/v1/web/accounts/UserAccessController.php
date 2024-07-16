@@ -109,7 +109,47 @@ class UserAccessController extends Controller
 
 
     public function update(Request $request){
-        dd("Hello World Update");
+        try {
+            DB::beginTransaction();
+            $role           = $request->role_id;
+            $modules        = $request->module_id;
+            $add            = $request->add;
+            $edit           = $request->edit;
+            $view           = $request->view;
+            $delete         = $request->delete;
+            $approve        = $request->approve;
+            $index = 0;
+            $modules_length = count($modules);
+
+            foreach ($modules as $module) {
+                UserAccess::where("role_id", $role)->where('module_id',$module)->update([
+                    "add"       => $add[$index],
+                    "edit"      => $edit[$index],
+                    "view"      => $view[$index],
+                    "delete"    => $delete[$index],
+                    "approve"   => $approve[$index],
+                ]);
+                $index++;
+                if ($index >= $modules_length) {
+                    $index--;
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                "error"             => false,
+                "message"           => trans('messages.success'),
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"             => true,
+                "message"           => trans("messages.error"),
+            ]);
+        }
     }
 
     public function get_update(Request $request){
@@ -119,16 +159,32 @@ class UserAccessController extends Controller
             $userAccessData = UserAccess::with([
                 "user_access_module",
                 "user_access_role"
-            ])->where;
+            ])->where('role_id',$role)->get();
 
-            dd($userAccessData[0]);
+            $tableData = $userAccessData->map(function ($items) {
+                return [
+                    "module_id"         => $items->module_id,
+                    "module_name"       => $items->user_access_module->module_name,
+                    "module_add"        => $items->user_access_module->add,
+                    "module_edit"       => $items->user_access_module->edit,
+                    "module_view"       => $items->user_access_module->view,
+                    "module_delete"     => $items->user_access_module->delete,
+                    "module_approve"    => $items->user_access_module->approve,
+                    "add"               => $items->add,
+                    "edit"              => $items->edit,
+                    "view"              => $items->view,
+                    "delete"            => $items->delete,
+                    "approve"           => $items->approve,
+                    "role_name"         => $items->user_access_role->role_name,
+                ];
+            });
 
             DB::commit();
 
             return response()->json([
                 "error"             => false,
                 "message"           => trans('messages.success'),
-                // "data"              => $tableData,
+                "data"              => $tableData,
             ]);
 
         } catch (Exception $e) {

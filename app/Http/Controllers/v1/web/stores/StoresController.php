@@ -22,7 +22,7 @@ class StoresController extends Controller
     public function create_store(Request $request) {
         try {
 
-            $createName = $request->name;
+            $createName = $request->store_name;
             if ($createName) {
                 $checkDupe = Store::where('store_name', $createName)->count();
 

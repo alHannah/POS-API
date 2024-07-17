@@ -11,6 +11,7 @@ use App\Models\Store;
 use App\Models\Uom;
 use App\Models\UomCategory;
 use App\Models\Product;
+use App\Models\ProductClassification;
 use App\Models\ProductPerStore;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,49 @@ class ProductDropdownController extends Controller
                 "error"         => false,
                 "message"       => trans('messages.success'),
                 "data"          => $branddropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+
+    public function uom_dropdown(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $uomDropdown = Uom::get(['name']);
+
+            return response()->json([
+                "error"         => false,
+                "message"       => trans('messages.success'),
+                "data"          => $uomDropdown,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info("Error: $e");
+            return response()->json([
+                "error"         => true,
+                "message"       => trans("messages.error"),
+            ]);
+        }
+    }
+    public function product_classification_dropdown(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $productClassificationDropdown = ProductClassification::get(['name']);
+
+            return response()->json([
+                "error"         => false,
+                "message"       => trans('messages.success'),
+                "data"          => $productClassificationDropdown,
             ]);
         } catch (Exception $e) {
             DB::rollback();

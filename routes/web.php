@@ -278,6 +278,8 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 });
 
                 $router->post('/uom_category_dropdown',             'v1\web\dropdowns\ProductDropdownController@uom_category_dropdown');
+                $router->post('/uom_dropdown',                      'v1\web\dropdowns\ProductDropdownController@uom_dropdown');
+                $router->post('/product_classification_dropdown',   'v1\web\dropdowns\ProductDropdownController@product_classification_dropdown');
                 $router->post('/store_dropdown',                    'v1\web\dropdowns\ProductDropdownController@store_dropdown');
                 $router->post('/product_store_dropdown',            'v1\web\dropdowns\ProductDropdownController@product_dropdown_per_store');
                 $router->post('/uom_per_product',                   'v1\web\dropdowns\ProductDropdownController@uom_per_product');
@@ -442,7 +444,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
-            $router->group(["prefix" => "/user_access", "middleware" => "auth"], function () use ($router) {
+            $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
                 });

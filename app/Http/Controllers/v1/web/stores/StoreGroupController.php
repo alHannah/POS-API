@@ -14,87 +14,57 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class StoreGroupController extends Controller
 {
     public function create_update(Request $request)
     {
+        $this->validateRequest($request);
+
         try {
             DB::beginTransaction();
-            $decryptedId    = !empty($request->id) ? Crypt::decrypt($request->id) : null;
-            $groupName      = $request->group_name;
-            $brandId        = $request->brand_id;
+            $decryptedId = $this->decryptId($request->id);
+            $groupName = $request->group_name;
+            $brandId = $request->brand_id;
 
-            if (!$groupName || !$brandId) {
-                return response()->json([
-                    'error'     => true,
-                    'message'   => trans('messages.required')
-                ]);
+            if ($this->groupExists($groupName, $brandId, $decryptedId)) {
+                return $this->jsonError(trans('messages.store.store_group.existed'));
             }
 
-            $existingGroup = StoreGroup::where('group_name', $groupName)
-                            ->where('brand_id', $brandId)
-                            ->where('id', '!=', $decryptedId)
-                            ->first();
-
-            if ($existingGroup) {
-                return response()->json([
-                    'error'     => true,
-                    'message'   => trans('messages.store.store_group.existed'),
-                ]);
-            }
-
-            $previousData       = Crypt::encrypt($decryptedId)
-                                ? StoreGroup::with('storeGroup_brand')->find($decryptedId)
-                                : null;
-            $previousStore      = $previousData->group_name ?? 'N/A';
-            $previousBrand      = $previousData->storeGroup_brand->brand ?? 'N/A';
+            $previousData = $decryptedId ? StoreGroup::with('storeGroup_brand')->find($decryptedId) : null;
+            $previousStore = $previousData->group_name ?? 'N/A';
+            $previousBrand = $previousData->storeGroup_brand->brand ?? 'N/A';
 
             $createUpdate = StoreGroup::updateOrCreate([
-                'id'            => $decryptedId
+                'id' => $decryptedId
             ], [
-                'group_name'    => $groupName,
-                'brand_id'      => $brandId
+                'group_name' => $groupName,
+                'brand_id' => $brandId
             ]);
 
             $brandName = Brand::find($brandId)->brand;
-
             $message = $decryptedId
-                    ? "Updated Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
-                    : "Created $groupName (Brand: $brandName)";
+                ? "Updated Previous: $previousStore (Brand: $previousBrand) New: $groupName (Brand: $brandName)"
+                : "Created $groupName (Brand: $brandName)";
 
-            $request['remarks'] = $message;
-            $request['type']    = 2;
-            $this->audit_trail($request);
+            $this->auditTrail($request, $message);
             DB::commit();
 
-            return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $createUpdate
-            ]);
+            return $this->jsonSuccess($createUpdate);
 
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info("Error: $e");
-            return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
-            ]);
+            Log::error("Error: {$e->getMessage()}");
+            return $this->jsonError(trans('messages.error'));
         }
     }
 
     public function get(Request $request)
     {
         try {
-            DB::beginTransaction();
-
-            $areaFilter         = (array) $request->areaFilter;
-            $brandFilter        = (array) $request->brandFilter;
-
-            // Flatten the filters in case they are nested
-            $areaFilter         = Arr::flatten($areaFilter, 1);
-            $brandFilter        = Arr::flatten($brandFilter, 1);
+            $areaFilter = Arr::flatten((array) $request->areaFilter);
+            $brandFilter = Arr::flatten((array) $request->brandFilter);
 
             $thisData = StoreGroup::withCount(['storeGroup_brand', 'storeGroup_store as store_count']);
             if (!empty($brandFilter)) {
@@ -108,91 +78,101 @@ class StoreGroupController extends Controller
             $getData = $thisData->latest()->get();
 
             $generateData = $getData->map(function ($item) {
-                $id                    = Crypt::encrypt($item->id);
-                $created_at            = $item->created_at;
                 return [
-                    'store_count'      => $item->store_count                        ?? 'N/A',
-                    'id'               => $id                                       ?? 'N/A',
-                    'store_name'       => $item->group_name                         ?? 'N/A',
-                    'brand'            => $item->storeGroup_brand->brand            ?? 'N/A',
-                    'created_at'       => $created_at->format("M d, Y h:i A")       ?? 'N/A',
+                    'store_count' => $item->store_count ?? 'N/A',
+                    'id' => Crypt::encrypt($item->id) ?? 'N/A',
+                    'store_name' => $item->group_name ?? 'N/A',
+                    'brand' => $item->storeGroup_brand->brand ?? 'N/A',
+                    'created_at' => $item->created_at->format("M d, Y h:i A") ?? 'N/A',
                 ];
-
             });
 
-            DB::commit();
-
-            return response()->json([
-                'error'         => false,
-                'message'       => trans('messages.success'),
-                'data'          => $generateData,
-            ]);
+            return $this->jsonSuccess($generateData);
 
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error("Error: {$e->getMessage()}");
-            return response()->json([
-                'error'         => true,
-                'message'       => trans('messages.error'),
-            ]);
+            return $this->jsonError(trans('messages.error'));
         }
     }
 
     public function delete(Request $request)
     {
         try {
-            DB::beginTransaction();
-            // dd(Crypt::encrypt(40));
-
             $decryptedId = Crypt::decrypt($request->id);
-
             $storeGroup = StoreGroup::find($decryptedId);
 
             if (!$storeGroup) {
-                return response()->json([
-                    'error'   => true,
-                    'message' => 'Store Group not found.',
-                ]);
+                return $this->jsonError('Store Group not found.');
             }
 
-            $storeData = Store::with('store_storeGroup')->get();
-
-            foreach ($storeData as $item) {
-                if ($item->group_id == $storeGroup->id) {
-                    return response()->json([
-                        'error'   => true,
-                        'message' => 'Deletion failed, This Store Group is used in Stores Table.',
-                    ]);
-                }
+            if ($this->isGroupUsedInStores($storeGroup->id)) {
+                return $this->jsonError('Deletion failed, This Store Group is used in Stores Table.');
             }
 
-            // Proceed with the deletion if no match is found
             $storeGroup->delete();
+            $this->auditTrail($request, "Deleted Store Group: $storeGroup->group_name");
 
-
-            $message = "Deleted Store Group: $storeGroup->group_name";
-
-            $request['remarks'] = $message;
-            $request['type']    = 2;
-            $this->audit_trail($request);
-            // dd(DB::getQueryLog());
-
-            DB::commit();
-
-            return response()->json([
-                'error'     => false,
-                'message'   => trans('messages.success'),
-                'data'      => $storeGroup,
-            ]);
+            return $this->jsonSuccess($storeGroup);
 
         } catch (Exception $e) {
-            DB::rollBack();
-            // dd(DB::getQueryLog());
-            Log::info("Error: $e");
-            return response()->json([
-                'error'     => true,
-                'message'   => trans('messages.error'),
-            ]);
+            Log::error("Error: {$e->getMessage()}");
+            return $this->jsonError(trans('messages.error'));
         }
+    }
+
+    // Helper Methods
+
+    private function validateRequest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'group_name' => 'required',
+            'brand_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            throw new \InvalidArgumentException(trans('messages.required'));
+        }
+    }
+
+    private function decryptId($id)
+    {
+        return !empty($id) ? Crypt::decrypt($id) : null;
+    }
+
+    private function groupExists($groupName, $brandId, $decryptedId)
+    {
+        return StoreGroup::where('group_name', $groupName)
+            ->where('brand_id', $brandId)
+            ->where('id', '!=', $decryptedId)
+            ->exists();
+    }
+
+    private function isGroupUsedInStores($groupId)
+    {
+        return Store::where('group_id', $groupId)->exists();
+    }
+
+    private function auditTrail(Request $request, $message)
+    {
+        $request['remarks'] = $message;
+        $request['type'] = 2;
+        $this->audit_trail($request);
+    }
+
+    private function jsonError($message)
+    {
+        return response()->json([
+            'error' => true,
+            'message' => $message,
+        ]);
+    }
+
+    private function jsonSuccess($data)
+    {
+        return response()->json([
+            'error' => false,
+            'message' => trans('messages.success'),
+            'data' => $data,
+        ]);
     }
 }

@@ -78,26 +78,13 @@ class ProductListController extends Controller
             $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
             $previousBrand                      = $previousData->product_brand->brand    ?? 'N/A';
 
-            // $imageBase64 = null;
-
-            // if ($request->hasFile('imageFile')) {
-            //     $image = $request->file('imageFile');
-            //     $imageBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($image->getRealPath()));
-            // }
-
-            // $imageBase64 = null;
-
-            // if ($request->hasFile('imageFile')) {
-            //     $image = $request->file('imageFile');
-            //     $imageBase64 = base64_encode(file_get_contents($image->getRealPath()));
-            // }
-
-            $image_file = $request->file('imageFile');
-
-            $fileName = $image_file->getClientOriginalName() ?? 'N/A';
-            // dd($fileName);
-            $imageURL = url('/') . '/storage/uploads/products/' . $fileName;
-            $image_file->storeAs('/uploads/products/', $fileName, 'public');
+            if ($image) {
+                $fileName = $image->getClientOriginalName();
+                $imageURL = url('/') . '/storage/uploads/products/' . $fileName;
+                $image->storeAs('/uploads/products/', $fileName, 'public');
+            } else {
+                $imageURL = 'N/A';
+            }
 
             $createUpdate = Product::updateOrCreate([
                 'id'                        => $decryptedId

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\ManagerInCharge;
 use Illuminate\Support\Facades\Crypt;
 
 class StoreDropdownController extends Controller
@@ -128,7 +129,7 @@ class StoreDropdownController extends Controller
             DB::beginTransaction();
 
             $brandId = $request->brand_id;
-            $areaDropdown = Area::where('brand_id', $brandId)->get();
+            $areaDropdown = Area::where('brand_id', $brandId)->where('status', 1)->get();
 
             return response()->json([
                 "error"         =>false,
@@ -193,7 +194,7 @@ class StoreDropdownController extends Controller
         try {
             DB::beginTransaction();
 
-            $managerDropdown = PriceTier::where('status', "active")->get();
+            $managerDropdown = ManagerInCharge::get();
 
             return response()->json([
                 "error"         => false,
@@ -303,7 +304,7 @@ class StoreDropdownController extends Controller
         }
     }
 
-    
+
 
     /*--------------STORES DROPDOWN---------------*/
 }

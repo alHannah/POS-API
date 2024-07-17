@@ -80,6 +80,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/store_group_dropdown_get',   'v1\web\dropdowns\StoreDropdownController@store_group_dropdown_get');
                 $router->post('/price_tier_dropdown',        'v1\web\dropdowns\StoreDropdownController@price_tier_dropdown');
                 $router->post('/manager_dropdown',           'v1\web\dropdowns\StoreDropdownController@manager_dropdown');
+                $router->post('/user_dropdown',              'v1\web\dropdowns\StoreDropdownController@user_dropdown');
                 $router->post('/add_product_dropdown',       'v1\web\dropdowns\StoreDropdownController@add_product_dropdown');
                 $router->post('/mobile_user_dropdown',       'v1\web\dropdowns\StoreDropdownController@mobile_user_dropdown');
                 $router->post('/stores_dropdown',            'v1\web\dropdowns\StoreDropdownController@stores_dropdown');

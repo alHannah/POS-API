@@ -21,6 +21,7 @@ class UserAccessController extends Controller
         try {
             DB::beginTransaction();
 
+            // Parameters
             $roleName = $request->roleName;
             $add      = Arr::flatten((array) $request->add, 1);
             $edit     = Arr::flatten((array) $request->edit, 1);

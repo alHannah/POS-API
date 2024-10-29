@@ -109,7 +109,7 @@ class OrderTypeController extends Controller
             //     $orderData = OrderType::get();
             // }
             $orderData = OrderType::whereIn('status', $statusFilter)->get();
-;
+
             $tableData = $orderData->map(function ($items) {
                 return [
                     'id'            => $items->id,

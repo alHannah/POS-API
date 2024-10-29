@@ -5,19 +5,12 @@ namespace App\Http\Controllers\v1\web\stores;
 use Exception;
 use App\Models\Area;
 use App\Models\Brand;
-use App\Models\Store;
-use App\Models\CashReport;
-use App\Models\GeneralTimeSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Inventory;
-use App\Models\InventoryDetail;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Crypt;
-
-use function PHPUnit\Framework\isEmpty;
 
 class AreaController extends Controller
 {
@@ -55,8 +48,7 @@ class AreaController extends Controller
             $previousArea       = $previousData->name ?? 'N/A';
             $previousBrand      = $previousData->brand_areas->brand ?? 'N/A';
 
-            // --------------------------updateOrCreate-----------------------------------------
-
+            // -------------------------- UPDATE OR CREATE -----------------------------------------
             $createUpdate = Area::updateOrCreate([
                 'id'        => $decryptedId
             ], [
@@ -98,10 +90,8 @@ class AreaController extends Controller
         try {
             DB::beginTransaction();
 
-            $brandFilter    = (array) $request->brandFilter;
-
             // Flatten the filters in case they are nested
-            $brandFilter = Arr::flatten($brandFilter, 1);
+            $brandFilter    = Arr::flatten((array) $request->brandFilter, 1);
 
             $thisData = Area::with(['brand_areas', 'areas_per_stores']);
 
@@ -112,18 +102,15 @@ class AreaController extends Controller
             $getData = $thisData->get();
 
             $generateData   = $getData->map(function ($items) {
-                    $id             = $items->id                        ?? 'N/A';
-                    $name           = $items->name                      ?? 'N/A';
-                    $brand          = $items->brand_areas->brand        ?? 'N/A';
-                    $created_at     = $items->created_at                ?? 'N/A';
-                    $status         = $items->status                    ?? 'N/A';
+                    $id             = $items->id                                    ?? 'N/A';
+                    $created_at     = $items->created_at                            ?? 'N/A';
 
                     return [
                         'id'            => Crypt::encrypt($id),
-                        'area_name'     => $name,
-                        'brand'         => $brand,
-                        'status'        => $status,
-                        'created_at'    => $created_at->format('M d, Y h:i A')
+                        'area_name'     => $items->name                             ?? 'N/A',
+                        'brand'         => $items->brand_areas->brand               ?? 'N/A',
+                        'status'        => $items->status                           ?? 'N/A',
+                        'created_at'    => $created_at->format('M d, Y h:i A'),
                     ];
             });
 

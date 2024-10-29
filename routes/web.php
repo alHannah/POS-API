@@ -35,19 +35,15 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/login', 'v1\web\LoginController@login');
                 $router->post('/logout', 'v1\web\LoginController@logout');
             });
-
-
         });
 
-          // ----------------------- AUDIT TRAIL --------------------------------------
-          $router->group(["prefix" => "/audit_trail", "middleware" => "auth"], function () use ($router) {
+        // ----------------------- AUDIT TRAIL --------------------------------------
+        $router->group(["prefix" => "/audit_trail", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
             $router->post('/',            'Controller@audit_trail');
-
-
         });
 
 
@@ -76,7 +72,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/area_dropdown_create',       'v1\web\dropdowns\StoreDropdownController@area_dropdown_create');
                 $router->post('/area_dropdown_get',          'v1\web\dropdowns\StoreDropdownController@area_dropdown_get');
                 $router->post('/area_dropdown_stores_get',   'v1\web\dropdowns\StoreDropdownController@area_dropdown_stores_get');
-                $router->post('/store_group_dropdown_create','v1\web\dropdowns\StoreDropdownController@store_group_dropdown_create');
+                $router->post('/store_group_dropdown_create', 'v1\web\dropdowns\StoreDropdownController@store_group_dropdown_create');
                 $router->post('/store_group_dropdown_get',   'v1\web\dropdowns\StoreDropdownController@store_group_dropdown_get');
                 $router->post('/price_tier_dropdown',        'v1\web\dropdowns\StoreDropdownController@price_tier_dropdown');
                 $router->post('/manager_dropdown',           'v1\web\dropdowns\StoreDropdownController@manager_dropdown');
@@ -105,7 +101,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/create_update',              'v1\web\stores\StoreGroupController@create_update');
                 $router->post('/delete',                     'v1\web\stores\StoreGroupController@delete');
                 $router->post('/get',                        'v1\web\stores\StoreGroupController@get');
-
             });
 
             $router->group(["prefix" => "/stores", "middleware" => "auth"], function () use ($router) {
@@ -149,7 +144,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/filterStoreHours',           'v1\web\stores\StoreHoursController@filterStoreHours');
                 $router->post('/displayStoreHours',          'v1\web\stores\StoreHoursController@displayStoreHours');
             });
-
         });
 
         // ----------------------- ACCESS --------------------------------------
@@ -157,7 +151,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- USER --------------------------------------
@@ -165,8 +158,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
-
         });
 
         // ----------------------- OIC --------------------------------------
@@ -174,8 +165,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
-
         });
 
         // ----------------------- OIC2 --------------------------------------
@@ -183,7 +172,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- SALES --------------------------------------
@@ -191,7 +179,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- DAILY SALES --------------------------------------
@@ -199,7 +186,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- SALES REPORT  --------------------------------------
@@ -207,7 +193,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- Z-READINGS --------------------------------------
@@ -215,7 +200,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- X-READINGS --------------------------------------
@@ -223,7 +207,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- Y-READINGS --------------------------------------
@@ -231,7 +214,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- CASH --------------------------------------
@@ -239,7 +221,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- PURCHASE --------------------------------------
@@ -247,7 +228,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- CUSTOMER --------------------------------------
@@ -255,7 +235,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- INVENTORY --------------------------------------
@@ -264,6 +243,33 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
+            $router->group(["prefix" => "/drop_down", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/store_group_dropdown',               'v1\web\dropdowns\InventoryDropdownController@store_group_dropdown');
+                $router->post('/store_dropdown',                     'v1\web\dropdowns\InventoryDropdownController@store_dropdown');
+                $router->post('/warehouse_dropdown',                 'v1\web\dropdowns\InventoryDropdownController@warehouse_dropdown');
+            });
+
+            $router->group(["prefix" => "/inventory_list", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/get',                                'v1\web\inventory\InventoryListController@get');
+                $router->post('/view',                               'v1\web\inventory\InventoryListController@view');
+            });
+
+            $router->group(["prefix" => "/return_pullouts", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/getReturnPullouts',                  'v1\web\inventory\ReturnPulloutsController@getReturnPullouts');
+                $router->post('/displayDetails',                     'v1\web\inventory\ReturnPulloutsController@displayDetails');
+            });
         });
 
         // ----------------------- PRODUCT --------------------------------------
@@ -287,8 +293,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/product_s_dropdown',                'v1\web\dropdowns\ProductDropdownController@product_s_dropdown');
                 $router->post('/product_w_dropdown',                'v1\web\dropdowns\ProductDropdownController@product_w_dropdown');
                 $router->post('/for_packaging_dropdown',            'v1\web\dropdowns\ProductDropdownController@for_packaging_dropdown');
-                $router->post('/brand_dropdown',                       'v1\web\dropdowns\ProductDropdownController@brand_dropdown');
-                $router->post('/mop_dropdown',                         'v1\web\dropdowns\ProductDropdownController@mop_dropdown');
+                $router->post('/brand_dropdown',                    'v1\web\dropdowns\ProductDropdownController@brand_dropdown');
+                $router->post('/mop_dropdown',                      'v1\web\dropdowns\ProductDropdownController@mop_dropdown');
+                $router->post('/order_type_dropdown',               'v1\web\dropdowns\ProductDropdownController@order_type_dropdown');
             });
 
             $router->group(["prefix" => "/product_list", "middleware" => "auth"], function () use ($router) {
@@ -308,8 +315,9 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
 
                 $router->post('/displayPriceTier',          'v1\web\products\PriceTierController@displayPriceTier');
                 $router->post('/create',                    'v1\web\products\PriceTierController@create');
-                $router->post('/displayTierProduct',        'v1\web\products\PriceTierController@displayTierProduct');
+                $router->post('/displayCreate',             'v1\web\products\PriceTierController@displayCreate');
                 $router->post('/update',                    'v1\web\products\PriceTierController@update');
+                $router->post('/displayUpdate',             'v1\web\products\PriceTierController@displayUpdate');
                 $router->post('/archivePriceTier',          'v1\web\products\PriceTierController@archivePriceTier');
                 $router->post('/displayDetails',            'v1\web\products\PriceTierController@displayDetails');
             });
@@ -353,7 +361,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/update',                            'v1\web\products\ProductClassificationController@edit_classification');
                 $router->post('/delete',                            'v1\web\products\ProductClassificationController@archive_classification');
                 $router->post('/get',                               'v1\web\products\ProductClassificationController@get_classification');
-
             });
 
             $router->group(["prefix" => "/inventory_category", "middleware" => "auth"], function () use ($router) {
@@ -393,10 +400,11 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                     return view('index', ['api' => env('APP_NAME')]);
                 });
 
-                $router->post('/displayPriceTier',          'v1\web\products\PriceTierController@displayPriceTier');
-                $router->post('/create',                    'v1\web\products\DiscountController@create');
-                $router->post('/update',                    'v1\web\products\DiscountController@update');
-                $router->post('/archiveDiscount',           'v1\web\products\DiscountController@archiveDiscount');
+                $router->post('/edit',                              'v1\web\products\ModeOfPaymentController@edit');
+                $router->post('/create',                            'v1\web\products\ModeOfPaymentController@create');
+                $router->post('/update',                            'v1\web\products\ModeOfPaymentController@update');
+                $router->post('/archived',                          'v1\web\products\ModeOfPaymentController@archived');
+                $router->post('/get',                               'v1\web\products\ModeOfPaymentController@get');
             });
 
             $router->group(["prefix" => "/order_type", "middleware" => "auth"], function () use ($router) {
@@ -409,9 +417,7 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/delete',                            'v1\web\products\OrderTypeController@archive_type');
                 $router->post('/get',                               'v1\web\products\OrderTypeController@get_type');
                 $router->post('/set',                               'v1\web\products\OrderTypeController@set_default');
-
             });
-
         });
 
         // ----------------------- POS CATEGORY --------------------------------------
@@ -419,7 +425,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- DATA PURGE --------------------------------------
@@ -427,7 +432,6 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
         // ----------------------- DATA RETRIEVE --------------------------------------
@@ -435,16 +439,25 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
-
         });
 
-
+        // -------------------------- ACCOUNTS --------------------------------------------
         $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
             $router->get('/', function () use ($router) {
                 return view('index', ['api' => env('APP_NAME')]);
             });
 
-            $router->group(["prefix" => "/accounts", "middleware" => "auth"], function () use ($router) {
+            $router->group(["prefix" => "/user", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',                     'v1\web\accounts\UsersController@create_update');
+                $router->post('/get',                               'v1\web\accounts\UsersController@get');
+                $router->post('/archive_activate',                  'v1\web\accounts\UsersController@archive_activate');
+            });
+
+            $router->group(["prefix" => "/user_access", "middleware" => "auth"], function () use ($router) {
                 $router->get('/', function () use ($router) {
                     return view('index', ['api' => env('APP_NAME')]);
                 });
@@ -456,7 +469,16 @@ $router->group(["prefix" => "/api", 'middleware' => 'cors'], function () use ($r
                 $router->post('/displayRole',                       'v1\web\accounts\UserAccessController@displayRole');
                 $router->post('/displayModule',                     'v1\web\accounts\UserAccessController@displayModule');
             });
-        });
 
+            $router->group(["prefix" => "/oic", "middleware" => "auth"], function () use ($router) {
+                $router->get('/', function () use ($router) {
+                    return view('index', ['api' => env('APP_NAME')]);
+                });
+
+                $router->post('/create_update',                     'v1\web\accounts\OICController@create_update');
+                $router->post('/get',                               'v1\web\accounts\OICController@get');
+                $router->post('/archive_activate',                  'v1\web\accounts\OICController@archive_activate');
+            });
+        });
     });
 });

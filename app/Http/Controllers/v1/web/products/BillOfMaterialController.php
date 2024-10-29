@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
 
 class BillOfMaterialController extends Controller
 {
@@ -114,8 +115,8 @@ class BillOfMaterialController extends Controller
     {
         try {
             DB::beginTransaction();
-
-            $bom = BillOfMaterial::with('bom_per_product')->where('id', $request->id)->get();
+            $id = Crypt::decrypt($request->id);
+            $bom = BillOfMaterial::with('bom_per_product')->where('id', $id)->get();
 
             $tableDetails = $bom->map(function ($item) {
                 $productComponents = BillOfMaterial::where('product_id', $item->product_id)->get([
@@ -236,7 +237,7 @@ class BillOfMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            $bomId = $request->id;
+            $bomId = Crypt::decrypt($request->id);
 
             $bom                = BillOfMaterial::find($bomId);
             $deleteBom          = BillOfMaterial::where('product_id', $bom->product_id)->delete();
@@ -288,7 +289,7 @@ class BillOfMaterialController extends Controller
                     'pos_category'      => $item->product_per_posCategories->pos_category_name,
                     'bill_of_materials' => $item->product_per_bom->map(function ($bom) {
                         return [
-                            'id'            => $bom->id,
+                            'id'            => Crypt::encrypt($bom->id),
                             'bom_id'        => $bom->bom_id,
                             'qty'           => $bom->qty,
                             'uom_id'        => $bom->uom_id,

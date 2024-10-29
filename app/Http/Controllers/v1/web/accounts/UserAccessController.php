@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\Role;
-use Illuminate\Cache\Lock;
 use App\Models\UserAccess;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +20,6 @@ class UserAccessController extends Controller
         try {
             DB::beginTransaction();
 
-            // Parameters
             $roleName = $request->roleName;
             $add      = Arr::flatten((array) $request->add, 1);
             $edit     = Arr::flatten((array) $request->edit, 1);

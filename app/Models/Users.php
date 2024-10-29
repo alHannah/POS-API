@@ -54,5 +54,10 @@ class Users extends Model implements AuthenticatableContract, AuthorizableContra
     public function area_assignment(): HasMany {
         return $this->hasMany(AreaAssignment::class, 'user_id');
     }
+
+    public function users_returnPullouts () : HasMany
+    {
+        return $this->hasMany(ReturnPullout::class, 'approved_by');
+    }
 }
 

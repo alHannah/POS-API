@@ -124,48 +124,20 @@ class PriceTierController extends Controller
         }
     }
 
-    public function displayPriceTier(Request $request)
+    public function displayCreate(Request $request)
     {
         try {
-            DB::beginTransaction();
+            $brandFilter = Arr::flatten((array) $request->brandFilter);
 
-            $data = PriceTier::with('price_tier_per_brand:id,brand')
-                ->orderByDesc('created_at')
-                ->get(['id', 'name', 'status', 'created_at', 'brand_id'])
-                ->map(function ($item) {
-                    return [
-                        'id'         => Crypt::encryptString($item->id),
-                        'brand'      => optional($item->price_tier_per_brand)->brand,
-                        'name'       => $item->name,
-                        'status'     => $item->status,
-                        'created_at' => $item->created_at->format('M d, Y h:i A'),
-                        'id_nE'      => $item->id,
-                    ];
-                });
+            if (empty($brandFilter)) {
+                return response()->json([
+                    'error'   => false,
+                    'message' => trans('messages.success'),
+                    'data'    => [],
+                ]);
+            }
 
-            DB::commit();
-
-            return response()->json([
-                'error'   => false,
-                'message' => trans('messages.success'),
-                'data'    => $data,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error("Error: {$e->getMessage()}");
-            return response()->json([
-                'error'   => true,
-                'message' => trans('messages.error'),
-            ]);
-        }
-    }
-
-    public function displayTierProduct(Request $request)
-    {
-        try {
-            $brandFilter = Arr::flatten((array) $request->brandFilter, 1);
-
-            $query = Product::with(['product_per_brand:id,brand', 'product_per_price_per_tiers:product_id,price']);
+            $query = Product::with(['product_per_brand:id,brand']);
 
             if (!empty($brandFilter)) {
                 $query->whereIn('brand_id', $brandFilter);
@@ -179,7 +151,6 @@ class PriceTierController extends Controller
                         'brand_id'      => Crypt::encrypt($item->brand_id),
                         'product_code'  => $item->product_code,
                         'name'          => $item->name,
-                        'price'         => optional($item->product_per_price_per_tiers->first())->price,
                         'created_at'    => Carbon::parse($item->created_at)->format('M d, Y h:i A'),
                         'brand_id_nE'   => $item->brand_id,
                     ];
@@ -293,7 +264,7 @@ class PriceTierController extends Controller
             }
 
             $message = "Updated Price Tier -> Name: {$previousName}, MOP: {$previousMOP}, Brand: {$previousBrand} || changed into || "
-                     . "Name: {$newName}, MOP: {$newMOP}, Brand: {$newBrand}. ";
+                . "Name: {$newName}, MOP: {$newMOP}, Brand: {$newBrand}. ";
             $message .= "Updated Products -> " . implode(", ", $messages);
 
             $request['remarks'] = $message;
@@ -326,6 +297,60 @@ class PriceTierController extends Controller
             ]);
         }
     }
+
+    public function displayUpdate(Request $request)
+    {
+        try {
+            $brandFilter = Arr::flatten((array) $request->brandFilter);
+            $tierFilter = Arr::flatten((array) $request->tierFilter);
+
+            if (empty($brandFilter) && empty($tierFilter)) {
+                return response()->json([
+                    'error'   => false,
+                    'message' => trans('messages.success'),
+                    'data'    => [],
+                ]);
+            }
+
+            $query = Product::with(['product_per_brand:id,brand', 'product_per_price_per_tiers:product_id,price,tier_id']);
+
+            if (!empty($brandFilter)) {
+                $query->whereIn('brand_id', $brandFilter);
+            }
+            if (!empty($tierFilter)) {
+                $query->whereHas('product_per_price_per_tiers', function ($q) use ($tierFilter) {
+                    $q->whereIn('tier_id', $tierFilter);
+                });
+            }
+
+            $data = $query->orderByDesc('created_at')
+                ->select(['id', 'brand_id', 'product_code', 'name', 'created_at'])
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'brand_id'      => Crypt::encrypt($item->brand_id),
+                        'product_code'  => $item->product_code,
+                        'name'          => $item->name,
+                        'price'         => optional($item->product_per_price_per_tiers->first())->price,
+                        'created_at'    => Carbon::parse($item->created_at)->format('M d, Y h:i A'),
+                        'brand_id_nE'   => $item->brand_id,
+                    ];
+                });
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+            ]);
+        } catch (Exception $e) {
+            Log::info("Error: $e");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
 
     public function archivePriceTier(Request $request)
     {
@@ -385,6 +410,8 @@ class PriceTierController extends Controller
             }
 
             $data = $query->select(['id', 'product_id', 'tier_id', 'price', 'created_at'])
+                ->whereNotNull('price')
+                ->where('price', '!=', '')
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($item) {
@@ -415,7 +442,44 @@ class PriceTierController extends Controller
         }
     }
 
-        // public function update(Request $request) //done
+    public function displayPriceTier(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = PriceTier::with('price_tier_per_brand:id,brand')
+                ->orderByDesc('created_at')
+                ->get(['id', 'name', 'status', 'created_at', 'brand_id'])
+                ->map(function ($item) {
+                    return [
+                        'id'         => Crypt::encryptString($item->id),
+                        'brand'      => optional($item->price_tier_per_brand)->brand,
+                        'name'       => $item->name,
+                        'status'     => $item->status,
+                        'created_at' => $item->created_at->format('M d, Y h:i A'),
+                        'id_nE'      => $item->id,
+                    ];
+                });
+
+            DB::commit();
+
+            return response()->json([
+                'error'   => false,
+                'message' => trans('messages.success'),
+                'data'    => $data,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error("Error: {$e->getMessage()}");
+            return response()->json([
+                'error'   => true,
+                'message' => trans('messages.error'),
+            ]);
+        }
+    }
+
+
+    // public function update(Request $request) //done
     // {
     //     try {
     //         DB::beginTransaction();

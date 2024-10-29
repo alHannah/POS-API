@@ -122,7 +122,7 @@ class PosCategoryController extends Controller
                         'category_name' => $item->pos_category_name,
                         'status'        => $item->status,
                         'created_at'    => Carbon::parse($item->created_at)->format('M d, Y h:i A'),
-                        'brand_id_nE'      => $item->brand_id,
+                        'brand_id_nE'   => $item->brand_id,
                     ];
                 });
 

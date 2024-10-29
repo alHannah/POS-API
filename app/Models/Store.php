@@ -137,4 +137,5 @@ class Store extends Model
     {
         return $this->hasMany(Customer::class,'store_id', 'id');
     }
+
 }

@@ -338,11 +338,6 @@ class StoresController extends Controller
         try {
             DB::beginTransaction();
 
-            $brandFilter        = $request->brandFilter;
-            $storeGroupsFilter  = $request->storeGroupsFilter;
-            $areaFilter         = $request->areaFilter;
-            $statusFilter       = $request->statusFilter;
-
             $data = Store::with([
                 'store_brands',
                 'store_storeGroup',
@@ -351,10 +346,15 @@ class StoresController extends Controller
                 'store_price_tier',
                 'store_devices',
                 'store_oic',
-            ])
-                ->whereIn('group_id', $storeGroupsFilter)
-                ->whereIn('area_id', $areaFilter);
-                //->whereIn('status', $statusFilter);
+            ]);
+
+            if ($request->has('areaFilter') || $request->has('storeGroupsFilter')) {
+                $brandFilter        = $request->brandFilter;
+                $storeGroupsFilter  = $request->storeGroupsFilter ?? [0];
+                $areaFilter         = $request->areaFilter ?? [0];
+
+                $data->whereIn('group_id', $storeGroupsFilter)->whereIn('area_id', $areaFilter);
+            }
 
             $data = $data->get();
 
@@ -365,8 +365,9 @@ class StoresController extends Controller
                     ->whereIn('mobile_user_id', $array)
                     ->where('store_id', $items->id)->get();
 
+                $oicname = [];
                 foreach ($oic as $oics) {
-                    $oicname[] = $oics->oic_mobile_user->name;
+                    $oicname = $oics->oic_mobile_user->name;
                 }
 
                 $mobileUserIdArray = [];

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MobileUser extends Model
 {
@@ -27,4 +28,9 @@ class MobileUser extends Model
         return $this->belongsTo(Store::class, 'store_id');
     }
     // ---------------------------HAS MANY
+
+    public function mobileUser_returnPullouts () : HasMany
+    {
+        return $this->hasMany(ReturnPullout::class, 'user_id');
+    }
 }

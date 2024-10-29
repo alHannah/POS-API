@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InventoryDetail extends Model
 {
@@ -18,4 +19,13 @@ class InventoryDetail extends Model
         'ending',
         'refund'
     ];
+
+    public function inventoryDetails_uom(): BelongsTo
+    {
+        return $this->belongsTo(Uom::class, 'uom_id');
+    }
+    public function inventoryDetails_product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

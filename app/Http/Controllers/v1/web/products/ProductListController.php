@@ -41,7 +41,6 @@ class ProductListController extends Controller
                 'product_tag'                => 'required',
             ]);
 
-
             if ($validator->fails()) {
                 return response()->json([
                     'error' => true,
@@ -61,11 +60,11 @@ class ProductListController extends Controller
                 ]);
             }
 
-
             $previousData = Crypt::encrypt($decryptedId)
                             ? Product::with('product_per_posCategories', 'product_brand', 'product_uom')->find($decryptedId)
                             : null;
 
+            // ----------------------------- PREVIOUS DATA FROM DATABASE --------------------------
             $previousProductName                = $previousData->name                    ?? 'N/A';
             $previousProductCode                = $previousData->product_code            ?? 'N/A';
             $previousCategory                   = $previousData->category_id             ?? 'N/A';
@@ -78,6 +77,7 @@ class ProductListController extends Controller
             $previousPackaging                  = $previousData->for_packaging           ?? 'N/A';
             $previousBrand                      = $previousData->product_brand->brand    ?? 'N/A';
 
+            // ----------------------- IMAGE STORING --------------------------
             if ($image) {
                 $fileName = $image->getClientOriginalName();
                 $imageURL = url('/') . '/storage/uploads/products/' . $fileName;
@@ -86,6 +86,7 @@ class ProductListController extends Controller
                 $imageURL = 'N/A';
             }
 
+            // --------------------- CREATE OR UPDATE ---------------------------
             $createUpdate = Product::updateOrCreate([
                 'id'                        => $decryptedId
             ], [
@@ -102,6 +103,7 @@ class ProductListController extends Controller
                 'brand_id'                      => $brand,
             ]);
 
+            // --------------------------- AUDIT TRAILING ------------------------------------------
             $brand = Brand::find($brand)->brand;
 
             $previousDetails = "Brand: $previousBrand, Product Code: $previousProductCode, Product Name: $previousProductName, "
@@ -142,44 +144,43 @@ class ProductListController extends Controller
         try {
             DB::beginTransaction();
 
-            $categoryFilter     = (array) $request->category;
-            $tagFilter          = (array) $request->tag;
-            $statusFilter       = (array) $request->status;
-
-            // Flatten the filters in case they are nested
-            $categoryFilter     = Arr::flatten($categoryFilter, 1);
-            $tagFilter          = Arr::flatten($tagFilter, 1);
-            $statusFilter       = Arr::flatten($statusFilter, 1);
-
             $thisData = Product::with('product_category', 'product_per_brand', 'product_uom');
 
-            if (!empty($categoryFilter)) {
-                $thisData->whereIn('pos_category_id', $categoryFilter);
-            }
+            $filters = [
+                // Flatten the filters in case they are nested
+                'pos_category_id' => Arr::flatten((array) $request->category, 1),
+                'product_tag'     => Arr::flatten((array) $request->tag, 1),
+                'status'          => Arr::flatten((array) $request->status, 1),
+            ];
 
-            if (!empty($tagFilter)) {
-                $thisData->whereIn('product_tag', $tagFilter);
-            }
-            if (!empty($statusFilter)) {
-                $thisData = $thisData->where('status', $statusFilter);
+            foreach ($filters as $filterType => $filterApplied) {
+                if (!empty($filterApplied)) {
+                    if ($filterType === 'status') {
+                        $thisData->where($filterType, $filterApplied);
+                    } else {
+                        $thisData->whereIn($filterType, $filterApplied);
+                    }
+                }
             }
 
             $getData = $thisData->get();
 
+
             $generateData = $getData->map(function ($items) {
-                $id           = $items->id                            ?? 'N/A';
-                $picture        = url($items->product_image);
+                $id           = $items->id                                          ?? 'N/A';
+                $picture      = url($items->product_image);
+
                 return [
-                    'id'                     => Crypt::encrypt($id)                                         ?? 'N/A',
-                    'product_code'           => $items->product_code                                        ?? 'N/A',
-                    'product_name'           => $items->name                                                ?? 'N/A',
-                    'product_image'          => $picture                                                    ?? 'N/A',
-                    'brand'                  => $items->product_per_brand->brand                            ?? 'N/A',
-                    'category'               => $items->product_category->name                              ?? 'N/A',
-                    'uom'                    => $items->product_uom->name                                   ?? 'N/A',
-                    'min_uom'                => $items->min_level_uom                                       ?? 'N/A',
-                    'tag'                    => $items->product_tag                                         ?? 'N/A',
-                    'status'                 => $items->status                                              ?? 'N/A',
+                    'id'                     => Crypt::encrypt($id)                 ?? 'N/A',
+                    'product_code'           => $items->product_code                ?? 'N/A',
+                    'product_name'           => $items->name                        ?? 'N/A',
+                    'product_image'          => $picture                            ?? 'N/A',
+                    'brand'                  => $items->product_per_brand->brand    ?? 'N/A',
+                    'category'               => $items->product_category->name      ?? 'N/A',
+                    'uom'                    => $items->product_uom->name           ?? 'N/A',
+                    'min_uom'                => $items->min_level_uom               ?? 'N/A',
+                    'tag'                    => $items->product_tag                 ?? 'N/A',
+                    'status'                 => $items->status                      ?? 'N/A',
                 ];
             });
 
@@ -203,7 +204,6 @@ class ProductListController extends Controller
     public function archive_activate(Request $request) {
         try {
             DB:: beginTransaction();
-            // dd(Crypt::encrypt(820));
 
             $decryptedId = Crypt::decrypt($request->id);
 
